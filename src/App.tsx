@@ -18,6 +18,11 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
+// Opportunity routes
+import Opportunities from "./pages/opportunities/Opportunities";
+import AddOpportunity from "./pages/opportunities/AddOpportunity";
+import OpportunityDetails from "./pages/opportunities/OpportunityDetails";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -43,8 +48,12 @@ const App = () => (
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
-                {/* We'd add more routes as needed */}
-                <Route path="/opportunities" element={<h1 className="text-3xl font-bold">Opportunities</h1>} />
+                
+                {/* Opportunities routes */}
+                <Route path="/opportunities" element={<Opportunities />} />
+                <Route path="/opportunities/add" element={<AddOpportunity />} />
+                <Route path="/opportunities/:id" element={<OpportunityDetails />} />
+                
                 <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
                 <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
               </Route>
