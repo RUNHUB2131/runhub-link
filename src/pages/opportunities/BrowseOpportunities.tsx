@@ -6,19 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Opportunity {
-  id: string;
-  title: string;
-  description: string;
-  reward: string;
-  deadline: string | null;
-  created_at: string;
-  brand: {
-    company_name: string;
-    logo_url?: string;
-  } | null;
-}
+import { Opportunity } from "@/types";
 
 const BrowseOpportunities = () => {
   const { toast } = useToast();
@@ -33,35 +21,40 @@ const BrowseOpportunities = () => {
   const fetchOpportunities = async () => {
     setIsLoading(true);
     try {
-      // Fetch all active opportunities with brand information
-      const { data, error } = await supabase
+      // First, fetch all opportunities
+      const { data: opportunitiesData, error: opportunitiesError } = await supabase
         .from('opportunities')
-        .select(`
-          id,
-          title,
-          description,
-          reward,
-          deadline,
-          created_at,
-          brand:brand_profiles!brand_id(
-            company_name,
-            logo_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (opportunitiesError) throw opportunitiesError;
       
-      // Make sure to handle potential null values
-      const safeData = data?.map(item => ({
-        ...item,
-        brand: item.brand || {
-          company_name: "Unknown Brand",
-          logo_url: undefined
-        }
-      })) || [];
+      if (!opportunitiesData) {
+        setOpportunities([]);
+        return;
+      }
       
-      setOpportunities(safeData);
+      // Then, for each opportunity, fetch the brand information separately
+      const enhancedOpportunities = await Promise.all(
+        opportunitiesData.map(async (opp) => {
+          // Get brand profile for each opportunity
+          const { data: brandData, error: brandError } = await supabase
+            .from('brand_profiles')
+            .select('company_name, logo_url')
+            .eq('id', opp.brand_id)
+            .single();
+          
+          return {
+            ...opp,
+            brand: brandError ? {
+              company_name: "Unknown Brand",
+              logo_url: undefined
+            } : brandData
+          } as Opportunity;
+        })
+      );
+      
+      setOpportunities(enhancedOpportunities);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({

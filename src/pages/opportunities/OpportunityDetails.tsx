@@ -7,27 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Opportunity {
-  id: string;
-  title: string;
-  description: string;
-  reward: string;
-  deadline: string | null;
-  duration: string | null;
-  requirements: string[] | null;
-  created_at: string;
-  brand_id: string;
-  brand?: {
-    company_name: string;
-    logo_url?: string;
-  } | null;
-}
-
-interface Application {
-  id: string;
-  status: 'pending' | 'accepted' | 'rejected';
-}
+import { Opportunity, Application } from "@/types";
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,36 +30,38 @@ const OpportunityDetails = () => {
     
     setIsLoading(true);
     try {
-      // Fetch opportunity with brand information
-      const { data, error } = await supabase
+      // First fetch the opportunity
+      const { data: opportunityData, error: opportunityError } = await supabase
         .from('opportunities')
-        .select(`
-          id,
-          title,
-          description,
-          reward,
-          deadline,
-          duration,
-          requirements,
-          created_at,
-          brand_id,
-          brand:brand_profiles!brand_id(
-            company_name,
-            logo_url
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
       
-      if (error) throw error;
+      if (opportunityError) throw opportunityError;
       
-      setOpportunity(data);
+      // Then fetch the brand information separately
+      const { data: brandData, error: brandError } = await supabase
+        .from('brand_profiles')
+        .select('company_name, logo_url')
+        .eq('id', opportunityData.brand_id)
+        .single();
+      
+      // Combine the data
+      const completeOpportunity: Opportunity = {
+        ...opportunityData,
+        brand: brandError ? {
+          company_name: "Unknown Brand",
+          logo_url: undefined
+        } : brandData
+      };
+      
+      setOpportunity(completeOpportunity);
       
       // For run clubs, check if they've already applied
       if (userType === 'run_club') {
         const { data: appData, error: appError } = await supabase
           .from('applications')
-          .select('id, status')
+          .select('id, status, created_at, opportunity_id, run_club_id')
           .eq('opportunity_id', id)
           .eq('run_club_id', user.id)
           .maybeSingle();
@@ -88,11 +70,9 @@ const OpportunityDetails = () => {
         
         if (appData) {
           // Ensure status is of the correct type
-          const typedStatus = appData.status as 'pending' | 'accepted' | 'rejected';
-          setApplication({
-            id: appData.id,
-            status: typedStatus
-          });
+          if (appData.status === 'pending' || appData.status === 'accepted' || appData.status === 'rejected') {
+            setApplication(appData as Application);
+          }
         }
       }
     } catch (error: any) {
@@ -130,7 +110,10 @@ const OpportunityDetails = () => {
       
       setApplication({
         id: 'new', // Placeholder ID until we refresh
-        status: 'pending'
+        opportunity_id: opportunity.id,
+        run_club_id: user.id,
+        status: 'pending',
+        created_at: new Date().toISOString()
       });
       
       // Refresh to get the actual application data
@@ -238,7 +221,7 @@ const OpportunityDetails = () => {
           )}
         </div>
         
-        {renderActionButton && renderActionButton()}
+        {renderActionButton()}
       </div>
       
       <Card>
