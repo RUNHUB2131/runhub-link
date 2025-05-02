@@ -1,14 +1,17 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Opportunity, Application } from "@/types";
 import OpportunityApplicationsTable from "@/components/opportunities/OpportunityApplicationsTable";
+import OpportunityDetailsSkeleton from "@/components/opportunities/OpportunityDetailsSkeleton";
+import OpportunityNotFound from "@/components/opportunities/OpportunityNotFound";
+import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
+import OpportunityActionButton from "@/components/opportunities/OpportunityActionButton";
+import OpportunityDetailsContent from "@/components/opportunities/OpportunityDetailsContent";
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -132,68 +135,12 @@ const OpportunityDetails = () => {
     }
   };
 
-  const renderActionButton = () => {
-    if (userType === 'run_club') {
-      if (application) {
-        return (
-          <Button disabled className="w-full md:w-auto">
-            Application {application.status}
-          </Button>
-        );
-      } else {
-        return (
-          <Button 
-            onClick={handleApply} 
-            disabled={isApplying} 
-            className="w-full md:w-auto"
-          >
-            {isApplying ? "Applying..." : "Apply Now"}
-          </Button>
-        );
-      }
-    } else if (userType === 'brand' && opportunity?.brand_id === user?.id) {
-      return (
-        <Button 
-          variant="outline"
-          onClick={() => setShowApplications(!showApplications)} 
-          className="w-full md:w-auto"
-        >
-          {showApplications ? "Hide Applications" : "View Applications"}
-        </Button>
-      );
-    }
-    return null;
-  };
-
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-2/3" />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/3 mb-2" />
-            <Skeleton className="h-4 w-1/4" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <OpportunityDetailsSkeleton />;
   }
 
   if (!opportunity) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-2">Opportunity not found</h2>
-        <p className="text-gray-500 mb-6">The opportunity you're looking for doesn't exist or has been removed.</p>
-        <Button onClick={() => navigate("/opportunities")}>
-          Back to Opportunities
-        </Button>
-      </div>
-    );
+    return <OpportunityNotFound />;
   }
 
   return (
@@ -201,81 +148,22 @@ const OpportunityDetails = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{opportunity?.title}</h1>
-          {opportunity?.brand && (
-            <div className="flex items-center mt-2">
-              {opportunity.brand.logo_url ? (
-                <div className="w-6 h-6 rounded overflow-hidden mr-2 bg-gray-100">
-                  <img 
-                    src={opportunity.brand.logo_url} 
-                    alt={opportunity.brand.company_name || "Brand logo"}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center mr-2">
-                  {(opportunity.brand.company_name?.[0] || "B").toUpperCase()}
-                </div>
-              )}
-              <span className="text-sm font-medium text-gray-600">
-                {opportunity.brand.company_name || "Unknown Brand"}
-              </span>
-            </div>
-          )}
+          <OpportunityBrandInfo opportunity={opportunity} />
         </div>
         
-        {renderActionButton()}
+        <OpportunityActionButton 
+          userType={userType}
+          userId={user?.id}
+          brandId={opportunity.brand_id}
+          application={application}
+          isApplying={isApplying}
+          handleApply={handleApply}
+          showApplications={showApplications}
+          setShowApplications={setShowApplications}
+        />
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Opportunity Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <h3 className="font-semibold text-lg">Description</h3>
-            <p className="mt-2 whitespace-pre-line">{opportunity?.description}</p>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold text-lg">Reward</h3>
-            <div className="mt-2 py-3 px-4 bg-primary/5 rounded-md inline-block">
-              <p className="font-medium">{opportunity?.reward}</p>
-            </div>
-          </div>
-          
-          {opportunity?.requirements && opportunity.requirements.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-lg">Requirements</h3>
-              <ul className="mt-2 list-disc pl-5 space-y-1">
-                {opportunity.requirements.map((req, index) => (
-                  <li key={index}>{req}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {opportunity?.deadline && (
-              <div>
-                <h3 className="font-semibold">Application Deadline</h3>
-                <p className="mt-1">{new Date(opportunity.deadline).toLocaleDateString()}</p>
-              </div>
-            )}
-            
-            {opportunity?.duration && (
-              <div>
-                <h3 className="font-semibold">Campaign Duration</h3>
-                <p className="mt-1">{opportunity.duration}</p>
-              </div>
-            )}
-            
-            <div>
-              <h3 className="font-semibold">Posted On</h3>
-              <p className="mt-1">{opportunity && new Date(opportunity.created_at).toLocaleDateString()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <OpportunityDetailsContent opportunity={opportunity} />
       
       {/* Show Applications Table for Brand Users */}
       {userType === 'brand' && 
