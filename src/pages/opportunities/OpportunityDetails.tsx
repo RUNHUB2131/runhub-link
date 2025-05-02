@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -120,8 +121,8 @@ const OpportunityDetails = () => {
         created_at: new Date().toISOString()
       });
       
-      // Refresh to get the actual application data
-      fetchOpportunityDetails();
+      // Redirect to my applications page after successful application
+      navigate('/applications');
     } catch (error: any) {
       console.error("Error applying to opportunity:", error);
       toast({
@@ -164,8 +165,6 @@ const OpportunityDetails = () => {
       </div>
       
       <OpportunityDetailsContent opportunity={opportunity} />
-      
-      {/* Remove the inline applications display since we now have a dedicated page */}
     </div>
   );
 };

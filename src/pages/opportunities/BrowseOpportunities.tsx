@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,13 +11,38 @@ import { Opportunity } from "@/types";
 
 const BrowseOpportunities = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userApplications, setUserApplications] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchOpportunities();
-  }, []);
+    if (user?.id) {
+      fetchUserApplications();
+      fetchOpportunities();
+    }
+  }, [user?.id]);
+
+  const fetchUserApplications = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Fetch all opportunities this run club has already applied for
+      const { data: applicationsData, error: applicationsError } = await supabase
+        .from('applications')
+        .select('opportunity_id')
+        .eq('run_club_id', user.id);
+      
+      if (applicationsError) throw applicationsError;
+      
+      // Extract just the opportunity IDs into an array
+      const appliedOpportunityIds = (applicationsData || []).map(app => app.opportunity_id);
+      setUserApplications(appliedOpportunityIds);
+    } catch (error: any) {
+      console.error("Error fetching user applications:", error);
+    }
+  };
 
   const fetchOpportunities = async () => {
     setIsLoading(true);
@@ -54,7 +80,15 @@ const BrowseOpportunities = () => {
         })
       );
       
-      setOpportunities(enhancedOpportunities);
+      // Filter out opportunities the user has already applied for
+      if (userApplications.length > 0) {
+        const filteredOpportunities = enhancedOpportunities.filter(
+          opp => !userApplications.includes(opp.id)
+        );
+        setOpportunities(filteredOpportunities);
+      } else {
+        setOpportunities(enhancedOpportunities);
+      }
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({
@@ -69,6 +103,42 @@ const BrowseOpportunities = () => {
 
   const handleViewOpportunity = (id: string) => {
     navigate(`/opportunities/${id}`);
+  };
+
+  const handleApply = async (opportunityId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent navigation to details page
+    if (!user?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .insert({
+          opportunity_id: opportunityId,
+          run_club_id: user.id,
+          status: 'pending'
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Application Submitted",
+        description: "Your application has been successfully submitted",
+      });
+      
+      // Update the userApplications state
+      setUserApplications([...userApplications, opportunityId]);
+      
+      // Remove the opportunity from the list
+      setOpportunities(opportunities.filter(opp => opp.id !== opportunityId));
+      
+    } catch (error: any) {
+      console.error("Error applying to opportunity:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -98,7 +168,11 @@ const BrowseOpportunities = () => {
       ) : opportunities.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {opportunities.map((opportunity) => (
-            <Card key={opportunity.id}>
+            <Card 
+              key={opportunity.id} 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handleViewOpportunity(opportunity.id)}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-center mb-2">
                   {opportunity.brand?.logo_url ? (
@@ -137,12 +211,24 @@ const BrowseOpportunities = () => {
               </CardContent>
               
               <CardFooter>
-                <Button 
-                  className="w-full"
-                  onClick={() => handleViewOpportunity(opportunity.id)}
-                >
-                  View Details
-                </Button>
+                <div className="w-full flex gap-2">
+                  <Button 
+                    variant="outline"
+                    className="w-1/2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewOpportunity(opportunity.id);
+                    }}
+                  >
+                    View Details
+                  </Button>
+                  <Button 
+                    className="w-1/2"
+                    onClick={(e) => handleApply(opportunity.id, e)}
+                  >
+                    Apply Now
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
