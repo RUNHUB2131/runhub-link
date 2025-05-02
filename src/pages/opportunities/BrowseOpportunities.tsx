@@ -17,7 +17,7 @@ interface Opportunity {
   brand: {
     company_name: string;
     logo_url?: string;
-  };
+  } | null;
 }
 
 const BrowseOpportunities = () => {
@@ -37,17 +37,31 @@ const BrowseOpportunities = () => {
       const { data, error } = await supabase
         .from('opportunities')
         .select(`
-          *,
-          brand:brand_id (
-            company_name:company_name,
-            logo_url:logo_url
+          id,
+          title,
+          description,
+          reward,
+          deadline,
+          created_at,
+          brand:brand_profiles!brand_id(
+            company_name,
+            logo_url
           )
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      setOpportunities(data || []);
+      // Make sure to handle potential null values
+      const safeData = data?.map(item => ({
+        ...item,
+        brand: item.brand || {
+          company_name: "Unknown Brand",
+          logo_url: undefined
+        }
+      })) || [];
+      
+      setOpportunities(safeData);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({

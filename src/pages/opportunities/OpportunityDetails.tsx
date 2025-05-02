@@ -21,7 +21,7 @@ interface Opportunity {
   brand?: {
     company_name: string;
     logo_url?: string;
-  };
+  } | null;
 }
 
 interface Application {
@@ -54,10 +54,18 @@ const OpportunityDetails = () => {
       const { data, error } = await supabase
         .from('opportunities')
         .select(`
-          *,
-          brand:brand_id (
-            company_name:company_name,
-            logo_url:logo_url
+          id,
+          title,
+          description,
+          reward,
+          deadline,
+          duration,
+          requirements,
+          created_at,
+          brand_id,
+          brand:brand_profiles!brand_id(
+            company_name,
+            logo_url
           )
         `)
         .eq('id', id)
@@ -71,7 +79,7 @@ const OpportunityDetails = () => {
       if (userType === 'run_club') {
         const { data: appData, error: appError } = await supabase
           .from('applications')
-          .select('*')
+          .select('id, status')
           .eq('opportunity_id', id)
           .eq('run_club_id', user.id)
           .maybeSingle();
@@ -79,7 +87,12 @@ const OpportunityDetails = () => {
         if (appError) console.error("Error checking application:", appError);
         
         if (appData) {
-          setApplication(appData);
+          // Ensure status is of the correct type
+          const typedStatus = appData.status as 'pending' | 'accepted' | 'rejected';
+          setApplication({
+            id: appData.id,
+            status: typedStatus
+          });
         }
       }
     } catch (error: any) {
@@ -202,8 +215,8 @@ const OpportunityDetails = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{opportunity.title}</h1>
-          {opportunity.brand && (
+          <h1 className="text-3xl font-bold">{opportunity?.title}</h1>
+          {opportunity?.brand && (
             <div className="flex items-center mt-2">
               {opportunity.brand.logo_url ? (
                 <div className="w-6 h-6 rounded overflow-hidden mr-2 bg-gray-100">
@@ -225,7 +238,7 @@ const OpportunityDetails = () => {
           )}
         </div>
         
-        {renderActionButton()}
+        {renderActionButton && renderActionButton()}
       </div>
       
       <Card>
@@ -235,17 +248,17 @@ const OpportunityDetails = () => {
         <CardContent className="space-y-6">
           <div>
             <h3 className="font-semibold text-lg">Description</h3>
-            <p className="mt-2 whitespace-pre-line">{opportunity.description}</p>
+            <p className="mt-2 whitespace-pre-line">{opportunity?.description}</p>
           </div>
           
           <div>
             <h3 className="font-semibold text-lg">Reward</h3>
             <div className="mt-2 py-3 px-4 bg-primary/5 rounded-md inline-block">
-              <p className="font-medium">{opportunity.reward}</p>
+              <p className="font-medium">{opportunity?.reward}</p>
             </div>
           </div>
           
-          {opportunity.requirements && opportunity.requirements.length > 0 && (
+          {opportunity?.requirements && opportunity.requirements.length > 0 && (
             <div>
               <h3 className="font-semibold text-lg">Requirements</h3>
               <ul className="mt-2 list-disc pl-5 space-y-1">
@@ -257,14 +270,14 @@ const OpportunityDetails = () => {
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {opportunity.deadline && (
+            {opportunity?.deadline && (
               <div>
                 <h3 className="font-semibold">Application Deadline</h3>
                 <p className="mt-1">{new Date(opportunity.deadline).toLocaleDateString()}</p>
               </div>
             )}
             
-            {opportunity.duration && (
+            {opportunity?.duration && (
               <div>
                 <h3 className="font-semibold">Campaign Duration</h3>
                 <p className="mt-1">{opportunity.duration}</p>
@@ -273,7 +286,7 @@ const OpportunityDetails = () => {
             
             <div>
               <h3 className="font-semibold">Posted On</h3>
-              <p className="mt-1">{new Date(opportunity.created_at).toLocaleDateString()}</p>
+              <p className="mt-1">{opportunity && new Date(opportunity.created_at).toLocaleDateString()}</p>
             </div>
           </div>
         </CardContent>

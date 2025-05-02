@@ -53,10 +53,14 @@ export interface Opportunity {
   title: string;
   description: string;
   reward: string;
-  deadline: string;
-  duration: string;
-  requirements: string[];
+  deadline: string | null;
+  duration: string | null;
+  requirements: string[] | null;
   created_at: string;
+  brand?: {
+    company_name: string;
+    logo_url?: string;
+  } | null;
 }
 
 export interface Application {
