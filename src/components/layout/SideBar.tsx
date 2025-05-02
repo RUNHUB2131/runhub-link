@@ -1,12 +1,14 @@
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, User, Search, FileText, MessageSquare } from "lucide-react";
+import { LayoutDashboard, User, Search, FileText, MessageSquare, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const SideBar = () => {
-  const { userType } = useAuth();
+  const { userType, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navItems = [
     { 
@@ -36,9 +38,18 @@ export const SideBar = () => {
     },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
-    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full">
-      <nav className="p-4">
+    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full flex flex-col">
+      <nav className="p-4 flex-1">
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.path}>
@@ -56,6 +67,18 @@ export const SideBar = () => {
           ))}
         </ul>
       </nav>
+
+      {/* Sign Out Button */}
+      <div className="p-4 border-t border-gray-200">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          Sign Out
+        </Button>
+      </div>
     </aside>
   );
 };
