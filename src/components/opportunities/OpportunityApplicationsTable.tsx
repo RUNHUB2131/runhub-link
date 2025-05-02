@@ -49,8 +49,11 @@ const OpportunityApplicationsTable = ({ opportunityId }: OpportunityApplications
 
       if (appError) throw appError;
 
-      // Initialize applications array without run club profile data
-      const initialApps: RunClubApplication[] = appData || [];
+      // Initialize applications array with proper typing for status
+      const initialApps: RunClubApplication[] = (appData || []).map(app => ({
+        ...app,
+        status: app.status as "pending" | "accepted" | "rejected"
+      }));
       
       // Now fetch the run club profile data separately for each application
       const appsWithProfiles = await Promise.all(
