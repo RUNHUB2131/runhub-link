@@ -36,7 +36,15 @@ const Profile = () => {
         if (error) throw error;
         
         if (data) {
-          // Transform data to match RunClubProfile type
+          // Transform data to match RunClubProfile type with proper type casting
+          const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
+            ? data.social_media as Record<string, string>
+            : {};
+            
+          const communityData = typeof data.community_data === 'object' && data.community_data !== null
+            ? data.community_data as Record<string, any>
+            : {};
+            
           setRunClubProfile({
             id: data.id,
             user_id: user.id,
@@ -48,16 +56,16 @@ const Profile = () => {
             member_count: data.member_count || 0,
             website: data.website || '',
             logo_url: data.logo_url || '',
-            social_media: data.social_media ? {
-              instagram: data.social_media.instagram as string || '',
-              facebook: data.social_media.facebook as string || '',
-              twitter: data.social_media.twitter as string || '',
-              strava: data.social_media.strava as string || '',
-            } : {},
-            community_data: data.community_data ? {
-              run_types: data.community_data.run_types as string[] || [],
-              demographics: data.community_data.demographics || {},
-            } : {},
+            social_media: {
+              instagram: socialMediaData.instagram || '',
+              facebook: socialMediaData.facebook || '',
+              twitter: socialMediaData.twitter || '',
+              strava: socialMediaData.strava || '',
+            },
+            community_data: {
+              run_types: Array.isArray(communityData.run_types) ? communityData.run_types : [],
+              demographics: communityData.demographics || {},
+            },
           });
         }
       } else if (userType === 'brand') {
@@ -70,7 +78,11 @@ const Profile = () => {
         if (error) throw error;
         
         if (data) {
-          // Transform data to match BrandProfile type
+          // Transform data to match BrandProfile type with proper type casting
+          const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
+            ? data.social_media as Record<string, string>
+            : {};
+            
           setBrandProfile({
             id: data.id,
             user_id: user.id,
@@ -81,12 +93,12 @@ const Profile = () => {
             description: data.description || '',
             website: data.website || '',
             logo_url: data.logo_url || '',
-            social_media: data.social_media ? {
-              instagram: data.social_media.instagram as string || '',
-              facebook: data.social_media.facebook as string || '',
-              twitter: data.social_media.twitter as string || '',
-              linkedin: data.social_media.linkedin as string || '',
-            } : {},
+            social_media: {
+              instagram: socialMediaData.instagram || '',
+              facebook: socialMediaData.facebook || '',
+              twitter: socialMediaData.twitter || '',
+              linkedin: socialMediaData.linkedin || '',
+            },
           });
         }
       }
