@@ -56,7 +56,7 @@ const App = () => (
                 <Route path="/opportunities/:id" element={<OpportunityDetails />} />
                 <Route path="/opportunities/applications/:id" element={<OpportunityApplications />} />
                 
-                <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
+                <Route path="/applications" element={<Opportunities />} />
                 <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
               </Route>
             </Route>

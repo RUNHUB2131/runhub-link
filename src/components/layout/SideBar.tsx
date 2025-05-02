@@ -39,7 +39,7 @@ export const SideBar = () => {
       icon: <Search className="h-5 w-5" /> 
     },
     { 
-      path: "/applications", 
+      path: "/opportunities?tab=applications", 
       label: "My Applications", 
       icon: <MessageSquare className="h-5 w-5" /> 
     }
@@ -64,6 +64,16 @@ export const SideBar = () => {
     }
   };
 
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
+    if (path === "/opportunities?tab=applications") {
+      e.preventDefault();
+      navigate("/opportunities");
+      // We'll handle the tab selection in the Opportunities component
+      localStorage.setItem("opportunities-active-tab", "applications");
+      window.dispatchEvent(new Event("storage"));
+    }
+  };
+
   return (
     <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full flex flex-col">
       <nav className="p-4 flex-1">
@@ -74,8 +84,11 @@ export const SideBar = () => {
                 to={item.path} 
                 className={cn(
                   "sidebar-item",
-                  location.pathname === item.path && "active"
+                  location.pathname === item.path.split("?")[0] && 
+                  (item.path !== "/opportunities?tab=applications" || 
+                   location.search.includes("tab=applications")) && "active"
                 )}
+                onClick={(e) => handleNavigation(e, item.path)}
               >
                 {item.icon}
                 <span>{item.label}</span>
