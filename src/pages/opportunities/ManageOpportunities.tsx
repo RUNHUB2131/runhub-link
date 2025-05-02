@@ -82,6 +82,11 @@ const ManageOpportunities = () => {
     navigate(`/opportunities/${id}`);
   };
 
+  const handleViewApplications = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card click
+    navigate(`/opportunities/applications/${id}`);
+  };
+
   const handleEditOpportunity = (id: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the card click
     // This would navigate to an edit page if one exists
@@ -206,10 +211,7 @@ const ManageOpportunities = () => {
                       <Button 
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/opportunities/${opportunity.id}`);
-                        }}
+                        onClick={(e) => handleViewApplications(opportunity.id, e)}
                         className="flex items-center"
                       >
                         <Eye className="h-4 w-4 mr-1" />

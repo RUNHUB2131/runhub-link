@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import Opportunities from "./pages/opportunities/Opportunities";
 import AddOpportunity from "./pages/opportunities/AddOpportunity";
 import OpportunityDetails from "./pages/opportunities/OpportunityDetails";
+import OpportunityApplications from "./pages/opportunities/OpportunityApplications";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/opportunities" element={<Opportunities />} />
                 <Route path="/opportunities/add" element={<AddOpportunity />} />
                 <Route path="/opportunities/:id" element={<OpportunityDetails />} />
+                <Route path="/opportunities/applications/:id" element={<OpportunityApplications />} />
                 
                 <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
                 <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
