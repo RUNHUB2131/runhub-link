@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface RunClubApplication extends Application {
-  run_club_profile: {
+  run_club_profile?: {
     club_name: string;
     location: string;
     member_count: number;
@@ -41,21 +41,34 @@ const OpportunityApplicationsTable = ({ opportunityId }: OpportunityApplications
   const fetchApplications = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      // First fetch the applications
+      const { data: appData, error: appError } = await supabase
         .from('applications')
-        .select(`
-          *,
-          run_club_profile:run_club_id (
-            club_name,
-            location,
-            member_count
-          )
-        `)
+        .select('*')
         .eq('opportunity_id', opportunityId);
 
-      if (error) throw error;
+      if (appError) throw appError;
 
-      setApplications(data as RunClubApplication[] || []);
+      // Initialize applications array without run club profile data
+      const initialApps: RunClubApplication[] = appData || [];
+      
+      // Now fetch the run club profile data separately for each application
+      const appsWithProfiles = await Promise.all(
+        initialApps.map(async (app) => {
+          const { data: profileData, error: profileError } = await supabase
+            .from('run_club_profiles')
+            .select('club_name, location, member_count')
+            .eq('id', app.run_club_id)
+            .single();
+
+          return {
+            ...app,
+            run_club_profile: profileError ? null : profileData
+          };
+        })
+      );
+
+      setApplications(appsWithProfiles);
     } catch (error: any) {
       console.error("Error fetching applications:", error);
       toast({
@@ -68,16 +81,16 @@ const OpportunityApplicationsTable = ({ opportunityId }: OpportunityApplications
     }
   };
 
-  const getStatusBadgeColor = (status: "pending" | "accepted" | "rejected") => {
+  const getStatusBadgeVariant = (status: "pending" | "accepted" | "rejected") => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "outline";
       case "accepted":
-        return "bg-green-100 text-green-800";
+        return "secondary";
       case "rejected":
-        return "bg-red-100 text-red-800";
+        return "destructive";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "outline";
     }
   };
 
@@ -140,7 +153,7 @@ const OpportunityApplicationsTable = ({ opportunityId }: OpportunityApplications
                 <TableCell>{application.run_club_profile?.member_count || 0}</TableCell>
                 <TableCell>{new Date(application.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={getStatusBadgeColor(application.status)}>
+                  <Badge variant={getStatusBadgeVariant(application.status as "pending" | "accepted" | "rejected")}>
                     {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                   </Badge>
                 </TableCell>
