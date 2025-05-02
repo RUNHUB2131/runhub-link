@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { BrandProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BrandProfileFormProps {
   initialData?: Partial<BrandProfile>;
@@ -28,6 +30,7 @@ export const BrandProfileForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -39,14 +42,29 @@ export const BrandProfileForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       if (onSave) {
         await onSave(formData);
       } else {
-        // Mock save for now
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Save to Supabase
+        const { error } = await supabase
+          .from('brand_profiles')
+          .update(formData)
+          .eq('id', user.id);
+        
+        if (error) throw error;
       }
       
       toast({
@@ -55,11 +73,11 @@ export const BrandProfileForm = ({
       });
       
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error",
-        description: "Failed to save profile. Please try again.",
+        description: error.message || "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     } finally {

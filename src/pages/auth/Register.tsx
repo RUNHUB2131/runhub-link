@@ -47,12 +47,6 @@ const Register = () => {
       navigate("/profile");
     } catch (error) {
       console.error(error);
-      toast({
-        title: "Registration failed",
-        description: "An error occurred during registration. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setIsLoading(false);
     }
   };

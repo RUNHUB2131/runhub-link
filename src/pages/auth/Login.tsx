@@ -28,12 +28,7 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
-    } finally {
+      // Error is handled in AuthContext
       setIsLoading(false);
     }
   };

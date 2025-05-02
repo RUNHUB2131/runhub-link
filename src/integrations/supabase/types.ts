@@ -9,7 +9,192 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string
+          run_club_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          run_club_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          run_club_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_run_club_id_fkey"
+            columns: ["run_club_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_profiles: {
+        Row: {
+          company_name: string | null
+          description: string | null
+          id: string
+          industry: string | null
+          logo_url: string | null
+          social_media: Json | null
+          website: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          description?: string | null
+          id: string
+          industry?: string | null
+          logo_url?: string | null
+          social_media?: Json | null
+          website?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          description?: string | null
+          id?: string
+          industry?: string | null
+          logo_url?: string | null
+          social_media?: Json | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          brand_id: string
+          created_at: string
+          deadline: string | null
+          description: string
+          duration: string | null
+          id: string
+          requirements: string[] | null
+          reward: string
+          title: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          deadline?: string | null
+          description: string
+          duration?: string | null
+          id?: string
+          requirements?: string[] | null
+          reward: string
+          title: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          duration?: string | null
+          id?: string
+          requirements?: string[] | null
+          reward?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      run_club_profiles: {
+        Row: {
+          club_name: string | null
+          community_data: Json | null
+          description: string | null
+          id: string
+          location: string | null
+          logo_url: string | null
+          member_count: number | null
+          social_media: Json | null
+          website: string | null
+        }
+        Insert: {
+          club_name?: string | null
+          community_data?: Json | null
+          description?: string | null
+          id: string
+          location?: string | null
+          logo_url?: string | null
+          member_count?: number | null
+          social_media?: Json | null
+          website?: string | null
+        }
+        Update: {
+          club_name?: string | null
+          community_data?: Json | null
+          description?: string | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          member_count?: number | null
+          social_media?: Json | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "run_club_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

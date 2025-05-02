@@ -11,6 +11,7 @@ const UserTypeSelection = () => {
 
   const handleContinue = () => {
     if (selectedType) {
+      // Store the selected user type in localStorage to use during registration
       localStorage.setItem("runhub_user_type", selectedType);
       navigate("/auth/register");
     }

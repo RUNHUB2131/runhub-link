@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { RunClubProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RunClubProfileFormProps {
   initialData?: Partial<RunClubProfile>;
@@ -29,6 +31,7 @@ export const RunClubProfileForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -40,14 +43,29 @@ export const RunClubProfileForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
       if (onSave) {
         await onSave(formData);
       } else {
-        // Mock save for now
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Save to Supabase
+        const { error } = await supabase
+          .from('run_club_profiles')
+          .update(formData)
+          .eq('id', user.id);
+        
+        if (error) throw error;
       }
       
       toast({
@@ -56,11 +74,11 @@ export const RunClubProfileForm = ({
       });
       
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         title: "Error",
-        description: "Failed to save profile. Please try again.",
+        description: error.message || "Failed to save profile. Please try again.",
         variant: "destructive",
       });
     } finally {

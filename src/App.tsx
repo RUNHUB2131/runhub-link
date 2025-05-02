@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthLayout } from "./components/layout/AuthLayout";
+import { ProtectedRoute } from "./components/layout/ProtectedRoute";
 
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
@@ -38,13 +39,15 @@ const App = () => (
             </Route>
             
             {/* Protected routes */}
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              {/* We'd add more routes as needed */}
-              <Route path="/opportunities" element={<h1 className="text-3xl font-bold">Opportunities</h1>} />
-              <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
-              <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                {/* We'd add more routes as needed */}
+                <Route path="/opportunities" element={<h1 className="text-3xl font-bold">Opportunities</h1>} />
+                <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
+                <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
+              </Route>
             </Route>
             
             {/* Catch-all route */}

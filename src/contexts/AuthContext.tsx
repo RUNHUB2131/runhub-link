@@ -1,6 +1,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, UserType } from "../types";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { Session } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -17,38 +20,110 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userType, setUserType] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
 
+  // Set up authentication state listener
   useEffect(() => {
-    // Check for existing session
-    const storedUser = localStorage.getItem("runhub_user");
-    const storedUserType = localStorage.getItem("runhub_user_type") as UserType | null;
-    
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      setUserType(storedUserType);
-    }
-    
-    setIsLoading(false);
+    // First, set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state changed:", event, session);
+        setSession(session);
+        
+        if (session?.user) {
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            user_type: session.user.user_metadata?.user_type as UserType || null
+          };
+          
+          setUser(userData);
+          setUserType(userData.user_type || null);
+          
+          // If user_type is not in metadata, try fetching from profiles
+          if (!userData.user_type) {
+            setTimeout(() => {
+              fetchUserProfile(session.user.id);
+            }, 0);
+          }
+        } else {
+          setUser(null);
+          setUserType(null);
+        }
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        const userData: User = {
+          id: session.user.id,
+          email: session.user.email || '',
+          user_type: session.user.user_metadata?.user_type as UserType || null
+        };
+        
+        setUser(userData);
+        setUserType(userData.user_type || null);
+        
+        // If user_type is not in metadata, try fetching from profiles
+        if (!userData.user_type) {
+          fetchUserProfile(session.user.id);
+        }
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        return;
+      }
+      
+      if (data && data.user_type) {
+        setUserType(data.user_type as UserType);
+        
+        // Update local user object
+        setUser(prev => 
+          prev ? { ...prev, user_type: data.user_type as UserType } : null
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // In a real app, this would communicate with Supabase
-      // For now we'll mock the authentication
-      const mockUser = {
-        id: "mock-id-" + Math.random().toString(36).substring(2, 9),
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        user_type: localStorage.getItem("runhub_user_type") as UserType || null,
-      };
-
-      // Store user in local storage
-      localStorage.setItem("runhub_user", JSON.stringify(mockUser));
+        password,
+      });
       
-      setUser(mockUser);
-      setUserType(mockUser.user_type || null);
-    } catch (error) {
+      if (error) throw error;
+      
+    } catch (error: any) {
       console.error("Login error:", error);
+      toast({
+        title: "Login failed",
+        description: error.message || "An error occurred during login",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -58,22 +133,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (email: string, password: string, userType: UserType) => {
     setIsLoading(true);
     try {
-      // In a real app, this would communicate with Supabase
-      // For now we'll mock the registration
-      const mockUser = {
-        id: "mock-id-" + Math.random().toString(36).substring(2, 9),
+      const { data, error } = await supabase.auth.signUp({
         email,
-        user_type: userType,
-      };
-
-      // Store user and user type in local storage
-      localStorage.setItem("runhub_user", JSON.stringify(mockUser));
-      localStorage.setItem("runhub_user_type", userType);
+        password,
+        options: {
+          data: {
+            user_type: userType
+          }
+        }
+      });
       
-      setUser(mockUser);
-      setUserType(userType);
-    } catch (error) {
+      if (error) throw error;
+      
+      // The trigger function will create the profile records
+      
+    } catch (error: any) {
       console.error("Registration error:", error);
+      toast({
+        title: "Registration failed",
+        description: error.message || "An error occurred during registration",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -83,13 +163,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      // Remove user from local storage
-      localStorage.removeItem("runhub_user");
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
       
       setUser(null);
       setUserType(null);
-    } catch (error) {
+      setSession(null);
+      
+    } catch (error: any) {
       console.error("Logout error:", error);
+      toast({
+        title: "Logout failed",
+        description: error.message || "An error occurred during logout",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
