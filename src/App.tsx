@@ -24,6 +24,9 @@ import AddOpportunity from "./pages/opportunities/AddOpportunity";
 import OpportunityDetails from "./pages/opportunities/OpportunityDetails";
 import OpportunityApplications from "./pages/opportunities/OpportunityApplications";
 
+// Application routes
+import MyApplications from "./pages/applications/MyApplications";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,7 +59,8 @@ const App = () => (
                 <Route path="/opportunities/:id" element={<OpportunityDetails />} />
                 <Route path="/opportunities/applications/:id" element={<OpportunityApplications />} />
                 
-                <Route path="/applications" element={<h1 className="text-3xl font-bold">Applications</h1>} />
+                {/* Applications routes */}
+                <Route path="/applications" element={<MyApplications />} />
                 <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
               </Route>
             </Route>

@@ -86,3 +86,48 @@ export const updateApplicationStatus = async (applicationId: string, status: "ac
     throw error;
   }
 };
+
+export const fetchRunClubApplications = async (runClubId: string) => {
+  try {
+    // Fetch applications for this run club
+    const { data: appData, error: appError } = await supabase
+      .from('applications')
+      .select('*, opportunities:opportunity_id(id, title, description, brand_id, reward, deadline, created_at)')
+      .eq('run_club_id', runClubId);
+
+    if (appError) throw appError;
+
+    // Get brand details for each opportunity
+    const applicationsWithBrands = await Promise.all(
+      (appData || []).map(async (app) => {
+        // Fetch brand profile for this opportunity
+        if (app.opportunities?.brand_id) {
+          const { data: brandData, error: brandError } = await supabase
+            .from('brand_profiles')
+            .select('company_name, logo_url')
+            .eq('id', app.opportunities.brand_id)
+            .single();
+          
+          return {
+            ...app,
+            status: app.status as "pending" | "accepted" | "rejected",
+            opportunities: {
+              ...app.opportunities,
+              brand: brandError ? null : brandData
+            }
+          };
+        }
+        
+        return {
+          ...app,
+          status: app.status as "pending" | "accepted" | "rejected",
+        };
+      })
+    );
+
+    return applicationsWithBrands;
+  } catch (error) {
+    console.error("Error fetching run club applications:", error);
+    throw error;
+  }
+};
