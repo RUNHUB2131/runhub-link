@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Opportunity, Application } from "@/types";
+import OpportunityApplicationsTable from "@/components/opportunities/OpportunityApplicationsTable";
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ const OpportunityDetails = () => {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isApplying, setIsApplying] = useState(false);
+  const [showApplications, setShowApplications] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -153,10 +155,10 @@ const OpportunityDetails = () => {
       return (
         <Button 
           variant="outline"
-          onClick={() => navigate(`/applications?opportunity=${opportunity.id}`)} 
+          onClick={() => setShowApplications(!showApplications)} 
           className="w-full md:w-auto"
         >
-          View Applications
+          {showApplications ? "Hide Applications" : "View Applications"}
         </Button>
       );
     }
@@ -274,6 +276,18 @@ const OpportunityDetails = () => {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Show Applications Table for Brand Users */}
+      {userType === 'brand' && 
+       opportunity?.brand_id === user?.id && 
+       showApplications && 
+       id && (
+        <Card className="mt-6">
+          <CardContent className="pt-6">
+            <OpportunityApplicationsTable opportunityId={id} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

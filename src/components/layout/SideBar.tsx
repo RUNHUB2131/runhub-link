@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, User, Search, FileText, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, User, Search, MessageSquare, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const SideBar = () => {
@@ -10,7 +10,8 @@ export const SideBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navItems = [
+  // Define nav items based on user type
+  const commonNavItems = [
     { 
       path: "/dashboard", 
       label: "Dashboard", 
@@ -20,22 +21,38 @@ export const SideBar = () => {
       path: "/profile", 
       label: "My Profile", 
       icon: <User className="h-5 w-5" /> 
-    },
+    }
+  ];
+
+  const brandNavItems = [
     { 
       path: "/opportunities", 
-      label: userType === 'run_club' ? "Browse Opportunities" : "Manage Opportunities", 
+      label: "Manage Opportunities", 
+      icon: <Search className="h-5 w-5" /> 
+    }
+  ];
+
+  const runClubNavItems = [
+    { 
+      path: "/opportunities", 
+      label: "Browse Opportunities", 
       icon: <Search className="h-5 w-5" /> 
     },
     { 
       path: "/applications", 
-      label: userType === 'run_club' ? "My Applications" : "Review Applications", 
-      icon: <FileText className="h-5 w-5" /> 
-    },
+      label: "My Applications", 
+      icon: <MessageSquare className="h-5 w-5" /> 
+    }
+  ];
+
+  const navItems = [
+    ...commonNavItems,
+    ...(userType === 'brand' ? brandNavItems : runClubNavItems),
     { 
       path: "/messages", 
       label: "Messages", 
       icon: <MessageSquare className="h-5 w-5" /> 
-    },
+    }
   ];
 
   const handleLogout = async () => {
