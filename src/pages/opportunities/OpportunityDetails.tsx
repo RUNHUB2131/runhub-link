@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -155,6 +154,7 @@ const OpportunityDetails = () => {
           userType={userType}
           userId={user?.id}
           brandId={opportunity.brand_id}
+          opportunityId={opportunity.id}
           application={application}
           isApplying={isApplying}
           handleApply={handleApply}
@@ -165,17 +165,7 @@ const OpportunityDetails = () => {
       
       <OpportunityDetailsContent opportunity={opportunity} />
       
-      {/* Show Applications Table for Brand Users */}
-      {userType === 'brand' && 
-       opportunity?.brand_id === user?.id && 
-       showApplications && 
-       id && (
-        <Card className="mt-6">
-          <CardContent className="pt-6">
-            <OpportunityApplicationsTable opportunityId={id} />
-          </CardContent>
-        </Card>
-      )}
+      {/* Remove the inline applications display since we now have a dedicated page */}
     </div>
   );
 };
