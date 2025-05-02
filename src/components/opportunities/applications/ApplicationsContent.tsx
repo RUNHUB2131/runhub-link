@@ -1,11 +1,12 @@
 
-import { Users } from "lucide-react";
+import { Users, MapPin } from "lucide-react";
+import { useState } from "react";
 import { Application } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
 import EmptyApplicationsState from "./EmptyApplicationsState";
+import RunClubProfileDialog from "./RunClubProfileDialog";
 
 interface RunClubApplication extends Application {
   run_club_profile?: {
@@ -22,6 +23,14 @@ interface ApplicationsContentProps {
 }
 
 const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: ApplicationsContentProps) => {
+  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  const handleViewProfile = (runClubId: string) => {
+    setSelectedClubId(runClubId);
+    setIsProfileDialogOpen(true);
+  };
+
   return (
     <div className="border rounded-lg p-6">
       <div className="flex items-center mb-6">
@@ -84,6 +93,7 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                     variant="ghost" 
                     size="sm"
                     className="px-0"
+                    onClick={() => handleViewProfile(application.run_club_id)}
                   >
                     View Profile
                   </Button>
@@ -116,6 +126,14 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
         </Table>
       ) : (
         <EmptyApplicationsState />
+      )}
+      
+      {selectedClubId && (
+        <RunClubProfileDialog
+          runClubId={selectedClubId}
+          isOpen={isProfileDialogOpen}
+          onOpenChange={setIsProfileDialogOpen}
+        />
       )}
     </div>
   );
