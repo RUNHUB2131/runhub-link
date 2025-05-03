@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRunClubApplications } from "@/services/applicationService";
@@ -9,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -185,22 +185,13 @@ const ApplicationCard = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center space-x-2">
-              {opportunity.brand?.logo_url ? (
-                <div className="w-8 h-8 rounded overflow-hidden bg-gray-100">
-                  <img 
-                    src={opportunity.brand.logo_url} 
-                    alt={opportunity.brand.company_name || "Brand logo"}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center">
-                  {(opportunity.brand?.company_name?.[0] || "B").toUpperCase()}
-                </div>
-              )}
               <div>
                 <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                <CardDescription>{opportunity.brand?.company_name}</CardDescription>
+                {/* Replace the old brand display with OpportunityBrandInfo */}
+                <OpportunityBrandInfo opportunity={{
+                  brand_id: opportunity.brand_id,
+                  brand: opportunity.brand || null
+                } as any} />
               </div>
             </div>
           </div>

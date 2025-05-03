@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Application } from "@/types";
+import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -137,9 +138,14 @@ const ApplicationCard = ({ application }: { application: ApplicationWithOpportun
           {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
         </Badge>
         <CardTitle className="text-lg">{application.opportunities?.title || "Unknown Opportunity"}</CardTitle>
-        <CardDescription>
-          {application.opportunities?.brand?.company_name || "Unknown Brand"}
-        </CardDescription>
+        
+        {/* Use OpportunityBrandInfo component instead of basic text */}
+        {application.opportunities && application.opportunities.brand_id && (
+          <OpportunityBrandInfo opportunity={{
+            brand_id: application.opportunities.brand_id,
+            brand: application.opportunities.brand || null
+          } as any} />
+        )}
       </CardHeader>
       <CardContent className="text-sm">
         <p className="line-clamp-2">{application.opportunities?.description || "No description available"}</p>
