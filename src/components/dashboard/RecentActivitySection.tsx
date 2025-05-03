@@ -2,6 +2,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Notification } from "@/services/notificationService";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Bell } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface RecentActivitySectionProps {
   notifications: Notification[];
@@ -16,38 +21,49 @@ export const RecentActivitySection = ({ notifications, isLoading, notificationsL
   };
 
   return (
-    <>
-      <h2 className="text-2xl font-bold mt-12">Recent Activity</h2>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <Card className="shadow-sm">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-2xl font-bold">Recent Activity</CardTitle>
+        {notifications.length > 0 && (
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="#" className="flex items-center gap-1">
+              <Bell size={16} /> View all
+            </Link>
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent>
         {isLoading || notificationsLoading ? (
-          <div className="space-y-4 p-4">
+          <div className="space-y-4">
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
           </div>
         ) : notifications.length > 0 ? (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-100">
             {notifications.slice(0, 5).map((notification) => (
-              <div key={notification.id} className="p-4 hover:bg-gray-50 transition-colors">
+              <div key={notification.id} className="py-3 hover:bg-gray-50 transition-colors rounded-md px-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{notification.title}</p>
-                    <p className="text-sm text-gray-500">{notification.message}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{notification.title}</p>
+                      {!notification.read && (
+                        <Badge variant="default" className="bg-primary-500 text-xs">New</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">{notification.message}</p>
                     <p className="text-xs text-gray-400 mt-1">{formatDate(notification.created_at)}</p>
                   </div>
-                  {!notification.read && (
-                    <span className="h-2 w-2 bg-primary-500 rounded-full"></span>
-                  )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center">
+          <div className="py-8 text-center">
             <p className="text-gray-500">No recent activity to show</p>
           </div>
         )}
-      </div>
-    </>
+      </CardContent>
+    </Card>
   );
 };

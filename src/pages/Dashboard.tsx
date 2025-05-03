@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionCard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentActivitySection } from "@/components/dashboard/RecentActivitySection";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 const Dashboard = () => {
   const { userType } = useAuth();
@@ -12,13 +13,8 @@ const Dashboard = () => {
   const { isLoading, profileCompletionPercentage, stats } = useDashboardData();
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome to your {userType === 'run_club' ? 'Run Club' : 'Brand'} dashboard
-        </p>
-      </div>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <DashboardHeader userType={userType} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ProfileCompletionCard 
