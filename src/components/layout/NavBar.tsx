@@ -1,8 +1,9 @@
 
 import { Link } from "react-router-dom";
-import { Bell, User } from "lucide-react";
+import { User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import NotificationsDropdown from "@/components/notifications/NotificationsDropdown";
 
 export const NavBar = () => {
   const { user, logout } = useAuth();
@@ -14,10 +15,7 @@ export const NavBar = () => {
 
         {user ? (
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="rounded-full relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></span>
-            </Button>
+            <NotificationsDropdown />
             
             <Button variant="ghost" size="icon" className="rounded-full">
               <User className="h-5 w-5" />
