@@ -20,9 +20,15 @@ const BrowseOpportunities = () => {
   useEffect(() => {
     if (user?.id) {
       fetchUserApplications();
-      fetchOpportunities();
     }
   }, [user?.id]);
+
+  // Update to fetch opportunities AFTER we have user applications
+  useEffect(() => {
+    if (user?.id) {
+      fetchOpportunities();
+    }
+  }, [userApplications]); // Depend on userApplications instead of user.id
 
   const fetchUserApplications = async () => {
     if (!user?.id) return;
@@ -81,14 +87,11 @@ const BrowseOpportunities = () => {
       );
       
       // Filter out opportunities the user has already applied for
-      if (userApplications.length > 0) {
-        const filteredOpportunities = enhancedOpportunities.filter(
-          opp => !userApplications.includes(opp.id)
-        );
-        setOpportunities(filteredOpportunities);
-      } else {
-        setOpportunities(enhancedOpportunities);
-      }
+      const filteredOpportunities = enhancedOpportunities.filter(
+        opp => !userApplications.includes(opp.id)
+      );
+      
+      setOpportunities(filteredOpportunities);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({
@@ -130,6 +133,9 @@ const BrowseOpportunities = () => {
       
       // Remove the opportunity from the list
       setOpportunities(opportunities.filter(opp => opp.id !== opportunityId));
+      
+      // Redirect to applications page
+      navigate('/applications');
       
     } catch (error: any) {
       console.error("Error applying to opportunity:", error);
