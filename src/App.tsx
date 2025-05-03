@@ -29,49 +29,51 @@ import MyApplications from "./pages/applications/MyApplications";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            
-            {/* Auth routes */}
-            <Route element={<AuthLayout />}>
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/register" element={<Register />} />
-              <Route path="/auth/user-type" element={<UserTypeSelection />} />
-            </Route>
-            
-            {/* Protected routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                
-                {/* Opportunities routes */}
-                <Route path="/opportunities" element={<Opportunities />} />
-                <Route path="/opportunities/add" element={<AddOpportunity />} />
-                <Route path="/opportunities/:id" element={<OpportunityDetails />} />
-                <Route path="/opportunities/applications/:id" element={<OpportunityApplications />} />
-                
-                {/* Applications routes */}
-                <Route path="/applications" element={<MyApplications />} />
-                <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
+              
+              {/* Auth routes */}
+              <Route element={<AuthLayout />}>
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/register" element={<Register />} />
+                <Route path="/auth/user-type" element={<UserTypeSelection />} />
               </Route>
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+              
+              {/* Protected routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/profile" element={<Profile />} />
+                  
+                  {/* Opportunities routes */}
+                  <Route path="/opportunities" element={<Opportunities />} />
+                  <Route path="/opportunities/add" element={<AddOpportunity />} />
+                  <Route path="/opportunities/:id" element={<OpportunityDetails />} />
+                  <Route path="/opportunities/applications/:id" element={<OpportunityApplications />} />
+                  
+                  {/* Applications routes */}
+                  <Route path="/applications" element={<MyApplications />} />
+                  <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
+                </Route>
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

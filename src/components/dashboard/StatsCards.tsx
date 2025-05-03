@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserType } from "@/types";
 import { LayoutGrid, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface StatsCardsProps {
   userType: UserType;
@@ -14,6 +15,22 @@ interface StatsCardsProps {
 }
 
 export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
+  const navigate = useNavigate();
+
+  const handleOpportunitiesClick = () => {
+    navigate("/opportunities");
+  };
+
+  const handleApplicationsClick = () => {
+    if (userType === 'brand') {
+      // Navigate to a page that shows all applications across opportunities
+      navigate("/applications");
+    } else {
+      // For run clubs, navigate to their applications
+      navigate("/applications");
+    }
+  };
+
   if (userType === 'run_club') {
     return (
       <>
@@ -31,7 +48,10 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+        <Card 
+          className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+          onClick={handleApplicationsClick}
+        >
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Pending Applications</CardTitle>
@@ -51,7 +71,10 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
 
   return (
     <>
-      <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Card 
+        className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+        onClick={handleOpportunitiesClick}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Active Campaigns</CardTitle>
@@ -65,7 +88,10 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
           </div>
         </CardContent>
       </Card>
-      <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Card 
+        className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+        onClick={handleApplicationsClick}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>New Applications</CardTitle>
