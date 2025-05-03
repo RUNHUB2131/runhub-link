@@ -1,16 +1,15 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRunClubApplications } from "@/services/applicationService";
 import { Application } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "react-router-dom";
-import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
+import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
+import ApplicationsList from "@/components/applications/ApplicationsList";
+import ApplicationsEmptyState from "@/components/applications/ApplicationsEmptyState";
+import ApplicationsLoadingSkeleton from "@/components/applications/ApplicationsLoadingSkeleton";
 
+// We keep the interface here since it's used across multiple components
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
     id: string;
@@ -29,7 +28,6 @@ interface ApplicationWithOpportunity extends Application {
 
 const MyApplications = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [applications, setApplications] = useState<ApplicationWithOpportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,10 +53,6 @@ const MyApplications = () => {
   const acceptedApplications = applications.filter(app => app.status === 'accepted');
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
 
-  const viewOpportunity = (opportunityId: string) => {
-    navigate(`/opportunities/${opportunityId}`);
-  };
-
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
@@ -67,181 +61,53 @@ const MyApplications = () => {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="w-full">
-              <CardHeader>
-                <Skeleton className="h-6 w-1/3 mb-2" />
-                <Skeleton className="h-4 w-1/4" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-28" />
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <ApplicationsLoadingSkeleton />
       ) : applications.length > 0 ? (
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
-            <TabsTrigger value="pending">Pending ({pendingApplications.length})</TabsTrigger>
-            <TabsTrigger value="accepted">Accepted ({acceptedApplications.length})</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected ({rejectedApplications.length})</TabsTrigger>
-          </TabsList>
+          <ApplicationsFilters 
+            totalCount={applications.length}
+            pendingCount={pendingApplications.length}
+            acceptedCount={acceptedApplications.length}
+            rejectedCount={rejectedApplications.length}
+          />
           
           <TabsContent value="all" className="space-y-6">
             {applications.length > 0 ? (
-              <ApplicationsList applications={applications} onViewOpportunity={viewOpportunity} />
+              <ApplicationsList applications={applications} />
             ) : (
-              <EmptyState />
+              <ApplicationsEmptyState />
             )}
           </TabsContent>
           
           <TabsContent value="pending" className="space-y-6">
             {pendingApplications.length > 0 ? (
-              <ApplicationsList applications={pendingApplications} onViewOpportunity={viewOpportunity} />
+              <ApplicationsList applications={pendingApplications} />
             ) : (
-              <EmptyState message="You don't have any pending applications" />
+              <ApplicationsEmptyState message="You don't have any pending applications" />
             )}
           </TabsContent>
           
           <TabsContent value="accepted" className="space-y-6">
             {acceptedApplications.length > 0 ? (
-              <ApplicationsList applications={acceptedApplications} onViewOpportunity={viewOpportunity} />
+              <ApplicationsList applications={acceptedApplications} />
             ) : (
-              <EmptyState message="You don't have any accepted applications" />
+              <ApplicationsEmptyState message="You don't have any accepted applications" />
             )}
           </TabsContent>
           
           <TabsContent value="rejected" className="space-y-6">
             {rejectedApplications.length > 0 ? (
-              <ApplicationsList applications={rejectedApplications} onViewOpportunity={viewOpportunity} />
+              <ApplicationsList applications={rejectedApplications} />
             ) : (
-              <EmptyState message="You don't have any rejected applications" />
+              <ApplicationsEmptyState message="You don't have any rejected applications" />
             )}
           </TabsContent>
         </Tabs>
       ) : (
-        <EmptyState />
+        <ApplicationsEmptyState />
       )}
     </div>
   );
 };
-
-const ApplicationsList = ({ 
-  applications, 
-  onViewOpportunity 
-}: { 
-  applications: ApplicationWithOpportunity[],
-  onViewOpportunity: (id: string) => void
-}) => {
-  return (
-    <div className="space-y-4">
-      {applications.map((application) => (
-        <ApplicationCard 
-          key={application.id} 
-          application={application} 
-          onViewOpportunity={onViewOpportunity} 
-        />
-      ))}
-    </div>
-  );
-};
-
-const ApplicationCard = ({ 
-  application, 
-  onViewOpportunity 
-}: { 
-  application: ApplicationWithOpportunity,
-  onViewOpportunity: (id: string) => void
-}) => {
-  if (!application.opportunities) {
-    return null;
-  }
-
-  const opportunity = application.opportunities;
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-[#FEC6A1] text-[#7d4829] hover:bg-[#FEC6A1]';
-      case 'accepted':
-        return 'bg-[#F2FCE2] text-[#4c7520] hover:bg-[#F2FCE2]';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
-      default:
-        return '';
-    }
-  };
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-2">
-              <div>
-                <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                {/* Replace the old brand display with OpportunityBrandInfo */}
-                <OpportunityBrandInfo opportunity={{
-                  brand_id: opportunity.brand_id,
-                  brand: opportunity.brand || null
-                } as any} />
-              </div>
-            </div>
-          </div>
-          <Badge 
-            variant="outline"
-            className={getStatusBadgeClass(application.status)}
-          >
-            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          <p className="text-sm line-clamp-2">{opportunity.description}</p>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-            <div>
-              <strong>Reward:</strong> {opportunity.reward}
-            </div>
-            {opportunity.deadline && (
-              <div>
-                <strong>Deadline:</strong> {new Date(opportunity.deadline).toLocaleDateString()}
-              </div>
-            )}
-            <div>
-              <strong>Applied on:</strong> {new Date(application.created_at).toLocaleDateString()}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="border-t pt-4">
-        <Button 
-          variant="outline" 
-          onClick={() => onViewOpportunity(opportunity.id)}
-        >
-          View Opportunity
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-const EmptyState = ({ message = "You haven't applied to any opportunities yet" }) => (
-  <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-    <h3 className="text-lg font-medium mb-2">No applications found</h3>
-    <p className="text-gray-500 mb-4">{message}</p>
-    <Button onClick={() => window.location.href = "/opportunities"}>
-      Browse Opportunities
-    </Button>
-  </div>
-);
 
 export default MyApplications;
