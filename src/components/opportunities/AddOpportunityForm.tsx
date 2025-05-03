@@ -1,181 +1,257 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { Opportunity } from "@/types";
 
-export const AddOpportunityForm = () => {
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+
+const opportunitySchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  reward: z.string().min(1, { message: "Reward is required" }),
+  deadline: z.date().optional(),
+  duration: z.string().optional(),
+  requirements: z.array(z.string()).optional(),
+});
+
+type OpportunityFormValues = z.infer<typeof opportunitySchema>;
+
+interface AddOpportunityFormProps {
+  onSuccess?: () => void;
+  initialValues?: Opportunity;
+  isEditing?: boolean;
+}
+
+export const AddOpportunityForm = ({ 
+  onSuccess, 
+  initialValues,
+  isEditing = false
+}: AddOpportunityFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [requirements, setRequirements] = useState<string>("");
-  
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    reward: "",
-    deadline: "",
-    duration: "",
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Set default values based on initialValues if provided
+  const defaultValues = initialValues 
+    ? {
+        ...initialValues,
+        deadline: initialValues.deadline ? new Date(initialValues.deadline) : undefined,
+      }
+    : {
+        title: "",
+        description: "",
+        reward: "",
+      };
+
+  const form = useForm<OpportunityFormValues>({
+    resolver: zodResolver(opportunitySchema),
+    defaultValues,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data: OpportunityFormValues) => {
     if (!user) {
       toast({
-        title: "Authentication error",
-        description: "You must be logged in to create an opportunity",
+        title: "Authentication required",
+        description: "You must be logged in to create an opportunity.",
         variant: "destructive",
       });
       return;
     }
-    
-    setIsLoading(true);
-    
+
+    setIsSubmitting(true);
+
     try {
-      // Parse requirements into an array
-      const requirementsArray = requirements
-        .split(",")
-        .map(item => item.trim())
-        .filter(item => item !== "");
-      
-      // Save to Supabase
-      const { error } = await supabase
-        .from('opportunities')
-        .insert({
-          brand_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          reward: formData.reward,
-          deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
-          duration: formData.duration,
-          requirements: requirementsArray
+      const opportunityData = {
+        ...data,
+        brand_id: user.id,
+      };
+
+      let result;
+
+      if (isEditing && initialValues) {
+        const { error } = await supabase
+          .from("opportunities")
+          .update(opportunityData)
+          .eq("id", initialValues.id);
+
+        if (error) throw error;
+        
+        result = { success: true };
+      } else {
+        const { data: insertData, error } = await supabase
+          .from("opportunities")
+          .insert([opportunityData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        result = { success: true, data: insertData };
+      }
+
+      if (result.success) {
+        toast({
+          title: isEditing ? "Opportunity updated" : "Opportunity created",
+          description: isEditing 
+            ? "Your opportunity has been updated successfully."
+            : "Your opportunity has been created successfully.",
         });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Opportunity created",
-        description: "Your sponsorship opportunity has been successfully created.",
-      });
-      
-      navigate("/opportunities");
+        
+        if (onSuccess) {
+          onSuccess();
+        }
+        
+        if (!isEditing) {
+          form.reset();
+        }
+      }
     } catch (error: any) {
-      console.error(error);
+      console.error("Error submitting opportunity:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create opportunity. Please try again.",
+        description: isEditing 
+          ? "Failed to update opportunity. Please try again."
+          : "Failed to create opportunity. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create New Sponsorship Opportunity</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Sponsorship title"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe what you're looking for"
-              rows={4}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="reward">Reward</Label>
-            <Input
-              id="reward"
-              name="reward"
-              value={formData.reward}
-              onChange={handleChange}
-              placeholder="What you're offering (e.g. $500, free products)"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="requirements">Requirements (comma separated)</Label>
-            <Textarea
-              id="requirements"
-              name="requirements"
-              value={requirements}
-              onChange={(e) => setRequirements(e.target.value)}
-              placeholder="e.g. 1000+ followers, weekly runs, race participation"
-              rows={2}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="deadline">Application Deadline</Label>
-              <Input
-                id="deadline"
-                name="deadline"
-                type="date"
-                value={formData.deadline}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="duration">Campaign Duration</Label>
-              <Input
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                placeholder="e.g. 3 months"
-              />
-            </div>
-          </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating..." : "Create Opportunity"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter opportunity title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Describe the opportunity in detail" 
+                  className="min-h-[120px]" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="reward"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reward</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. $500, free products, etc." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="duration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Duration (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. 2 weeks, 1 month" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="deadline"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Deadline (Optional)</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
+          {isSubmitting ? (
+            "Processing..."
+          ) : isEditing ? (
+            "Update Opportunity"
+          ) : (
+            "Create Opportunity"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 };
