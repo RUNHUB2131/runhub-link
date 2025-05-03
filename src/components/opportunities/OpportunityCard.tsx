@@ -1,8 +1,8 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Edit, Eye } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface Opportunity {
   id: string;
@@ -21,7 +21,6 @@ interface OpportunityCardProps {
 
 const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleViewOpportunity = () => {
     navigate(`/opportunities/${opportunity.id}`);
@@ -34,18 +33,7 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
 
   const handleEditOpportunity = (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // If there are applications, don't allow editing
-    if (opportunity.applications_count && opportunity.applications_count > 0) {
-      toast({
-        title: "Cannot edit opportunity",
-        description: "This opportunity cannot be edited because it has received applications.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    navigate(`/opportunities/edit/${opportunity.id}`);
+    navigate(`/opportunities/${opportunity.id}`);
   };
 
   const isNew = (createdAt: string) => {
@@ -72,9 +60,6 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
   const getOpportunityType = () => {
     return opportunity.title.toLowerCase().includes('sponsor') ? 'Sponsorship' : 'Event';
   };
-
-  // Determine if the opportunity can be edited
-  const canEdit = !opportunity.applications_count || opportunity.applications_count === 0;
 
   return (
     <div 
@@ -143,8 +128,6 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
               variant="outline"
               size="sm"
               onClick={handleEditOpportunity}
-              className={!canEdit ? "opacity-50" : ""}
-              title={!canEdit ? "Cannot edit opportunities that have applications" : "Edit opportunity"}
             >
               <Edit className="h-4 w-4 mr-1" />
               Edit
