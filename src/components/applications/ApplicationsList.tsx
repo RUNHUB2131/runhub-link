@@ -1,6 +1,7 @@
 
 import { Application } from "@/types";
 import ApplicationCard from "./ApplicationCard";
+import { motion } from "framer-motion";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -22,16 +23,35 @@ interface ApplicationsListProps {
   applications: ApplicationWithOpportunity[];
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
 const ApplicationsList = ({ applications }: ApplicationsListProps) => {
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
       {applications.map((application) => (
-        <ApplicationCard 
-          key={application.id} 
-          application={application}
-        />
+        <motion.div key={application.id} variants={item}>
+          <ApplicationCard application={application} />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

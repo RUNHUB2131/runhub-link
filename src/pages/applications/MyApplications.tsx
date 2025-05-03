@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRunClubApplications } from "@/services/applicationService";
 import { Application } from "@/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
 import ApplicationsList from "@/components/applications/ApplicationsList";
 import ApplicationsEmptyState from "@/components/applications/ApplicationsEmptyState";
 import ApplicationsLoadingSkeleton from "@/components/applications/ApplicationsLoadingSkeleton";
+import { AnimatePresence } from "framer-motion";
 
 // We keep the interface here since it's used across multiple components
 interface ApplicationWithOpportunity extends Application {
@@ -30,6 +30,7 @@ const MyApplications = () => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithOpportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
     const loadApplications = async () => {
@@ -63,7 +64,11 @@ const MyApplications = () => {
       {isLoading ? (
         <ApplicationsLoadingSkeleton />
       ) : applications.length > 0 ? (
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs 
+          defaultValue="all" 
+          className="w-full"
+          onValueChange={setActiveTab}
+        >
           <ApplicationsFilters 
             totalCount={applications.length}
             pendingCount={pendingApplications.length}
@@ -71,37 +76,39 @@ const MyApplications = () => {
             rejectedCount={rejectedApplications.length}
           />
           
-          <TabsContent value="all" className="space-y-6">
-            {applications.length > 0 ? (
-              <ApplicationsList applications={applications} />
-            ) : (
-              <ApplicationsEmptyState />
-            )}
-          </TabsContent>
+          <AnimatePresence mode="wait">
+            <TabsContent value="all" className="space-y-6" key="all">
+              {applications.length > 0 ? (
+                <ApplicationsList applications={applications} />
+              ) : (
+                <ApplicationsEmptyState />
+              )}
+            </TabsContent>
           
-          <TabsContent value="pending" className="space-y-6">
-            {pendingApplications.length > 0 ? (
-              <ApplicationsList applications={pendingApplications} />
-            ) : (
-              <ApplicationsEmptyState message="You don't have any pending applications" />
-            )}
-          </TabsContent>
+            <TabsContent value="pending" className="space-y-6" key="pending">
+              {pendingApplications.length > 0 ? (
+                <ApplicationsList applications={pendingApplications} />
+              ) : (
+                <ApplicationsEmptyState message="You don't have any pending applications" />
+              )}
+            </TabsContent>
           
-          <TabsContent value="accepted" className="space-y-6">
-            {acceptedApplications.length > 0 ? (
-              <ApplicationsList applications={acceptedApplications} />
-            ) : (
-              <ApplicationsEmptyState message="You don't have any accepted applications" />
-            )}
-          </TabsContent>
+            <TabsContent value="accepted" className="space-y-6" key="accepted">
+              {acceptedApplications.length > 0 ? (
+                <ApplicationsList applications={acceptedApplications} />
+              ) : (
+                <ApplicationsEmptyState message="You don't have any accepted applications" />
+              )}
+            </TabsContent>
           
-          <TabsContent value="rejected" className="space-y-6">
-            {rejectedApplications.length > 0 ? (
-              <ApplicationsList applications={rejectedApplications} />
-            ) : (
-              <ApplicationsEmptyState message="You don't have any rejected applications" />
-            )}
-          </TabsContent>
+            <TabsContent value="rejected" className="space-y-6" key="rejected">
+              {rejectedApplications.length > 0 ? (
+                <ApplicationsList applications={rejectedApplications} />
+              ) : (
+                <ApplicationsEmptyState message="You don't have any rejected applications" />
+              )}
+            </TabsContent>
+          </AnimatePresence>
         </Tabs>
       ) : (
         <ApplicationsEmptyState />
