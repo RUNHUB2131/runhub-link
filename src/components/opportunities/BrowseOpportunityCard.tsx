@@ -41,7 +41,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply }: BrowseOpportunityCardPr
               />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center mr-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded bg-primary-100 text-primary-800 flex items-center justify-center mr-2 flex-shrink-0">
               {(opportunity.brand?.company_name?.[0] || "B").toUpperCase()}
             </div>
           )}
@@ -57,7 +57,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply }: BrowseOpportunityCardPr
           Posted {new Date(opportunity.created_at).toLocaleDateString()}
         </p>
         <p className="line-clamp-3 text-sm">{opportunity.description}</p>
-        <div className="mt-3 py-2 px-3 bg-primary/5 rounded-md">
+        <div className="mt-3 py-2 px-3 bg-primary-50 rounded-md">
           <p className="font-medium">Reward: {opportunity.reward}</p>
         </div>
         {opportunity.deadline && (

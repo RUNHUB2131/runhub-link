@@ -71,14 +71,14 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
           <div className="space-y-2">
             <div className="flex gap-2">
               <Badge 
-                className="bg-[#FEC6A1] text-[#7d4829] hover:bg-[#FEC6A1]"
+                className="bg-primary-100 text-primary-800 hover:bg-primary-100"
               >
                 {getOpportunityType()}
               </Badge>
               
               {isNew(opportunity.created_at) && (
                 <Badge 
-                  className="bg-[#F2FCE2] text-[#4c7520] hover:bg-[#F2FCE2]"
+                  className="bg-green-100 text-green-800 hover:bg-green-100"
                 >
                   New
                 </Badge>
@@ -89,7 +89,7 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
             <p className="text-gray-600 line-clamp-1">{opportunity.description}</p>
           </div>
           
-          <div className="text-[#f26640] font-bold text-2xl">
+          <div className="text-primary-500 font-bold text-2xl">
             {opportunity.reward.startsWith('$') ? opportunity.reward : `$${opportunity.reward}`}
           </div>
         </div>
