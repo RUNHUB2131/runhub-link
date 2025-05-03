@@ -84,6 +84,8 @@ export const AddOpportunityForm = ({
       const opportunityData = {
         ...data,
         brand_id: user.id,
+        // Convert Date object to ISO string for the database
+        deadline: data.deadline ? data.deadline.toISOString() : null
       };
 
       let result;
