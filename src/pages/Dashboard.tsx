@@ -1,25 +1,22 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 const Dashboard = () => {
   const { userType, user } = useAuth();
   const { toast } = useToast();
+  const { notifications, isLoading: notificationsLoading } = useNotifications();
   const [isLoading, setIsLoading] = useState(true);
   const [profileCompletionPercentage, setProfileCompletionPercentage] = useState(0);
   const [stats, setStats] = useState({
     opportunities: 0,
     applications: 0
   });
-  const [recentActivity, setRecentActivity] = useState<Array<{
-    id: string;
-    message: string;
-    timestamp: string;
-  }>>([]);
 
   useEffect(() => {
     if (user) {
@@ -89,12 +86,6 @@ const Dashboard = () => {
           }));
         }
       }
-      
-      // For simplicity, we don't have a real activity log table yet
-      // In a real application, you would fetch from an activity log table
-      // This is a placeholder for now
-      setRecentActivity([]);
-      
     } catch (error: any) {
       console.error("Error fetching dashboard data:", error);
       toast({
@@ -131,6 +122,11 @@ const Dashboard = () => {
     
     const percentage = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
     setProfileCompletionPercentage(percentage);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, "MMM d, h:mm a");
   };
 
   return (
@@ -212,22 +208,29 @@ const Dashboard = () => {
 
       <h2 className="text-2xl font-bold mt-12">Recent Activity</h2>
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        {isLoading ? (
+        {isLoading || notificationsLoading ? (
           <div className="space-y-4 p-4">
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-14 w-full" />
           </div>
-        ) : recentActivity.length > 0 ? (
-          recentActivity.map((activity) => (
-            <div key={activity.id} className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <div>
-                <p className="font-medium">{activity.message}</p>
-                <p className="text-sm text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
+        ) : notifications.length > 0 ? (
+          <div className="divide-y divide-gray-200">
+            {notifications.slice(0, 5).map((notification) => (
+              <div key={notification.id} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{notification.title}</p>
+                    <p className="text-sm text-gray-500">{notification.message}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(notification.created_at)}</p>
+                  </div>
+                  {!notification.read && (
+                    <span className="h-2 w-2 bg-primary-500 rounded-full"></span>
+                  )}
+                </div>
               </div>
-              <Button>View</Button>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
           <div className="p-8 text-center">
             <p className="text-gray-500">No recent activity to show</p>
@@ -237,14 +240,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
-const Button = ({ children, ...props }) => (
-  <button 
-    className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-md text-sm transition-colors"
-    {...props}
-  >
-    {children}
-  </button>
-);
 
 export default Dashboard;
