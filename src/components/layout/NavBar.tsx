@@ -1,6 +1,5 @@
 
 import { Link } from "react-router-dom";
-import { User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import NotificationsDropdown from "@/components/notifications/NotificationsDropdown";
@@ -16,10 +15,6 @@ export const NavBar = () => {
         {user ? (
           <div className="flex items-center gap-4">
             <NotificationsDropdown />
-            
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <User className="h-5 w-5" />
-            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-4">
