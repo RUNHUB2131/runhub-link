@@ -1,6 +1,4 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,17 +6,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { RunClubProfile } from "@/types";
-import { Checkbox } from "@/components/ui/checkbox";
+import { CommunityDataForm } from "./community/CommunityDataForm";
 
 interface EditCommunityInfoDialogProps {
   open: boolean;
@@ -33,87 +23,41 @@ export function EditCommunityInfoDialog({
   profile,
   onSave,
 }: EditCommunityInfoDialogProps) {
-  const communityData = profile.community_data || {};
-  const demographics = communityData.demographics || {};
-  
-  const initialRunTypes = Array.isArray(communityData.run_types) ? communityData.run_types : [];
-  const initialEventExperience = Array.isArray(demographics.event_experience) ? demographics.event_experience : [];
-  
-  const [formData, setFormData] = useState({
-    member_count: profile.member_count || 0,
-    average_group_size: demographics.average_group_size || "",
-    core_demographic: demographics.core_demographic || "",
-  });
-  
-  const [runTypes, setRunTypes] = useState<string[]>(initialRunTypes);
-  const [eventExperience, setEventExperience] = useState<string[]>(initialEventExperience);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const availableRunTypes = ["Road", "Trail", "Track", "Urban"];
-  const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
-  const groupSizeRanges = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
-  const demographicRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "member_count" ? parseInt(value) || 0 : value,
-    }));
-  };
-
-  const handleRunTypeToggle = (value: string) => {
-    setRunTypes(current =>
-      current.includes(value)
-        ? current.filter(type => type !== value)
-        : [...current, value]
-    );
-  };
-
-  const handleEventTypeToggle = (value: string) => {
-    setEventExperience(current =>
-      current.includes(value)
-        ? current.filter(type => type !== value)
-        : [...current, value]
-    );
-  };
-
-  const handleGroupSizeChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      average_group_size: value,
-    }));
-  };
-
-  const handleDemographicChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      core_demographic: value,
-    }));
-  };
-
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSave({
-        member_count: formData.member_count,
-        community_data: {
-          run_types: runTypes,
-          demographics: {
-            ...demographics,
-            average_group_size: formData.average_group_size,
-            core_demographic: formData.core_demographic,
-            event_experience: eventExperience,
-          },
+  const handleSave = async ({
+    member_count,
+    average_group_size,
+    core_demographic,
+    runTypes,
+    eventExperience,
+  }: {
+    member_count: number;
+    average_group_size: string;
+    core_demographic: string;
+    runTypes: string[];
+    eventExperience: string[];
+  }) => {
+    const demographics = profile.community_data?.demographics || {};
+    
+    await onSave({
+      member_count,
+      community_data: {
+        run_types: runTypes,
+        demographics: {
+          ...demographics,
+          average_group_size,
+          core_demographic,
+          event_experience: eventExperience,
         },
-      });
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error saving community info:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+    });
+    
+    onOpenChange(false);
   };
+
+  const { formComponents, handleSubmit, isLoading } = CommunityDataForm({
+    profile,
+    onSaveData: handleSave,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,98 +66,7 @@ export function EditCommunityInfoDialog({
           <DialogTitle>Edit Community Information</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="member_count">Total Member Count</Label>
-            <Input
-              id="member_count"
-              name="member_count"
-              type="number"
-              value={formData.member_count}
-              onChange={handleChange}
-              min="0"
-              placeholder="Enter total number of members"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="average_group_size">Average Group Size</Label>
-            <Select
-              value={formData.average_group_size}
-              onValueChange={handleGroupSizeChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select average group size range" />
-              </SelectTrigger>
-              <SelectContent>
-                {groupSizeRanges.map((range) => (
-                  <SelectItem key={range} value={range}>
-                    {range}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="core_demographic">Core Demographic (Age)</Label>
-            <Select
-              value={formData.core_demographic}
-              onValueChange={handleDemographicChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select core demographic age range" />
-              </SelectTrigger>
-              <SelectContent>
-                {demographicRanges.map((range) => (
-                  <SelectItem key={range} value={range}>
-                    {range}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Run Types</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {availableRunTypes.map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`run-type-${type}`}
-                    checked={runTypes.includes(type)}
-                    onCheckedChange={() => handleRunTypeToggle(type)}
-                  />
-                  <label
-                    htmlFor={`run-type-${type}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {type}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <Label>Event Experience</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {availableEventTypes.map((type) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`event-type-${type}`}
-                    checked={eventExperience.includes(type)}
-                    onCheckedChange={() => handleEventTypeToggle(type)}
-                  />
-                  <label
-                    htmlFor={`event-type-${type}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {type}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          {formComponents}
         </div>
         <DialogFooter>
           <Button onClick={() => onOpenChange(false)} variant="outline">
