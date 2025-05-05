@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { RunClubProfile } from "@/types";
 
 interface EditSocialMediaDialogProps {
@@ -32,6 +33,7 @@ export function EditSocialMediaDialog({
     twitter: socialMedia.twitter || "",
     facebook: socialMedia.facebook || "",
     strava: socialMedia.strava || "",
+    follower_count_range: socialMedia.follower_count_range || "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,6 +42,13 @@ export function EditSocialMediaDialog({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleRangeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      follower_count_range: value,
     }));
   };
 
@@ -63,7 +72,37 @@ export function EditSocialMediaDialog({
         <DialogHeader>
           <DialogTitle>Edit Social Media</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <div className="space-y-6 py-4">
+          <div className="space-y-4">
+            <Label>Total Social Media Audience</Label>
+            <RadioGroup
+              value={formData.follower_count_range}
+              onValueChange={handleRangeChange}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="under_1000" id="under_1000" />
+                <Label htmlFor="under_1000">0 - 1,000 followers</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="1000_to_4000" id="1000_to_4000" />
+                <Label htmlFor="1000_to_4000">1,000 - 4,000 followers</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="4000_to_9000" id="4000_to_9000" />
+                <Label htmlFor="4000_to_9000">4,000 - 9,000 followers</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="9000_to_20000" id="9000_to_20000" />
+                <Label htmlFor="9000_to_20000">9,000 - 20,000 followers</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="over_20000" id="over_20000" />
+                <Label htmlFor="over_20000">20,000+ followers</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="instagram">Instagram</Label>
             <Input

@@ -37,6 +37,7 @@ export const fetchRunClubProfile = async (userId: string) => {
         facebook: socialMediaData.facebook || '',
         twitter: socialMediaData.twitter || '',
         strava: socialMediaData.strava || '',
+        follower_count_range: socialMediaData.follower_count_range || '',
       },
       community_data: {
         run_types: Array.isArray(communityData.run_types) ? communityData.run_types : [],

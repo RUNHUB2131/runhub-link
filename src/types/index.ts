@@ -26,6 +26,7 @@ export interface RunClubProfile extends Profile {
     facebook?: string;
     twitter?: string;
     strava?: string;
+    follower_count_range?: 'under_1000' | '1000_to_4000' | '4000_to_9000' | '9000_to_20000' | 'over_20000';
   };
   community_data?: {
     run_types?: string[];
