@@ -27,6 +27,10 @@ import OpportunityApplications from "./pages/opportunities/OpportunityApplicatio
 // Application routes
 import MyApplications from "./pages/applications/MyApplications";
 
+// Chat routes
+import ChatPage from "./pages/chat/ChatPage";
+import ChatListPage from "./pages/chat/ChatListPage";
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -62,6 +66,11 @@ function App() {
                   
                   {/* Applications routes */}
                   <Route path="/applications" element={<MyApplications />} />
+                  
+                  {/* Chat routes */}
+                  <Route path="/chat" element={<ChatListPage />} />
+                  <Route path="/chat/:chatId" element={<ChatPage />} />
+                  
                   <Route path="/messages" element={<h1 className="text-3xl font-bold">Messages</h1>} />
                 </Route>
               </Route>

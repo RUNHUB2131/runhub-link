@@ -1,24 +1,15 @@
 
-import { Application } from "@/types";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
 import { useState } from "react";
-import { X } from "lucide-react";
-import { withdrawApplication } from "@/services/applicationService";
+import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { Clock, Check, X, MessageCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Application } from "@/types";
+import { checkChatExistsForApplication } from "@/services/chatService";
+import ChatDrawer from "@/components/chat/ChatDrawer";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from "@/components/ui/alert-dialog";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -42,162 +33,139 @@ interface ApplicationCardProps {
 }
 
 const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-
-  if (!application.opportunities) {
-    return null;
-  }
-
-  const opportunity = application.opportunities;
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-[#FEC6A1] text-[#7d4829] hover:bg-[#FEC6A1]';
-      case 'accepted':
-        return 'bg-[#F2FCE2] text-[#4c7520] hover:bg-[#F2FCE2]';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 hover:bg-red-100';
-      default:
-        return '';
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  const getStatusIcon = (status: string) => {
+    switch(status) {
+      case "pending": return <Clock className="h-4 w-4" />;
+      case "accepted": return <Check className="h-4 w-4" />;
+      case "rejected": return <X className="h-4 w-4" />;
+      default: return null;
     }
   };
-
-  const viewOpportunity = (opportunityId: string) => {
-    navigate(`/opportunities/${opportunityId}`);
+  
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case "pending": return "bg-amber-100 text-amber-800";
+      case "accepted": return "bg-green-100 text-green-800";
+      case "rejected": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
   };
-
-  const handleWithdrawClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsAlertOpen(true);
-  };
-
+  
   const handleWithdraw = async () => {
+    if (!onWithdraw) return;
+    
     setIsWithdrawing(true);
     try {
-      console.log("Starting application withdrawal for:", application.id);
-      // Call withdraw function from service, which returns opportunity ID
-      const { success, opportunityId } = await withdrawApplication(application.id);
-      
-      if (success) {
-        console.log("Withdrawal successful, opportunity ID:", opportunityId);
-        toast({
-          title: "Application withdrawn",
-          description: "The opportunity is now available in Browse Opportunities",
-        });
-        
-        if (onWithdraw) {
-          onWithdraw(application.id);
-          
-          // Navigate to Browse Opportunities with state to trigger refresh
-          navigate('/opportunities/browse', { 
-            state: { 
-              fromWithdraw: true, 
-              opportunityId 
-            }
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Failed to withdraw application:", error);
-      toast({
-        title: "Error",
-        description: "Failed to withdraw application. Please try again.",
-        variant: "destructive",
-      });
+      await onWithdraw(application.id);
     } finally {
       setIsWithdrawing(false);
-      setIsAlertOpen(false);
     }
   };
-
+  
+  const handleChatClick = async () => {
+    if (application.status !== 'accepted') return;
+    
+    try {
+      const existingChatId = await checkChatExistsForApplication(application.id);
+      
+      if (existingChatId) {
+        setChatId(existingChatId);
+        setIsDrawerOpen(true);
+      } else {
+        toast({
+          title: "Chat Not Available",
+          description: "The chat for this application cannot be found.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking chat existence:", error);
+      toast({
+        title: "Error",
+        description: "Failed to open chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   return (
-    <>
-      <Card className="w-full">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-2">
-                <div>
-                  <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                  <OpportunityBrandInfo opportunity={{
-                    brand_id: opportunity.brand_id,
-                    brand: opportunity.brand || null
-                  } as any} />
-                </div>
-              </div>
-            </div>
-            <Badge 
-              variant="outline"
-              className={getStatusBadgeClass(application.status)}
-            >
-              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <p className="text-sm line-clamp-2">{opportunity.description}</p>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-              <div>
-                <strong>Reward:</strong> {opportunity.reward}
-              </div>
-              {opportunity.deadline && (
-                <div>
-                  <strong>Deadline:</strong> {new Date(opportunity.deadline).toLocaleDateString()}
-                </div>
-              )}
-              <div>
-                <strong>Applied on:</strong> {new Date(application.created_at).toLocaleDateString()}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="border-t pt-4 flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={() => viewOpportunity(opportunity.id)}
+    <Card className="transition-shadow hover:shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <Badge 
+            className={`${getStatusColor(application.status)} flex w-fit items-center gap-1 border-none`}
           >
-            View Opportunity
+            {getStatusIcon(application.status)}
+            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+          </Badge>
+          
+          <div className="text-sm text-muted-foreground">
+            {format(new Date(application.created_at), "MMM d, yyyy")}
+          </div>
+        </div>
+        
+        <CardTitle className="mt-2 text-lg">
+          {application.opportunities?.title || "Untitled Opportunity"}
+        </CardTitle>
+        
+        {application.opportunities?.brand && (
+          <CardDescription>
+            {application.opportunities.brand.company_name || "Unknown Brand"}
+          </CardDescription>
+        )}
+      </CardHeader>
+      
+      <CardContent>
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {application.opportunities?.description || "No description available."}
+        </p>
+      </CardContent>
+      
+      <CardFooter className="flex justify-between pt-2">
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/opportunities/${application.opportunity_id}`}>
+              View Details
+            </Link>
           </Button>
           
-          {application.status === "pending" && (
+          {onWithdraw && application.status === "pending" && (
             <Button 
-              variant="outline"
-              className="border-red-500 text-red-500 hover:bg-red-50"
-              onClick={handleWithdrawClick}
+              variant="ghost" 
+              size="sm"
+              onClick={handleWithdraw}
               disabled={isWithdrawing}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50"
             >
-              <X className="h-4 w-4 mr-1" />
-              {isWithdrawing ? "Withdrawing..." : "Withdraw Application"}
+              {isWithdrawing ? "Withdrawing..." : "Withdraw"}
             </Button>
           )}
-        </CardFooter>
-      </Card>
+        </div>
+        
+        {application.status === "accepted" && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={handleChatClick}
+          >
+            <MessageCircle className="h-4 w-4" />
+            Chat
+          </Button>
+        )}
+      </CardFooter>
       
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Withdraw Application</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to withdraw your application? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleWithdraw}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              Withdraw
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      <ChatDrawer 
+        chatId={chatId} 
+        isOpen={isDrawerOpen} 
+        onOpenChange={setIsDrawerOpen}
+      />
+    </Card>
   );
 };
 

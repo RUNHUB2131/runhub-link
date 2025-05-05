@@ -1,22 +1,26 @@
 
-import { Button } from "@/components/ui/button";
-import { Application, RunClubProfile } from "@/types";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { isProfileComplete } from "@/utils/profileCompletionUtils";
+import { Application, RunClubProfile } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { checkChatExistsForApplication } from "@/services/chatService";
+import ChatDrawer from "@/components/chat/ChatDrawer";
 
 interface OpportunityActionButtonProps {
-  userType: string | undefined;
+  userType: 'run_club' | 'brand' | undefined;
   userId: string | undefined;
-  brandId: string | undefined;
+  brandId: string;
   opportunityId: string;
   application: Application | null;
   isApplying: boolean;
-  handleApply: () => void;
+  handleApply: () => Promise<boolean>;
   showApplications: boolean;
   setShowApplications: (show: boolean) => void;
-  runClubProfile?: Partial<RunClubProfile>;
+  runClubProfile: Partial<RunClubProfile>;
 }
 
 const OpportunityActionButton = ({
@@ -29,93 +33,121 @@ const OpportunityActionButton = ({
   handleApply,
   showApplications,
   setShowApplications,
-  runClubProfile = {}
+  runClubProfile
 }: OpportunityActionButtonProps) => {
   const navigate = useNavigate();
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const { toast } = useToast();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [chatId, setChatId] = useState<string | null>(null);
   
-  const profileComplete = isProfileComplete(runClubProfile);
-  const missingFields = getMissingProfileFields(runClubProfile);
-
-  const handleViewApplications = () => {
-    // Navigate to the dedicated applications page
-    navigate(`/opportunities/applications/${opportunityId}`);
-  };
-  
-  const handleApplyClick = () => {
-    if (profileComplete) {
-      handleApply();
+  const handleChatClick = async () => {
+    if (!application || application.status !== 'accepted') return;
+    
+    // Check if chat exists
+    const existingChatId = await checkChatExistsForApplication(application.id);
+    
+    if (existingChatId) {
+      setChatId(existingChatId);
+      setIsDrawerOpen(true);
     } else {
-      setShowProfileDialog(true);
+      // This shouldn't happen as chat is created automatically on acceptance
+      toast({
+        title: "Chat Not Found",
+        description: "The chat for this application cannot be found.",
+        variant: "destructive",
+      });
     }
   };
-  
-  const handleCompleteProfile = () => {
-    setShowProfileDialog(false);
-    navigate('/profile');
-  };
 
-  if (userType === 'run_club') {
-    if (application) {
-      return (
-        <Button disabled className="w-full md:w-auto">
-          Application {application.status}
-        </Button>
-      );
-    } else {
-      return (
-        <>
-          <Button 
-            onClick={handleApplyClick} 
-            disabled={isApplying} 
-            className="w-full md:w-auto"
-          >
-            {isApplying ? "Applying..." : "Apply Now"}
-          </Button>
-          
-          <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Complete Your Profile</DialogTitle>
-                <DialogDescription>
-                  You need to complete your run club profile before applying to opportunities.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="py-4">
-                <h4 className="font-medium mb-2">Missing information:</h4>
-                <ul className="list-disc pl-5 space-y-1">
-                  {missingFields.map((field, index) => (
-                    <li key={index} className="text-sm">{field}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowProfileDialog(false)}>
-                  Later
-                </Button>
-                <Button onClick={handleCompleteProfile}>
-                  Complete Profile
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </>
-      );
-    }
-  } else if (userType === 'brand' && brandId === userId) {
+  // Brand viewing their own opportunity
+  if (userType === 'brand' && userId === brandId) {
     return (
-      <Button 
-        onClick={handleViewApplications}
-        className="w-full md:w-auto bg-white text-black border border-gray-200 hover:bg-gray-100"
-      >
-        View Applications
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button onClick={() => setShowApplications(!showApplications)}>
+          {showApplications ? "Hide Applications" : "View Applications"}
+        </Button>
+      </div>
     );
   }
   
-  return null;
+  // Run club viewing an opportunity
+  if (userType === 'run_club') {
+    // Already applied
+    if (application) {
+      const buttonProps = {
+        disabled: true,
+        children: `Application ${application.status}`,
+        className: application.status === 'accepted' ? 'bg-green-500 hover:bg-green-600' : 
+                 application.status === 'rejected' ? 'bg-red-500 hover:bg-red-600' : undefined
+      };
+      
+      return (
+        <div className="flex items-center gap-2">
+          <Button {...buttonProps} />
+          
+          {application.status === 'accepted' && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={handleChatClick}
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Chat with the brand</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
+          <ChatDrawer 
+            chatId={chatId} 
+            isOpen={isDrawerOpen} 
+            onOpenChange={setIsDrawerOpen} 
+          />
+        </div>
+      );
+    }
+    
+    // Check if profile is complete before showing apply button
+    const isComplete = isProfileComplete(runClubProfile);
+    
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                onClick={handleApply}
+                disabled={isApplying || !isComplete}
+              >
+                {isApplying ? "Applying..." : "Apply Now"}
+              </Button>
+            </div>
+          </TooltipTrigger>
+          {!isComplete && (
+            <TooltipContent>
+              <p>Complete your profile before applying</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+  
+  // Not logged in or brand viewing another brand's opportunity
+  return (
+    <Button 
+      variant="outline" 
+      onClick={() => navigate('/auth/login')}
+    >
+      Login to Apply
+    </Button>
+  );
 };
 
 export default OpportunityActionButton;
