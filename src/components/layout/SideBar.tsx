@@ -90,14 +90,8 @@ export function SideBar() {
   }, [userType]);
 
   return (
-    <div className="hidden border-r bg-background md:block">
+    <div className="hidden w-64 border-r bg-background md:block">
       <div className="flex h-full flex-col gap-2 p-4">
-        <Button variant="ghost" className="mb-2 w-full justify-start" asChild>
-          <NavLink to="/">
-            <Home className="mr-2 h-5 w-5" />
-            <span className="font-semibold">RunClubConnect</span>
-          </NavLink>
-        </Button>
         <div className="space-y-1">
           {navLinks.map((link) =>
             renderNavLink(link.to, link.icon, link.label)

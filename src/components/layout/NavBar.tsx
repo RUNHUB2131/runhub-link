@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, User, Bell } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,12 +27,6 @@ export const NavBar = () => {
           </SheetContent>
         </Sheet>
         
-        <div className="flex items-center space-x-4">
-          <Link to="/" className="font-semibold">
-            RunClubConnect
-          </Link>
-        </div>
-
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
