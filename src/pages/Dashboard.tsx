@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [profilePercentage, setProfilePercentage] = useState<number>(0);
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -76,11 +77,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader />
+      <DashboardHeader userType={userType} />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <StatsCards stats={stats} isLoading={isLoading} />
+          <StatsCards userType={userType} stats={stats} isLoading={isLoading} />
         </div>
         
         {userType === 'run_club' && (
@@ -92,7 +93,11 @@ const Dashboard = () => {
         )}
       </div>
       
-      <RecentActivitySection activity={recentActivity} isLoading={isLoading} />
+      <RecentActivitySection 
+        notifications={recentActivity} 
+        isLoading={isLoading} 
+        notificationsLoading={notificationsLoading} 
+      />
     </div>
   );
 };
