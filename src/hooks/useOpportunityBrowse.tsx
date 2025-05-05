@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,52 +13,49 @@ export const useOpportunityBrowse = () => {
   const [userApplications, setUserApplications] = useState<string[]>([]);
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchUserApplications();
-    }
-  }, [user?.id, lastRefresh]);
-
-  // Update to fetch opportunities AFTER we have user applications
-  useEffect(() => {
-    if (user?.id) {
-      fetchOpportunities();
-    }
-  }, [userApplications, lastRefresh]); // Depend on userApplications instead of user.id
-
-  const fetchUserApplications = async () => {
+  const fetchUserApplications = useCallback(async () => {
     if (!user?.id) return;
     
     try {
+      console.log("Fetching user applications for user ID:", user.id);
       // Fetch all opportunities this run club has already applied for
       const { data: applicationsData, error: applicationsError } = await supabase
         .from('applications')
         .select('opportunity_id')
         .eq('run_club_id', user.id);
       
-      if (applicationsError) throw applicationsError;
+      if (applicationsError) {
+        console.error("Error fetching user applications:", applicationsError);
+        throw applicationsError;
+      }
       
       // Extract just the opportunity IDs into an array
       const appliedOpportunityIds = (applicationsData || []).map(app => app.opportunity_id);
+      console.log("User has applied to these opportunities:", appliedOpportunityIds);
       setUserApplications(appliedOpportunityIds);
     } catch (error: any) {
       console.error("Error fetching user applications:", error);
     }
-  };
+  }, [user?.id]);
 
-  const fetchOpportunities = async () => {
+  const fetchOpportunities = useCallback(async () => {
     setIsLoading(true);
     try {
+      console.log("Fetching opportunities, applied opportunities:", userApplications);
       // First, fetch all opportunities
       const { data: opportunitiesData, error: opportunitiesError } = await supabase
         .from('opportunities')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (opportunitiesError) throw opportunitiesError;
+      if (opportunitiesError) {
+        console.error("Error fetching opportunities:", opportunitiesError);
+        throw opportunitiesError;
+      }
       
       if (!opportunitiesData) {
         setOpportunities([]);
+        setIsLoading(false);
         return;
       }
       
@@ -87,6 +84,7 @@ export const useOpportunityBrowse = () => {
         opp => !userApplications.includes(opp.id)
       );
       
+      console.log("Filtered opportunities:", filteredOpportunities.length);
       setOpportunities(filteredOpportunities);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
@@ -98,17 +96,32 @@ export const useOpportunityBrowse = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userApplications, toast]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserApplications();
+    }
+  }, [user?.id, lastRefresh, fetchUserApplications]);
+
+  // Update to fetch opportunities AFTER we have user applications
+  useEffect(() => {
+    if (user?.id) {
+      fetchOpportunities();
+    }
+  }, [userApplications, lastRefresh, fetchOpportunities, user?.id]); 
 
   // Add a method to refresh the data when an application is withdrawn
-  const refreshAfterWithdrawal = () => {
+  const refreshAfterWithdrawal = useCallback(() => {
+    console.log("Refreshing after withdrawal");
     setLastRefresh(Date.now()); // This will trigger both useEffects
-  };
+  }, []);
 
   // Add a simple method to force a refresh
-  const refresh = () => {
+  const refresh = useCallback(() => {
+    console.log("Manual refresh triggered");
     setLastRefresh(Date.now());
-  };
+  }, []);
 
   return {
     opportunities,

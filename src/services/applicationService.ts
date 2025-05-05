@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/types";
 
@@ -133,14 +134,28 @@ export const fetchRunClubApplications = async (runClubId: string) => {
 
 export const withdrawApplication = async (applicationId: string) => {
   try {
-    const { error } = await supabase
+    // First, get the opportunity ID associated with this application
+    const { data: applicationData, error: fetchError } = await supabase
+      .from('applications')
+      .select('opportunity_id')
+      .eq('id', applicationId)
+      .single();
+    
+    if (fetchError) throw fetchError;
+    const opportunityId = applicationData?.opportunity_id;
+    
+    // Now delete the application
+    const { error: deleteError } = await supabase
       .from('applications')
       .delete()
       .eq('id', applicationId);
 
-    if (error) throw error;
+    if (deleteError) throw deleteError;
     
-    return { success: true };
+    return { 
+      success: true,
+      opportunityId // Return the opportunity ID for navigation purposes
+    };
   } catch (error) {
     console.error("Error withdrawing application:", error);
     throw error;

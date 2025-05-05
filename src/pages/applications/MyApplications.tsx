@@ -1,8 +1,7 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchRunClubApplications, withdrawApplication } from "@/services/applicationService";
+import { fetchRunClubApplications } from "@/services/applicationService";
 import { Application } from "@/types";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
@@ -36,17 +35,21 @@ const MyApplications = () => {
   const [applications, setApplications] = useState<ApplicationWithOpportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [withdrawnApplications, setWithdrawnApplications] = useState<Set<string>>(new Set());
-
-  const loadApplications = async () => {
+  
+  // Keep track of withdrawn applications during the current session
+  const [withdrawnApplicationIds, setWithdrawnApplicationIds] = useState<Set<string>>(new Set());
+  
+  const loadApplications = useCallback(async () => {
     if (!user?.id) return;
     
     try {
       setIsLoading(true);
+      console.log("Fetching applications for user:", user.id);
       const data = await fetchRunClubApplications(user.id);
       
-      // Filter out applications that have been withdrawn in the current session
-      const filteredData = data.filter(app => !withdrawnApplications.has(app.id));
+      // Filter out any applications that have been withdrawn in the current session
+      const filteredData = data.filter(app => !withdrawnApplicationIds.has(app.id));
+      console.log("Filtered applications:", filteredData.length, "out of", data.length);
       setApplications(filteredData || []);
     } catch (error) {
       console.error("Error loading applications:", error);
@@ -57,46 +60,26 @@ const MyApplications = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, withdrawnApplicationIds, toast]);
 
   useEffect(() => {
     loadApplications();
-  }, [user?.id, withdrawnApplications]);
+  }, [loadApplications]);
 
-  const handleWithdrawApplication = async (applicationId: string) => {
-    try {
-      // Call the API to withdraw the application
-      const result = await withdrawApplication(applicationId);
-      
-      // Find the withdrawn application to get its opportunity ID
-      const withdrawnApp = applications.find(app => app.id === applicationId);
-      
-      // Add to withdrawn applications set
-      setWithdrawnApplications(prev => new Set(prev).add(applicationId));
-      
-      // Remove the application from the local state
-      setApplications(applications.filter(app => app.id !== applicationId));
-      
-      toast({
-        title: "Application withdrawn",
-        description: "The opportunity is now available in Browse Opportunities"
-      });
-      
-      // Navigate to Browse Opportunities with state to trigger refresh
-      if (withdrawnApp) {
-        navigate('/opportunities/browse', { 
-          state: { fromWithdraw: true, opportunityId: withdrawnApp.opportunity_id } 
-        });
-      }
-    } catch (error) {
-      console.error("Error withdrawing application:", error);
-      toast({
-        title: "Error",
-        description: "Failed to withdraw application",
-        variant: "destructive",
-      });
-    }
-  };
+  const handleWithdrawApplication = useCallback((applicationId: string) => {
+    // Add to withdrawn applications set
+    setWithdrawnApplicationIds(prev => {
+      const newSet = new Set(prev);
+      newSet.add(applicationId);
+      return newSet;
+    });
+    
+    // Remove the application from the local state
+    setApplications(prevApps => prevApps.filter(app => app.id !== applicationId));
+    
+    // Note: The actual withdrawal API call and navigation is handled in ApplicationCard
+    // This function is just for updating the local state
+  }, []);
 
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const acceptedApplications = applications.filter(app => app.status === 'accepted');
@@ -125,7 +108,7 @@ const MyApplications = () => {
           />
           
           <AnimatePresence mode="wait">
-            <TabsContent value="all" className="space-y-6" key="all">
+            <TabsContent value="all" className="space-y-6">
               {applications.length > 0 ? (
                 <ApplicationsList 
                   applications={applications} 
@@ -136,7 +119,7 @@ const MyApplications = () => {
               )}
             </TabsContent>
           
-            <TabsContent value="pending" className="space-y-6" key="pending">
+            <TabsContent value="pending" className="space-y-6">
               {pendingApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={pendingApplications} 
@@ -147,7 +130,7 @@ const MyApplications = () => {
               )}
             </TabsContent>
           
-            <TabsContent value="accepted" className="space-y-6" key="accepted">
+            <TabsContent value="accepted" className="space-y-6">
               {acceptedApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={acceptedApplications}
@@ -157,7 +140,7 @@ const MyApplications = () => {
               )}
             </TabsContent>
           
-            <TabsContent value="rejected" className="space-y-6" key="rejected">
+            <TabsContent value="rejected" className="space-y-6">
               {rejectedApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={rejectedApplications}

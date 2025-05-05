@@ -78,20 +78,32 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
     try {
-      await withdrawApplication(application.id);
-      toast({
-        title: "Application withdrawn",
-        description: "You can now apply to this opportunity again",
-      });
+      // Call withdraw function from service, which returns opportunity ID
+      const { success, opportunityId } = await withdrawApplication(application.id);
       
-      if (onWithdraw) {
-        onWithdraw(application.id);
+      if (success) {
+        toast({
+          title: "Application withdrawn",
+          description: "The opportunity is now available in Browse Opportunities",
+        });
+        
+        if (onWithdraw) {
+          onWithdraw(application.id);
+          
+          // Navigate to Browse Opportunities with state to trigger refresh
+          navigate('/opportunities/browse', { 
+            state: { 
+              fromWithdraw: true, 
+              opportunityId: opportunityId
+            }
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to withdraw application:", error);
       toast({
         title: "Error",
-        description: "Failed to withdraw application",
+        description: "Failed to withdraw application. Please try again.",
         variant: "destructive",
       });
     } finally {

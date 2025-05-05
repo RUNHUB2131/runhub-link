@@ -22,20 +22,26 @@ const BrowseOpportunities = () => {
     refresh
   } = useOpportunityBrowse();
 
-  // Check if we've been redirected from the applications page
+  // Check if we've been redirected from the applications page with withdrawal info
   useEffect(() => {
-    const shouldRefresh = location.state?.fromWithdraw;
+    // Get state from location if it exists
+    const state = location.state || {};
+    const shouldRefresh = state.fromWithdraw;
+    const opportunityId = state.opportunityId;
+    
     if (shouldRefresh) {
+      console.log("Refreshing after withdrawal, opportunity ID:", opportunityId);
       refreshAfterWithdrawal();
+      
       // Clean up the state
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, navigate, refreshAfterWithdrawal]);
 
   // Additional refresh when component mounts
   useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
 
   const handleApply = async (opportunityId: string) => {
     if (!user?.id) return;
