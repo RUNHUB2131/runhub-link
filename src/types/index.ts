@@ -28,8 +28,8 @@ export interface RunClubProfile extends Profile {
     instagram_follower_range?: FollowerCountRange;
     facebook?: string;
     facebook_follower_range?: FollowerCountRange;
-    twitter?: string;
-    twitter_follower_range?: FollowerCountRange;
+    tiktok?: string;
+    tiktok_follower_range?: FollowerCountRange;
     strava?: string;
     strava_follower_range?: FollowerCountRange;
   };
@@ -48,7 +48,7 @@ export interface BrandProfile extends Profile {
   social_media?: {
     instagram?: string;
     facebook?: string;
-    twitter?: string;
+    tiktok?: string;
     linkedin?: string;
   };
 }

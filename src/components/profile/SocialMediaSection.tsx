@@ -1,5 +1,6 @@
 
 import { ExternalLink } from "lucide-react";
+import { TikTok } from "lucide-react";
 import { RunClubProfile, FollowerCountRange } from "@/types";
 
 interface SocialMediaSectionProps {
@@ -21,8 +22,8 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
     switch (platform.toLowerCase()) {
       case 'instagram':
         return `https://instagram.com/${cleanHandle}`;
-      case 'twitter':
-        return `https://twitter.com/${cleanHandle}`;
+      case 'tiktok':
+        return `https://tiktok.com/@${cleanHandle}`;
       case 'facebook':
         return `https://facebook.com/${cleanHandle}`;
       case 'strava':
@@ -79,21 +80,21 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
         </div>
         
         <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-4">Twitter</h3>
-          {socialMedia.twitter ? (
+          <h3 className="font-semibold mb-4">TikTok</h3>
+          {socialMedia.tiktok ? (
             <>
               <a 
-                href={getSocialUrl(socialMedia.twitter, 'twitter')}
+                href={getSocialUrl(socialMedia.tiktok, 'tiktok')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline flex items-center mb-2"
               >
-                {formatSocialHandle(socialMedia.twitter, 'twitter')}
+                {formatSocialHandle(socialMedia.tiktok, 'tiktok')}
                 <ExternalLink size={16} className="ml-1" />
               </a>
-              {socialMedia.twitter_follower_range && (
+              {socialMedia.tiktok_follower_range && (
                 <p className="text-sm text-muted-foreground">
-                  {getFollowerRangeDisplay(socialMedia.twitter_follower_range)}
+                  {getFollowerRangeDisplay(socialMedia.tiktok_follower_range)}
                 </p>
               )}
             </>

@@ -37,8 +37,8 @@ export function EditSocialMediaDialog({
   const [formData, setFormData] = useState({
     instagram: socialMedia.instagram || "",
     instagram_follower_range: socialMedia.instagram_follower_range || undefined,
-    twitter: socialMedia.twitter || "",
-    twitter_follower_range: socialMedia.twitter_follower_range || undefined,
+    tiktok: socialMedia.tiktok || "",
+    tiktok_follower_range: socialMedia.tiktok_follower_range || undefined,
     facebook: socialMedia.facebook || "",
     facebook_follower_range: socialMedia.facebook_follower_range || undefined,
     strava: socialMedia.strava || "",
@@ -68,8 +68,8 @@ export function EditSocialMediaDialog({
         social_media: {
           instagram: formData.instagram,
           instagram_follower_range: formData.instagram_follower_range,
-          twitter: formData.twitter,
-          twitter_follower_range: formData.twitter_follower_range,
+          tiktok: formData.tiktok,
+          tiktok_follower_range: formData.tiktok_follower_range,
           facebook: formData.facebook,
           facebook_follower_range: formData.facebook_follower_range,
           strava: formData.strava,
@@ -129,25 +129,25 @@ export function EditSocialMediaDialog({
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="twitter">Twitter</Label>
+              <Label htmlFor="tiktok">TikTok</Label>
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <Input
-                  id="twitter"
-                  name="twitter"
-                  value={formData.twitter}
+                  id="tiktok"
+                  name="tiktok"
+                  value={formData.tiktok}
                   onChange={handleChange}
                   placeholder="@yourusername"
                 />
                 <Select
-                  value={formData.twitter_follower_range}
-                  onValueChange={(value) => handleRangeChange('twitter', value as FollowerCountRange)}
+                  value={formData.tiktok_follower_range}
+                  onValueChange={(value) => handleRangeChange('tiktok', value as FollowerCountRange)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Follower count" />
                   </SelectTrigger>
                   <SelectContent>
                     {followerRangeOptions.map((option) => (
-                      <SelectItem key={`twitter-${option.value}`} value={option.value}>
+                      <SelectItem key={`tiktok-${option.value}`} value={option.value}>
                         {option.label}
                       </SelectItem>
                     ))}
