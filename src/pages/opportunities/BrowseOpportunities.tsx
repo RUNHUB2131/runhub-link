@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { OpportunityCard } from "@/components/opportunities/OpportunityCard";
+import OpportunityCard from "@/components/opportunities/OpportunityCard";
 import { RunClubProfile, Opportunity } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
@@ -28,7 +29,7 @@ const BrowseOpportunities = () => {
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchRunClubProfile = async () => {
+    const loadRunClubProfile = async () => {
       if (userType === 'run_club' && user) {
         try {
           setProfileLoading(true);
@@ -50,7 +51,13 @@ const BrowseOpportunities = () => {
       try {
         const { data, error } = await supabase
           .from('opportunities')
-          .select('*, brand:brand_id (company_name, logo_url)');
+          .select(`
+            *,
+            brand:brand_id (
+              company_name,
+              logo_url
+            )
+          `);
         
         if (error) {
           console.error("Error fetching opportunities:", error);
@@ -60,7 +67,7 @@ const BrowseOpportunities = () => {
             variant: "destructive",
           });
         } else {
-          setOpportunities(data || []);
+          setOpportunities(data as Opportunity[] || []);
         }
       } catch (error) {
         console.error("Error fetching opportunities:", error);
@@ -74,9 +81,9 @@ const BrowseOpportunities = () => {
       }
     };
     
-    fetchRunClubProfile();
+    loadRunClubProfile();
     fetchOpportunities();
-  }, [user, userType]);
+  }, [user, userType, toast]);
 
   useEffect(() => {
     if (runClubProfile && Object.keys(runClubProfile).length > 0) {

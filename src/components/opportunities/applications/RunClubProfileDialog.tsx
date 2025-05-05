@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -136,3 +137,5 @@ export function RunClubProfileDialog({
     </Dialog>
   );
 }
+
+export default RunClubProfileDialog;

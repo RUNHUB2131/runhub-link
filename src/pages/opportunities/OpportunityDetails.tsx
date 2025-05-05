@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,7 +53,7 @@ const OpportunityDetails = () => {
         }
 
         if (data) {
-          setOpportunity(data);
+          setOpportunity(data as Opportunity);
         } else {
           toast({
             title: "Not Found",
@@ -215,7 +216,7 @@ const OpportunityDetails = () => {
         <CardFooter className="flex justify-between items-center">
           {userType === 'run_club' ? (
             hasApplied ? (
-              <Badge variant="success">
+              <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
                 <CheckCircle className="mr-2 h-4 w-4" />
                 Applied
               </Badge>

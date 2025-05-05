@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BrandProfile, RunClubProfile, UserType, FollowerCountRange } from "@/types";
 
@@ -46,9 +45,9 @@ export const fetchRunClubProfile = async (userId: string) => {
       }
     }
 
-    // Convert average_group_size to string if it's a number
+    // Always convert average_group_size to string
     let averageGroupSize = data.average_group_size;
-    if (typeof averageGroupSize === 'number') {
+    if (averageGroupSize !== null && averageGroupSize !== undefined) {
       averageGroupSize = String(averageGroupSize);
     }
       
@@ -136,8 +135,16 @@ export const saveRunClubBasicInfo = async (userId: string, data: Partial<RunClub
     processedData.website = `https://${processedData.website}`;
   }
 
-  // Use type assertion to work around the type mismatch
-  const dataToUpdate = processedData as any;
+  // Convert average_group_size to the right type for database
+  const dataToUpdate: any = { ...processedData };
+  
+  // If we're sending average_group_size as a string, convert to number for DB
+  if (typeof dataToUpdate.average_group_size === 'string' && dataToUpdate.average_group_size) {
+    const parsed = parseInt(dataToUpdate.average_group_size);
+    if (!isNaN(parsed)) {
+      dataToUpdate.average_group_size = parsed;
+    }
+  }
   
   const { error } = await supabase
     .from('run_club_profiles')
@@ -160,19 +167,25 @@ export const saveRunClubSocialMedia = async (userId: string, socialMediaData: Pa
 
 export const saveRunClubCommunityInfo = async (userId: string, communityData: Partial<RunClubProfile>) => {
   // Create an update object with all community related fields
-  const updateData = {
+  const updateData: any = {
     member_count: communityData.member_count,
-    average_group_size: communityData.average_group_size,
     core_demographic: communityData.core_demographic,
     community_data: communityData.community_data
   };
 
-  // Use type assertion to work around the type mismatch
-  const dataToUpdate = updateData as any;
+  // Convert average_group_size to number for database
+  if (typeof communityData.average_group_size === 'string' && communityData.average_group_size) {
+    const parsed = parseInt(communityData.average_group_size);
+    if (!isNaN(parsed)) {
+      updateData.average_group_size = parsed;
+    }
+  } else {
+    updateData.average_group_size = communityData.average_group_size;
+  }
 
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(dataToUpdate)
+    .update(updateData)
     .eq('id', userId);
   
   if (error) throw error;

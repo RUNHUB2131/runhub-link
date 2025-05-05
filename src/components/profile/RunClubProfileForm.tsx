@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -112,12 +111,22 @@ export const RunClubProfileForm = ({
       }
 
       if (onSave) {
-        await onSave(dataToSave);
+        await onSave(dataToSave as Partial<RunClubProfile>);
       } else {
+        // Convert to the appropriate type for database
+        const dataForDb: any = { ...dataToSave };
+        
+        if (typeof dataForDb.average_group_size === 'string' && dataForDb.average_group_size) {
+          const parsed = parseInt(dataForDb.average_group_size);
+          if (!isNaN(parsed)) {
+            dataForDb.average_group_size = parsed;
+          }
+        }
+        
         // Save to Supabase
         const { error } = await supabase
           .from('run_club_profiles')
-          .update(dataToSave)
+          .update(dataForDb)
           .eq('id', user.id);
         
         if (error) throw error;
@@ -249,7 +258,7 @@ export const RunClubProfileForm = ({
               <div className="space-y-2">
                 <Label htmlFor="average_group_size">Average Group Size*</Label>
                 <Select
-                  value={formData.average_group_size.toString()}
+                  value={formData.average_group_size}
                   onValueChange={handleAverageGroupSizeChange}
                 >
                   <SelectTrigger className="w-full">
