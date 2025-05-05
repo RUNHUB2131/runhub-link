@@ -136,9 +136,12 @@ export const saveRunClubBasicInfo = async (userId: string, data: Partial<RunClub
     processedData.website = `https://${processedData.website}`;
   }
 
+  // Use type assertion to work around the type mismatch
+  const dataToUpdate = processedData as any;
+  
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(processedData)
+    .update(dataToUpdate)
     .eq('id', userId);
   
   if (error) throw error;
@@ -164,9 +167,12 @@ export const saveRunClubCommunityInfo = async (userId: string, communityData: Pa
     community_data: communityData.community_data
   };
 
+  // Use type assertion to work around the type mismatch
+  const dataToUpdate = updateData as any;
+
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(updateData)
+    .update(dataToUpdate)
     .eq('id', userId);
   
   if (error) throw error;

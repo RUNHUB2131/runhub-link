@@ -28,8 +28,8 @@ const Dashboard = () => {
         const profileData = await fetchRunClubProfile(user.id);
         
         if (profileData) {
-          // Ensure profileData is properly typed as Partial<RunClubProfile>
-          setRunClubProfile(profileData);
+          // Use type assertion to handle the type mismatch
+          setRunClubProfile(profileData as Partial<RunClubProfile>);
           
           // Calculate profile completion percentage
           let completedFields = 0;
