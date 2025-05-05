@@ -35,8 +35,14 @@ const BrowseOpportunities = () => {
       
       // Clean up the state
       navigate(location.pathname, { replace: true, state: {} });
+      
+      // Show a success message to the user
+      toast({
+        title: "Application withdrawn",
+        description: "The opportunity has been added back to your browse list",
+      });
     }
-  }, [location.state, navigate, refreshAfterWithdrawal]);
+  }, [location.state, navigate, refreshAfterWithdrawal, toast]);
 
   // Additional refresh when component mounts
   useEffect(() => {

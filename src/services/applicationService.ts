@@ -134,6 +134,8 @@ export const fetchRunClubApplications = async (runClubId: string) => {
 
 export const withdrawApplication = async (applicationId: string) => {
   try {
+    console.log("Withdrawing application:", applicationId);
+    
     // First, get the opportunity ID associated with this application
     const { data: applicationData, error: fetchError } = await supabase
       .from('applications')
@@ -141,8 +143,13 @@ export const withdrawApplication = async (applicationId: string) => {
       .eq('id', applicationId)
       .single();
     
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error("Error fetching application:", fetchError);
+      throw fetchError;
+    }
+    
     const opportunityId = applicationData?.opportunity_id;
+    console.log("Found opportunity ID:", opportunityId);
     
     // Now delete the application
     const { error: deleteError } = await supabase
@@ -150,7 +157,12 @@ export const withdrawApplication = async (applicationId: string) => {
       .delete()
       .eq('id', applicationId);
 
-    if (deleteError) throw deleteError;
+    if (deleteError) {
+      console.error("Error deleting application:", deleteError);
+      throw deleteError;
+    }
+    
+    console.log("Application successfully deleted");
     
     return { 
       success: true,

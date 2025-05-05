@@ -78,10 +78,12 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
     try {
+      console.log("Starting application withdrawal for:", application.id);
       // Call withdraw function from service, which returns opportunity ID
       const { success, opportunityId } = await withdrawApplication(application.id);
       
       if (success) {
+        console.log("Withdrawal successful, opportunity ID:", opportunityId);
         toast({
           title: "Application withdrawn",
           description: "The opportunity is now available in Browse Opportunities",
@@ -94,7 +96,7 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
           navigate('/opportunities/browse', { 
             state: { 
               fromWithdraw: true, 
-              opportunityId: opportunityId
+              opportunityId 
             }
           });
         }
