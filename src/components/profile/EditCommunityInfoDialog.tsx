@@ -52,6 +52,7 @@ export function EditCommunityInfoDialog({
   const availableRunTypes = ["Road", "Trail", "Track", "Urban"];
   const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
   const groupSizeRanges = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
+  const demographicRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -81,6 +82,13 @@ export function EditCommunityInfoDialog({
     setFormData((prev) => ({
       ...prev,
       average_group_size: value,
+    }));
+  };
+
+  const handleDemographicChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      core_demographic: value,
     }));
   };
 
@@ -147,14 +155,22 @@ export function EditCommunityInfoDialog({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="core_demographic">Core Demographic</Label>
-            <Input
-              id="core_demographic"
-              name="core_demographic"
+            <Label htmlFor="core_demographic">Core Demographic (Age)</Label>
+            <Select
               value={formData.core_demographic}
-              onChange={handleChange}
-              placeholder="e.g., 25-34 years"
-            />
+              onValueChange={handleDemographicChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select core demographic age range" />
+              </SelectTrigger>
+              <SelectContent>
+                {demographicRanges.map((range) => (
+                  <SelectItem key={range} value={range}>
+                    {range}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-3">

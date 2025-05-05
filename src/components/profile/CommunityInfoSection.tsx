@@ -1,7 +1,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { RunClubProfile } from "@/types";
-import { Users } from "lucide-react";
+import { Users, Calendar } from "lucide-react";
 
 interface CommunityInfoSectionProps {
   profile: Partial<RunClubProfile>;
@@ -15,9 +15,18 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
   
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="p-6 border rounded-lg flex items-center">
           <Users className="h-10 w-10 text-blue-500 mr-4" />
+          <div>
+            <p className="text-sm text-muted-foreground">Total Member Count</p>
+            <p className="text-3xl font-semibold">
+              {profile.member_count ? `${profile.member_count}` : "Not specified"}
+            </p>
+          </div>
+        </div>
+        <div className="p-6 border rounded-lg flex items-center">
+          <Users className="h-10 w-10 text-green-500 mr-4" />
           <div>
             <p className="text-sm text-muted-foreground">Average Group Size</p>
             <p className="text-3xl font-semibold">
@@ -26,11 +35,11 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
           </div>
         </div>
         <div className="p-6 border rounded-lg flex items-center">
-          <Users className="h-10 w-10 text-green-500 mr-4" />
+          <Calendar className="h-10 w-10 text-amber-500 mr-4" />
           <div>
-            <p className="text-sm text-muted-foreground">Total Member Count</p>
+            <p className="text-sm text-muted-foreground">Core Demographic</p>
             <p className="text-3xl font-semibold">
-              {profile.member_count ? `${profile.member_count} members` : "Not specified"}
+              {demographics.core_demographic || "Not specified"}
             </p>
           </div>
         </div>
