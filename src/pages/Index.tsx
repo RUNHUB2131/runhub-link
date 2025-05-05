@@ -23,7 +23,7 @@ const Index = () => {
         {/* Hero Section */}
         <section className="bg-gradient-to-b from-primary-50 to-white py-20">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold mb-6">Connect Run Clubs with Brands</h1>
+            <h1 className="text-5xl font-bold mb-6">Connecting Run Clubs with Brands</h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               RUNHUB Connect is the platform that brings running clubs and brands together for 
               meaningful sponsorships and partnerships.
