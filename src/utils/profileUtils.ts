@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { BrandProfile, RunClubProfile, UserType } from "@/types";
+import { BrandProfile, RunClubProfile, UserType, FollowerCountRange } from "@/types";
 
 export const fetchRunClubProfile = async (userId: string) => {
   const { data, error } = await supabase
@@ -14,12 +14,20 @@ export const fetchRunClubProfile = async (userId: string) => {
   if (data) {
     // Transform data to match RunClubProfile type with proper type casting
     const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
-      ? data.social_media as Record<string, string>
+      ? data.social_media as Record<string, any>
       : {};
       
     const communityData = typeof data.community_data === 'object' && data.community_data !== null
       ? data.community_data as Record<string, any>
       : {};
+    
+    // Make sure follower_count_range is one of the valid values
+    const followerCountRange = socialMediaData.follower_count_range || '';
+    const validRanges: FollowerCountRange[] = ['under_1000', '1000_to_4000', '4000_to_9000', '9000_to_20000', 'over_20000'];
+    
+    const validatedFollowerCountRange = validRanges.includes(followerCountRange as FollowerCountRange) 
+      ? followerCountRange as FollowerCountRange 
+      : undefined;
       
     return {
       id: data.id,
@@ -37,7 +45,7 @@ export const fetchRunClubProfile = async (userId: string) => {
         facebook: socialMediaData.facebook || '',
         twitter: socialMediaData.twitter || '',
         strava: socialMediaData.strava || '',
-        follower_count_range: socialMediaData.follower_count_range || '',
+        follower_count_range: validatedFollowerCountRange,
       },
       community_data: {
         run_types: Array.isArray(communityData.run_types) ? communityData.run_types : [],

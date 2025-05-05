@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { RunClubProfile } from "@/types";
+import { RunClubProfile, FollowerCountRange } from "@/types";
 
 interface EditSocialMediaDialogProps {
   open: boolean;
@@ -33,7 +33,7 @@ export function EditSocialMediaDialog({
     twitter: socialMedia.twitter || "",
     facebook: socialMedia.facebook || "",
     strava: socialMedia.strava || "",
-    follower_count_range: socialMedia.follower_count_range || "",
+    follower_count_range: socialMedia.follower_count_range || "" as FollowerCountRange | "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,7 +45,7 @@ export function EditSocialMediaDialog({
     }));
   };
 
-  const handleRangeChange = (value: string) => {
+  const handleRangeChange = (value: FollowerCountRange) => {
     setFormData((prev) => ({
       ...prev,
       follower_count_range: value,
@@ -56,7 +56,13 @@ export function EditSocialMediaDialog({
     setIsLoading(true);
     try {
       await onSave({
-        social_media: formData,
+        social_media: {
+          instagram: formData.instagram,
+          twitter: formData.twitter,
+          facebook: formData.facebook,
+          strava: formData.strava,
+          follower_count_range: formData.follower_count_range as FollowerCountRange | undefined,
+        },
       });
       onOpenChange(false);
     } catch (error) {
@@ -77,7 +83,7 @@ export function EditSocialMediaDialog({
             <Label>Total Social Media Audience</Label>
             <RadioGroup
               value={formData.follower_count_range}
-              onValueChange={handleRangeChange}
+              onValueChange={handleRangeChange as (value: string) => void}
               className="space-y-2"
             >
               <div className="flex items-center space-x-2">
