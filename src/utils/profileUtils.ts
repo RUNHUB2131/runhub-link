@@ -27,20 +27,6 @@ export const fetchRunClubProfile = async (userId: string) => {
     const validateFollowerRange = (range?: string): FollowerCountRange | undefined => {
       return range && validRanges.includes(range as FollowerCountRange) ? range as FollowerCountRange : undefined;
     };
-    
-    // Extract city and state from location if they're not directly provided
-    let city = data.city || '';
-    let state = data.state || '';
-    
-    if (!city && !state && data.location) {
-      const locationParts = data.location.split(',').map(part => part.trim());
-      if (locationParts.length >= 2) {
-        city = locationParts[0];
-        state = locationParts[1];
-      } else if (locationParts.length === 1) {
-        city = locationParts[0];
-      }
-    }
       
     return {
       id: data.id,
@@ -49,12 +35,8 @@ export const fetchRunClubProfile = async (userId: string) => {
       created_at: new Date().toISOString(),
       club_name: data.club_name || '',
       description: data.description || '',
-      city: city,
-      state: state,
       location: data.location || '',
       member_count: data.member_count || 0,
-      average_group_size: data.average_group_size || 0,
-      core_demographic: data.core_demographic || '',
       website: data.website || '',
       logo_url: data.logo_url || '',
       social_media: {
