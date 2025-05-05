@@ -34,7 +34,7 @@ const OpportunityDetails = () => {
         description: "Please complete your profile before applying",
         variant: "destructive",
       });
-      return;
+      return false; // Return false to indicate unsuccessful application
     }
     
     setIsApplying(true);
@@ -45,6 +45,8 @@ const OpportunityDetails = () => {
       // Redirect to my applications page after successful application
       navigate('/applications');
     }
+    
+    return success; // Return the success value to match the expected Promise<boolean> return type
   };
 
   if (isLoading) {
