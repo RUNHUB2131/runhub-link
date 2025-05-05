@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { MapPin, Globe, Instagram, Facebook, Linkedin } from "lucide-react";
@@ -17,23 +17,30 @@ interface BrandProfileDialogProps {
 const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialogProps) => {
   const [profile, setProfile] = useState<Partial<BrandProfile> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   // Fetch the brand profile details when the dialog opens
   useEffect(() => {
     if (isOpen && brandId) {
       setIsLoading(true);
+      setNotFound(false);
       
       // Fetch the brand profile from Supabase
       supabase
         .from("brand_profiles")
         .select("*")
         .eq("id", brandId)
-        .single()
+        .maybeSingle() // Use maybeSingle instead of single to prevent errors
         .then(({ data, error }) => {
           if (error) {
             console.error("Error fetching brand profile:", error);
+            setNotFound(true);
+          } else if (!data) {
+            console.log("No brand profile found for ID:", brandId);
+            setNotFound(true);
           } else {
             setProfile(data as Partial<BrandProfile>);
+            setNotFound(false);
           }
           setIsLoading(false);
         });
@@ -45,6 +52,11 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Brand Profile</DialogTitle>
+          {notFound && (
+            <DialogDescription>
+              Brand information is not available at this moment.
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {isLoading ? (
@@ -58,6 +70,10 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
             </div>
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-10 w-full" />
+          </div>
+        ) : notFound ? (
+          <div className="py-4 text-center text-muted-foreground">
+            <p>The brand profile could not be found.</p>
           </div>
         ) : (
           <div className="space-y-6">

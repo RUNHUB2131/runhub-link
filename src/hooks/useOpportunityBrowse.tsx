@@ -62,29 +62,23 @@ export const useOpportunityBrowse = () => {
       // Then, for each opportunity, fetch the brand information separately
       const enhancedOpportunities = await Promise.all(
         opportunitiesData.map(async (opp) => {
-          // Get brand profile for each opportunity
+          // Get brand profile for each opportunity - using maybeSingle instead of single
+          // to prevent errors when the brand doesn't exist
           const { data: brandData, error: brandError } = await supabase
             .from('brand_profiles')
             .select('company_name, logo_url')
             .eq('id', opp.brand_id)
-            .single();
+            .maybeSingle();
           
           if (brandError) {
             console.error(`Error fetching brand info for opportunity ${opp.id}:`, brandError);
-            return {
-              ...opp,
-              brand: {
-                company_name: "Unknown Brand",
-                logo_url: undefined
-              }
-            } as Opportunity;
           }
           
           return {
             ...opp,
             brand: {
               company_name: brandData?.company_name || "Unknown Brand",
-              logo_url: brandData?.logo_url
+              logo_url: brandData?.logo_url || undefined
             }
           } as Opportunity;
         })
