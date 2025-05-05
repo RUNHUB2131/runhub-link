@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BrandProfile, RunClubProfile, UserType, FollowerCountRange } from "@/types";
 
@@ -44,6 +45,12 @@ export const fetchRunClubProfile = async (userId: string) => {
         }
       }
     }
+
+    // Convert average_group_size to string if it's a number
+    let averageGroupSize = data.average_group_size;
+    if (typeof averageGroupSize === 'number') {
+      averageGroupSize = String(averageGroupSize);
+    }
       
     return {
       id: data.id,
@@ -55,7 +62,7 @@ export const fetchRunClubProfile = async (userId: string) => {
       city: city,
       state: state,
       member_count: data.member_count || 0,
-      average_group_size: data.average_group_size || '', // Changed to string
+      average_group_size: averageGroupSize || '',
       core_demographic: data.core_demographic || '',
       website: data.website || '',
       logo_url: data.logo_url || '',

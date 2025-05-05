@@ -1,4 +1,3 @@
-
 import { RunClubProfile } from "@/types";
 import { useState } from "react";
 import { DemographicSelections } from "./DemographicSelections";

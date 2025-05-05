@@ -41,6 +41,7 @@ const OpportunityDetails = () => {
       try {
         const profileData = await fetchRunClubProfile(user.id);
         if (profileData) {
+          // Ensure profileData is properly typed as Partial<RunClubProfile>
           setRunClubProfile(profileData);
         }
       } catch (error) {

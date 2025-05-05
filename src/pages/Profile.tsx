@@ -29,6 +29,7 @@ const Profile = () => {
       if (userType === 'run_club') {
         const profileData = await fetchRunClubProfile(user.id);
         if (profileData) {
+          // Ensure profileData is properly typed as Partial<RunClubProfile>
           setRunClubProfile(profileData);
         }
       } else if (userType === 'brand') {

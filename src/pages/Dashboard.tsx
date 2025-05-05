@@ -28,6 +28,7 @@ const Dashboard = () => {
         const profileData = await fetchRunClubProfile(user.id);
         
         if (profileData) {
+          // Ensure profileData is properly typed as Partial<RunClubProfile>
           setRunClubProfile(profileData);
           
           // Calculate profile completion percentage

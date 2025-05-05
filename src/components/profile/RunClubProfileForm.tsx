@@ -52,7 +52,7 @@ export const RunClubProfileForm = ({
     
     // Community info fields
     member_count: initialData.member_count || 0,
-    average_group_size: initialData.average_group_size || 0,
+    average_group_size: initialData.average_group_size || "",
     core_demographic: initialData.core_demographic || "",
   });
   
@@ -86,7 +86,7 @@ export const RunClubProfileForm = ({
   const handleAverageGroupSizeChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      average_group_size: parseInt(value) || 0
+      average_group_size: value
     }));
   };
 

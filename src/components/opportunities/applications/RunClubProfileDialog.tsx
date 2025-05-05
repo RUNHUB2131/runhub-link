@@ -34,7 +34,12 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
             if (error) {
               console.error("Error fetching run club profile:", error);
             } else {
-              setProfile(data as Partial<RunClubProfile>);
+              // Convert average_group_size to string if needed
+              let profileData = { ...data };
+              if (typeof profileData.average_group_size === 'number') {
+                profileData.average_group_size = String(profileData.average_group_size);
+              }
+              setProfile(profileData as Partial<RunClubProfile>);
             }
             setIsLoading(false);
           });
