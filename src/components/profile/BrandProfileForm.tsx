@@ -10,6 +10,7 @@ import { BrandProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface BrandProfileFormProps {
   initialData?: Partial<BrandProfile>;
@@ -37,6 +38,13 @@ export const BrandProfileForm = ({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleLogoUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      logo_url: url
     }));
   };
 
@@ -92,6 +100,15 @@ export const BrandProfileForm = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex justify-center mb-4">
+            <ImageUpload 
+              userId={user?.id || ''}
+              currentImageUrl={formData.logo_url}
+              onImageUpload={handleLogoUpload}
+              size="lg"
+            />
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="company_name">Company Name</Label>
             <Input
@@ -133,17 +150,6 @@ export const BrandProfileForm = ({
               id="website"
               name="website"
               value={formData.website}
-              onChange={handleChange}
-              placeholder="https://"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="logo_url">Logo URL</Label>
-            <Input
-              id="logo_url"
-              name="logo_url"
-              value={formData.logo_url}
               onChange={handleChange}
               placeholder="https://"
             />

@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RunClubProfile } from "@/types";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditBasicInfoDialogProps {
   open: boolean;
@@ -26,6 +28,7 @@ export function EditBasicInfoDialog({
   profile,
   onSave,
 }: EditBasicInfoDialogProps) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     club_name: profile.club_name || "",
     description: profile.description || "",
@@ -41,6 +44,13 @@ export function EditBasicInfoDialog({
     setFormData((prev) => ({
       ...prev,
       [name]: name === "member_count" ? parseInt(value) || 0 : value,
+    }));
+  };
+
+  const handleLogoUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      logo_url: url
     }));
   };
 
@@ -63,6 +73,15 @@ export function EditBasicInfoDialog({
           <DialogTitle>Edit Basic Information</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          <div className="flex justify-center mb-4">
+            <ImageUpload 
+              userId={user?.id || ''}
+              currentImageUrl={formData.logo_url}
+              onImageUpload={handleLogoUpload}
+              size="lg"
+            />
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="club_name">Club Name</Label>
             <Input

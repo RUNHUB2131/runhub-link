@@ -1,22 +1,27 @@
 
 import { ExternalLink } from "lucide-react";
 import { RunClubProfile } from "@/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface BasicInfoSectionProps {
   profile: Partial<RunClubProfile>;
 }
 
 export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
+  const clubInitial = profile.club_name ? profile.club_name.charAt(0).toUpperCase() : "C";
+  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="flex items-center space-x-4 mb-6">
+        <Avatar className="h-24 w-24 border-2 border-muted">
+          {profile.logo_url ? (
+            <AvatarImage src={profile.logo_url} alt={profile.club_name || "Club logo"} />
+          ) : null}
+          <AvatarFallback className="text-2xl">{clubInitial}</AvatarFallback>
+        </Avatar>
         <div>
-          <h3 className="font-semibold mb-2">Club Name</h3>
-          <p className="text-2xl">{profile.club_name || "Not specified"}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold mb-2">Location</h3>
-          <p className="text-2xl">{profile.location || "Not specified"}</p>
+          <h2 className="text-2xl font-bold">{profile.club_name || "Not specified"}</h2>
+          <p className="text-muted-foreground">{profile.location || "No location specified"}</p>
         </div>
       </div>
 

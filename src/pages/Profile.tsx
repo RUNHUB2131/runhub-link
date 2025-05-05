@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -6,6 +5,7 @@ import { RunClubProfile, BrandProfile } from "@/types";
 import { BrandProfileForm } from "@/components/profile/BrandProfileForm";
 import { RunClubProfileView } from "@/components/profile/RunClubProfileView";
 import { fetchRunClubProfile, fetchBrandProfile } from "@/utils/profileUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { userType, user } = useAuth();
@@ -49,6 +49,37 @@ const Profile = () => {
     }
   };
 
+  const handleBrandProfileSave = async (formData: Partial<BrandProfile>) => {
+    if (!user) return;
+    
+    try {
+      // Save to Supabase
+      const { error } = await supabase
+        .from('brand_profiles')
+        .update(formData)
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      // Refresh profile data
+      fetchProfileData();
+      
+      toast({
+        title: "Profile updated",
+        description: "Your brand profile has been updated successfully.",
+      });
+      
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save profile. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -58,7 +89,7 @@ const Profile = () => {
   }
 
   if (userType === 'brand') {
-    return <BrandProfileForm initialData={brandProfile} />;
+    return <BrandProfileForm initialData={brandProfile} onSave={handleBrandProfileSave} />;
   }
 
   return (
