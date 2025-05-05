@@ -78,20 +78,27 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
     try {
-      await withdrawApplication(application.id);
+      const result = await withdrawApplication(application.id);
+      
       toast({
         title: "Application withdrawn",
         description: "You can now apply to this opportunity again",
       });
       
-      if (onWithdraw) {
-        onWithdraw(application.id);
+      // Verify the withdrawal went through before calling onWithdraw
+      if (result && result.success) {
+        console.log("Withdrawal successful, updating UI", result);
+        if (onWithdraw) {
+          onWithdraw(application.id);
+        }
+      } else {
+        throw new Error("Withdrawal did not return a success status");
       }
     } catch (error) {
       console.error("Failed to withdraw application:", error);
       toast({
         title: "Error",
-        description: "Failed to withdraw application",
+        description: "Failed to withdraw application. Please try again.",
         variant: "destructive",
       });
     } finally {

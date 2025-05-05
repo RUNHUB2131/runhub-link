@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -26,16 +25,18 @@ const BrowseOpportunities = () => {
   useEffect(() => {
     const shouldRefresh = location.state?.fromWithdraw;
     if (shouldRefresh) {
+      console.log("Refreshing opportunities after withdrawal", location.state);
       refreshAfterWithdrawal();
       // Clean up the state
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [location.state, refreshAfterWithdrawal, navigate, location.pathname]);
 
   // Additional refresh when component mounts
   useEffect(() => {
+    console.log("BrowseOpportunities component mounted, refreshing data");
     refresh();
-  }, []);
+  }, [refresh]);
 
   const handleApply = async (opportunityId: string) => {
     if (!user?.id) return;
