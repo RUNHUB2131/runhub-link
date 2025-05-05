@@ -42,6 +42,18 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
     }
   }, [isOpen, runClubId]);
 
+  // Format location from city and state
+  const getLocationDisplay = () => {
+    if (profile?.city && profile?.state) {
+      return `${profile.city}, ${profile.state}`;
+    } else if (profile?.city) {
+      return profile.city;
+    } else if (profile?.state) {
+      return profile.state;
+    }
+    return "Location not specified";
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -79,12 +91,10 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
               </Avatar>
               <div>
                 <h3 className="text-xl font-bold">{profile?.club_name || "Unknown Club"}</h3>
-                {profile?.location && (
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{profile.location}</span>
-                  </div>
-                )}
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span>{getLocationDisplay()}</span>
+                </div>
               </div>
             </div>
 

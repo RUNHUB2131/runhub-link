@@ -29,16 +29,20 @@ export const fetchRunClubProfile = async (userId: string) => {
     };
 
     // Support for backwards compatibility with existing data
-    // Parse location into city and state if they don't exist
+    // Use city and state from the database, or parse from location if they don't exist
     let city = data.city || '';
     let state = data.state || '';
-    if (data.location && (!city || !state)) {
-      const locationParts = data.location.split(',').map(part => part.trim());
-      if (locationParts.length >= 2) {
-        city = city || locationParts[0];
-        state = state || locationParts[1];
-      } else if (locationParts.length === 1) {
-        city = city || locationParts[0];
+    
+    if (!city || !state) {
+      // If city or state are missing but location exists, try to parse them
+      if (data.location) {
+        const locationParts = data.location.split(',').map(part => part.trim());
+        if (locationParts.length >= 2) {
+          city = city || locationParts[0];
+          state = state || locationParts[1];
+        } else if (locationParts.length === 1) {
+          city = city || locationParts[0];
+        }
       }
     }
       
