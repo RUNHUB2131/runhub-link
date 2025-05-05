@@ -1,38 +1,98 @@
 
-import { useNotifications } from "@/hooks/useNotifications";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionCard";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useToast } from "@/hooks/use-toast";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentActivitySection } from "@/components/dashboard/RecentActivitySection";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionCard";
+import { RunClubProfile } from "@/types";
+import { fetchRunClubProfile } from "@/utils/profileUtils";
 
 const Dashboard = () => {
-  const { userType } = useAuth();
-  const { notifications, isLoading: notificationsLoading } = useNotifications();
-  const { isLoading, profileCompletionPercentage, stats } = useDashboardData();
+  const { user, userType } = useAuth();
+  const { toast } = useToast();
+  const { isLoading, stats, recentActivity } = useDashboardData();
+  const [profilePercentage, setProfilePercentage] = useState<number>(0);
+  const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user?.id || userType !== 'run_club') return;
+      
+      try {
+        setProfileLoading(true);
+        const profileData = await fetchRunClubProfile(user.id);
+        
+        if (profileData) {
+          setRunClubProfile(profileData);
+          
+          // Calculate profile completion percentage
+          let completedFields = 0;
+          let totalFields = 0;
+          
+          // Basic fields
+          const basicFields = ['club_name', 'description', 'location', 'member_count', 'website', 'logo_url'];
+          basicFields.forEach(field => {
+            totalFields++;
+            if (profileData[field as keyof RunClubProfile]) completedFields++;
+          });
+          
+          // Social media
+          if (profileData.social_media) {
+            const socialMediaFields = ['instagram', 'facebook', 'tiktok', 'strava'];
+            socialMediaFields.forEach(platform => {
+              totalFields++;
+              if (profileData.social_media?.[platform as keyof typeof profileData.social_media]) completedFields++;
+            });
+          }
+          
+          // Community data
+          if (profileData.community_data) {
+            totalFields += 3; // run types, demographics, and events
+            if (profileData.community_data.run_types && profileData.community_data.run_types.length > 0) completedFields++;
+            if (profileData.community_data.demographics && Object.keys(profileData.community_data.demographics).length > 0) completedFields++;
+          }
+          
+          const percentage = Math.round((completedFields / totalFields) * 100);
+          setProfilePercentage(percentage);
+        }
+      } catch (error) {
+        console.error("Error loading profile data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    
+    loadProfileData();
+  }, [user?.id, userType, toast]);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <DashboardHeader userType={userType} />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ProfileCompletionCard 
-          isLoading={isLoading} 
-          percentage={profileCompletionPercentage} 
-        />
-        <StatsCards 
-          userType={userType!} 
-          isLoading={isLoading} 
-          stats={stats} 
-        />
+    <div className="space-y-6">
+      <DashboardHeader />
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <StatsCards stats={stats} isLoading={isLoading} />
+        </div>
+        
+        {userType === 'run_club' && (
+          <ProfileCompletionCard 
+            isLoading={profileLoading} 
+            percentage={profilePercentage}
+            profile={runClubProfile} 
+          />
+        )}
       </div>
-
-      <RecentActivitySection 
-        notifications={notifications}
-        isLoading={isLoading}
-        notificationsLoading={notificationsLoading}
-      />
+      
+      <RecentActivitySection activity={recentActivity} isLoading={isLoading} />
     </div>
   );
 };

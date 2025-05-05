@@ -2,18 +2,20 @@
 import BrowseOpportunityCard from "./BrowseOpportunityCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Opportunity } from "@/types";
+import { Opportunity, RunClubProfile } from "@/types";
 
 interface BrowseOpportunityListProps {
   opportunities: Opportunity[];
   isLoading: boolean;
   onApply: (opportunityId: string) => void;
+  runClubProfile?: Partial<RunClubProfile>;
 }
 
 const BrowseOpportunityList = ({
   opportunities,
   isLoading,
-  onApply
+  onApply,
+  runClubProfile
 }: BrowseOpportunityListProps) => {
   if (isLoading) {
     return (
@@ -52,6 +54,7 @@ const BrowseOpportunityList = ({
           key={opportunity.id}
           opportunity={opportunity} 
           onApply={onApply}
+          runClubProfile={runClubProfile}
         />
       ))}
     </div>

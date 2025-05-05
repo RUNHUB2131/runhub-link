@@ -5,13 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Opportunity, Application } from "@/types";
+import { Opportunity, Application, RunClubProfile } from "@/types";
 import OpportunityApplicationsTable from "@/components/opportunities/OpportunityApplicationsTable";
 import OpportunityDetailsSkeleton from "@/components/opportunities/OpportunityDetailsSkeleton";
 import OpportunityNotFound from "@/components/opportunities/OpportunityNotFound";
 import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
 import OpportunityActionButton from "@/components/opportunities/OpportunityActionButton";
 import OpportunityDetailsContent from "@/components/opportunities/OpportunityDetailsContent";
+import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { isProfileComplete } from "@/utils/profileCompletionUtils";
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,12 +25,31 @@ const OpportunityDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isApplying, setIsApplying] = useState(false);
   const [showApplications, setShowApplications] = useState(false);
+  const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
 
   useEffect(() => {
     if (id) {
       fetchOpportunityDetails();
     }
   }, [id]);
+  
+  // Fetch the run club profile if the user is a run club
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id || userType !== 'run_club') return;
+      
+      try {
+        const profileData = await fetchRunClubProfile(user.id);
+        if (profileData) {
+          setRunClubProfile(profileData);
+        }
+      } catch (error) {
+        console.error("Error fetching run club profile:", error);
+      }
+    };
+    
+    loadProfile();
+  }, [user?.id, userType]);
 
   const fetchOpportunityDetails = async () => {
     if (!id || !user) return;
@@ -96,6 +117,16 @@ const OpportunityDetails = () => {
   const handleApply = async () => {
     if (!user || !opportunity) return;
     
+    // Check if profile is complete before applying
+    if (!isProfileComplete(runClubProfile)) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile before applying",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsApplying(true);
     try {
       const { error } = await supabase
@@ -161,6 +192,7 @@ const OpportunityDetails = () => {
           handleApply={handleApply}
           showApplications={showApplications}
           setShowApplications={setShowApplications}
+          runClubProfile={runClubProfile}
         />
       </div>
       

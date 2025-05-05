@@ -1,11 +1,14 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOpportunityBrowse } from "@/hooks/useOpportunityBrowse";
 import { supabase } from "@/integrations/supabase/client";
 import BrowseOpportunityList from "@/components/opportunities/BrowseOpportunityList";
+import { RunClubProfile } from "@/types";
+import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { isProfileComplete } from "@/utils/profileCompletionUtils";
 
 const BrowseOpportunities = () => {
   const { toast } = useToast();
@@ -21,6 +24,9 @@ const BrowseOpportunities = () => {
     refreshAfterWithdrawal,
     refresh
   } = useOpportunityBrowse();
+  
+  const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
+  const [profileLoading, setProfileLoading] = useState(true);
 
   // Check if we've been redirected from the applications page with withdrawal info
   useEffect(() => {
@@ -48,9 +54,40 @@ const BrowseOpportunities = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
+  
+  // Fetch the run club profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setProfileLoading(true);
+        const profileData = await fetchRunClubProfile(user.id);
+        if (profileData) {
+          setRunClubProfile(profileData);
+        }
+      } catch (error) {
+        console.error("Error fetching run club profile:", error);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    
+    loadProfile();
+  }, [user?.id]);
 
   const handleApply = async (opportunityId: string) => {
     if (!user?.id) return;
+    
+    // Double-check profile completion before submitting application
+    if (!isProfileComplete(runClubProfile)) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile before applying",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       const { error } = await supabase
@@ -96,8 +133,9 @@ const BrowseOpportunities = () => {
       
       <BrowseOpportunityList 
         opportunities={opportunities}
-        isLoading={isLoading}
+        isLoading={isLoading || profileLoading}
         onApply={handleApply}
+        runClubProfile={runClubProfile}
       />
     </div>
   );
