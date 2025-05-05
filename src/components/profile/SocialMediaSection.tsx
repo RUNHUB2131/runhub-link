@@ -1,6 +1,5 @@
 
 import { ExternalLink } from "lucide-react";
-import { TikTok } from "lucide-react";
 import { RunClubProfile, FollowerCountRange } from "@/types";
 
 interface SocialMediaSectionProps {

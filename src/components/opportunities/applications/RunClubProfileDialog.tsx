@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Users, Globe, Instagram, Facebook, Twitter } from "lucide-react";
+import { MapPin, Users, Globe, Instagram, Facebook } from "lucide-react";
 import { RunClubProfile } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -155,14 +155,14 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
                     <Facebook className="h-5 w-5" />
                   </a>
                 )}
-                {profile?.social_media?.twitter && (
+                {profile?.social_media?.tiktok && (
                   <a 
-                    href={`https://twitter.com/${profile.social_media.twitter}`}
+                    href={`https://tiktok.com/@${profile.social_media.tiktok}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    <Twitter className="h-5 w-5" />
+                    <span className="flex items-center justify-center h-5 w-5 font-bold">T</span>
                   </a>
                 )}
               </div>

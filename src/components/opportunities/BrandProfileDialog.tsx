@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { MapPin, Globe, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { MapPin, Globe, Instagram, Facebook, Linkedin } from "lucide-react";
 import { BrandProfile } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,14 +125,14 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
                     <Facebook className="h-5 w-5" />
                   </a>
                 )}
-                {profile?.social_media?.twitter && (
+                {profile?.social_media?.tiktok && (
                   <a 
-                    href={`https://twitter.com/${profile.social_media.twitter}`}
+                    href={`https://tiktok.com/@${profile.social_media.tiktok}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-primary"
                   >
-                    <Twitter className="h-5 w-5" />
+                    <span className="flex items-center justify-center h-5 w-5 font-bold">T</span>
                   </a>
                 )}
                 {profile?.social_media?.linkedin && (
