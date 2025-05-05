@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRunClubApplications } from "@/services/applicationService";
@@ -50,6 +51,11 @@ const MyApplications = () => {
     loadApplications();
   }, [user?.id]);
 
+  const handleWithdrawApplication = (applicationId: string) => {
+    // Remove the application from the local state
+    setApplications(applications.filter(app => app.id !== applicationId));
+  };
+
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const acceptedApplications = applications.filter(app => app.status === 'accepted');
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
@@ -79,7 +85,10 @@ const MyApplications = () => {
           <AnimatePresence mode="wait">
             <TabsContent value="all" className="space-y-6" key="all">
               {applications.length > 0 ? (
-                <ApplicationsList applications={applications} />
+                <ApplicationsList 
+                  applications={applications} 
+                  onWithdraw={handleWithdrawApplication}
+                />
               ) : (
                 <ApplicationsEmptyState />
               )}
@@ -87,7 +96,10 @@ const MyApplications = () => {
           
             <TabsContent value="pending" className="space-y-6" key="pending">
               {pendingApplications.length > 0 ? (
-                <ApplicationsList applications={pendingApplications} />
+                <ApplicationsList 
+                  applications={pendingApplications} 
+                  onWithdraw={handleWithdrawApplication}
+                />
               ) : (
                 <ApplicationsEmptyState message="You don't have any pending applications" />
               )}
@@ -95,7 +107,10 @@ const MyApplications = () => {
           
             <TabsContent value="accepted" className="space-y-6" key="accepted">
               {acceptedApplications.length > 0 ? (
-                <ApplicationsList applications={acceptedApplications} />
+                <ApplicationsList 
+                  applications={acceptedApplications}
+                  onWithdraw={handleWithdrawApplication}
+                />
               ) : (
                 <ApplicationsEmptyState message="You don't have any accepted applications" />
               )}
@@ -103,7 +118,10 @@ const MyApplications = () => {
           
             <TabsContent value="rejected" className="space-y-6" key="rejected">
               {rejectedApplications.length > 0 ? (
-                <ApplicationsList applications={rejectedApplications} />
+                <ApplicationsList 
+                  applications={rejectedApplications}
+                  onWithdraw={handleWithdrawApplication}
+                />
               ) : (
                 <ApplicationsEmptyState message="You don't have any rejected applications" />
               )}

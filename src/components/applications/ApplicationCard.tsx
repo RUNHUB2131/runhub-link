@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
+import { useState } from "react";
+import { X } from "lucide-react";
+import { withdrawApplication } from "@/services/applicationService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -24,10 +28,13 @@ interface ApplicationWithOpportunity extends Application {
 
 interface ApplicationCardProps {
   application: ApplicationWithOpportunity;
+  onWithdraw?: (applicationId: string) => void;
 }
 
-const ApplicationCard = ({ application }: ApplicationCardProps) => {
+const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   if (!application.opportunities) {
     return null;
@@ -52,6 +59,33 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
     navigate(`/opportunities/${opportunityId}`);
   };
 
+  const handleWithdraw = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (window.confirm("Are you sure you want to withdraw this application?")) {
+      setIsWithdrawing(true);
+      try {
+        await withdrawApplication(application.id);
+        toast({
+          title: "Application withdrawn",
+          description: "You can now apply to this opportunity again",
+        });
+        
+        if (onWithdraw) {
+          onWithdraw(application.id);
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to withdraw application",
+          variant: "destructive",
+        });
+      } finally {
+        setIsWithdrawing(false);
+      }
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -60,7 +94,6 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
             <div className="flex items-center space-x-2">
               <div>
                 <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                {/* Use OpportunityBrandInfo component to display brand information */}
                 <OpportunityBrandInfo opportunity={{
                   brand_id: opportunity.brand_id,
                   brand: opportunity.brand || null
@@ -94,13 +127,25 @@ const ApplicationCard = ({ application }: ApplicationCardProps) => {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="border-t pt-4">
+      <CardFooter className="border-t pt-4 flex justify-between">
         <Button 
           variant="outline" 
           onClick={() => viewOpportunity(opportunity.id)}
         >
           View Opportunity
         </Button>
+        
+        {application.status === "pending" && (
+          <Button 
+            variant="outline"
+            className="border-red-500 text-red-500 hover:bg-red-50"
+            onClick={handleWithdraw}
+            disabled={isWithdrawing}
+          >
+            <X className="h-4 w-4 mr-1" />
+            {isWithdrawing ? "Withdrawing..." : "Withdraw Application"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

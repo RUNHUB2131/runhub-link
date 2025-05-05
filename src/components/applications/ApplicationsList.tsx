@@ -21,6 +21,7 @@ interface ApplicationWithOpportunity extends Application {
 
 interface ApplicationsListProps {
   applications: ApplicationWithOpportunity[];
+  onWithdraw?: (applicationId: string) => void;
 }
 
 const container = {
@@ -38,7 +39,7 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-const ApplicationsList = ({ applications }: ApplicationsListProps) => {
+const ApplicationsList = ({ applications, onWithdraw }: ApplicationsListProps) => {
   return (
     <motion.div 
       className="space-y-4"
@@ -48,7 +49,10 @@ const ApplicationsList = ({ applications }: ApplicationsListProps) => {
     >
       {applications.map((application) => (
         <motion.div key={application.id} variants={item}>
-          <ApplicationCard application={application} />
+          <ApplicationCard 
+            application={application} 
+            onWithdraw={onWithdraw}
+          />
         </motion.div>
       ))}
     </motion.div>

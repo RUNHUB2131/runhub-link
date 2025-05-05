@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/types";
 
@@ -128,6 +127,22 @@ export const fetchRunClubApplications = async (runClubId: string) => {
     return applicationsWithBrands;
   } catch (error) {
     console.error("Error fetching run club applications:", error);
+    throw error;
+  }
+};
+
+export const withdrawApplication = async (applicationId: string) => {
+  try {
+    const { error } = await supabase
+      .from('applications')
+      .delete()
+      .eq('id', applicationId);
+
+    if (error) throw error;
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error withdrawing application:", error);
     throw error;
   }
 };

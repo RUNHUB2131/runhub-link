@@ -99,11 +99,17 @@ export const useOpportunityBrowse = () => {
     }
   };
 
+  // Add a method to refresh the data when an application is withdrawn
+  const refreshAfterWithdrawal = () => {
+    fetchUserApplications();
+  };
+
   return {
     opportunities,
     isLoading,
     userApplications,
     setUserApplications,
-    setOpportunities
+    setOpportunities,
+    refreshAfterWithdrawal
   };
 };
