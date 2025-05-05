@@ -1,6 +1,6 @@
 
 import { ExternalLink } from "lucide-react";
-import { RunClubProfile } from "@/types";
+import { RunClubProfile, FollowerCountRange } from "@/types";
 
 interface SocialMediaSectionProps {
   profile: Partial<RunClubProfile>;
@@ -32,7 +32,7 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
     }
   };
   
-  const getFollowerRangeDisplay = (range: string | undefined): string => {
+  const getFollowerRangeDisplay = (range: FollowerCountRange | undefined): string => {
     if (!range) return 'Not specified';
     
     switch (range) {
@@ -53,13 +53,6 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
 
   return (
     <div className="space-y-4">
-      {socialMedia.follower_count_range && (
-        <div className="p-4 bg-muted/50 rounded-lg mb-4">
-          <h3 className="font-medium mb-1">Total Social Media Audience</h3>
-          <p className="text-lg font-semibold">{getFollowerRangeDisplay(socialMedia.follower_count_range)}</p>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="p-6 border rounded-lg">
           <h3 className="font-semibold mb-4">Instagram</h3>
@@ -74,6 +67,11 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 {formatSocialHandle(socialMedia.instagram, 'instagram')}
                 <ExternalLink size={16} className="ml-1" />
               </a>
+              {socialMedia.instagram_follower_range && (
+                <p className="text-sm text-muted-foreground">
+                  {getFollowerRangeDisplay(socialMedia.instagram_follower_range)}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-muted-foreground">Not linked</p>
@@ -93,6 +91,11 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 {formatSocialHandle(socialMedia.twitter, 'twitter')}
                 <ExternalLink size={16} className="ml-1" />
               </a>
+              {socialMedia.twitter_follower_range && (
+                <p className="text-sm text-muted-foreground">
+                  {getFollowerRangeDisplay(socialMedia.twitter_follower_range)}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-muted-foreground">Not linked</p>
@@ -112,6 +115,35 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 {socialMedia.facebook}
                 <ExternalLink size={16} className="ml-1" />
               </a>
+              {socialMedia.facebook_follower_range && (
+                <p className="text-sm text-muted-foreground">
+                  {getFollowerRangeDisplay(socialMedia.facebook_follower_range)}
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-muted-foreground">Not linked</p>
+          )}
+        </div>
+        
+        <div className="p-6 border rounded-lg">
+          <h3 className="font-semibold mb-4">Strava</h3>
+          {socialMedia.strava ? (
+            <>
+              <a 
+                href={getSocialUrl(socialMedia.strava, 'strava')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline flex items-center mb-2"
+              >
+                {socialMedia.strava}
+                <ExternalLink size={16} className="ml-1" />
+              </a>
+              {socialMedia.strava_follower_range && (
+                <p className="text-sm text-muted-foreground">
+                  {getFollowerRangeDisplay(socialMedia.strava_follower_range)}
+                </p>
+              )}
             </>
           ) : (
             <p className="text-muted-foreground">Not linked</p>

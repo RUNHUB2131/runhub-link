@@ -25,10 +25,13 @@ export interface RunClubProfile extends Profile {
   logo_url?: string;
   social_media?: {
     instagram?: string;
+    instagram_follower_range?: FollowerCountRange;
     facebook?: string;
+    facebook_follower_range?: FollowerCountRange;
     twitter?: string;
+    twitter_follower_range?: FollowerCountRange;
     strava?: string;
-    follower_count_range?: FollowerCountRange;
+    strava_follower_range?: FollowerCountRange;
   };
   community_data?: {
     run_types?: string[];

@@ -21,18 +21,17 @@ export const fetchRunClubProfile = async (userId: string) => {
       ? data.community_data as Record<string, any>
       : {};
     
-    // Make sure follower_count_range is one of the valid values
-    const followerCountRange = socialMediaData.follower_count_range || '';
+    // Validate follower ranges for each platform
     const validRanges: FollowerCountRange[] = ['under_1000', '1000_to_4000', '4000_to_9000', '9000_to_20000', 'over_20000'];
     
-    const validatedFollowerCountRange = validRanges.includes(followerCountRange as FollowerCountRange) 
-      ? followerCountRange as FollowerCountRange 
-      : undefined;
+    const validateFollowerRange = (range?: string): FollowerCountRange | undefined => {
+      return range && validRanges.includes(range as FollowerCountRange) ? range as FollowerCountRange : undefined;
+    };
       
     return {
       id: data.id,
       user_id: userId,
-      user_type: 'run_club' as UserType, // Explicitly cast to UserType
+      user_type: 'run_club' as UserType,
       created_at: new Date().toISOString(),
       club_name: data.club_name || '',
       description: data.description || '',
@@ -42,10 +41,13 @@ export const fetchRunClubProfile = async (userId: string) => {
       logo_url: data.logo_url || '',
       social_media: {
         instagram: socialMediaData.instagram || '',
+        instagram_follower_range: validateFollowerRange(socialMediaData.instagram_follower_range),
         facebook: socialMediaData.facebook || '',
+        facebook_follower_range: validateFollowerRange(socialMediaData.facebook_follower_range),
         twitter: socialMediaData.twitter || '',
+        twitter_follower_range: validateFollowerRange(socialMediaData.twitter_follower_range),
         strava: socialMediaData.strava || '',
-        follower_count_range: validatedFollowerCountRange,
+        strava_follower_range: validateFollowerRange(socialMediaData.strava_follower_range),
       },
       community_data: {
         run_types: Array.isArray(communityData.run_types) ? communityData.run_types : [],

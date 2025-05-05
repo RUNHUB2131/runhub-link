@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { RunClubProfile, FollowerCountRange } from "@/types";
 
 interface EditSocialMediaDialogProps {
@@ -30,10 +36,13 @@ export function EditSocialMediaDialog({
   
   const [formData, setFormData] = useState({
     instagram: socialMedia.instagram || "",
+    instagram_follower_range: socialMedia.instagram_follower_range || undefined,
     twitter: socialMedia.twitter || "",
+    twitter_follower_range: socialMedia.twitter_follower_range || undefined,
     facebook: socialMedia.facebook || "",
+    facebook_follower_range: socialMedia.facebook_follower_range || undefined,
     strava: socialMedia.strava || "",
-    follower_count_range: socialMedia.follower_count_range || "" as FollowerCountRange | "",
+    strava_follower_range: socialMedia.strava_follower_range || undefined,
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -45,10 +54,10 @@ export function EditSocialMediaDialog({
     }));
   };
 
-  const handleRangeChange = (value: FollowerCountRange) => {
+  const handleRangeChange = (platform: string, value: FollowerCountRange | undefined) => {
     setFormData((prev) => ({
       ...prev,
-      follower_count_range: value,
+      [`${platform}_follower_range`]: value,
     }));
   };
 
@@ -58,10 +67,13 @@ export function EditSocialMediaDialog({
       await onSave({
         social_media: {
           instagram: formData.instagram,
+          instagram_follower_range: formData.instagram_follower_range,
           twitter: formData.twitter,
+          twitter_follower_range: formData.twitter_follower_range,
           facebook: formData.facebook,
+          facebook_follower_range: formData.facebook_follower_range,
           strava: formData.strava,
-          follower_count_range: formData.follower_count_range as FollowerCountRange | undefined,
+          strava_follower_range: formData.strava_follower_range,
         },
       });
       onOpenChange(false);
@@ -72,6 +84,14 @@ export function EditSocialMediaDialog({
     }
   };
 
+  const followerRangeOptions = [
+    { value: "under_1000", label: "0 - 1,000 followers" },
+    { value: "1000_to_4000", label: "1,000 - 4,000 followers" },
+    { value: "4000_to_9000", label: "4,000 - 9,000 followers" },
+    { value: "9000_to_20000", label: "9,000 - 20,000 followers" },
+    { value: "over_20000", label: "20,000+ followers" },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
@@ -80,77 +100,117 @@ export function EditSocialMediaDialog({
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-4">
-            <Label>Total Social Media Audience</Label>
-            <RadioGroup
-              value={formData.follower_count_range}
-              onValueChange={handleRangeChange as (value: string) => void}
-              className="space-y-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="under_1000" id="under_1000" />
-                <Label htmlFor="under_1000">0 - 1,000 followers</Label>
+            <div className="space-y-2">
+              <Label htmlFor="instagram">Instagram</Label>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <Input
+                  id="instagram"
+                  name="instagram"
+                  value={formData.instagram}
+                  onChange={handleChange}
+                  placeholder="@yourusername"
+                />
+                <Select
+                  value={formData.instagram_follower_range}
+                  onValueChange={(value) => handleRangeChange('instagram', value as FollowerCountRange)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Follower count" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {followerRangeOptions.map((option) => (
+                      <SelectItem key={`instagram-${option.value}`} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="1000_to_4000" id="1000_to_4000" />
-                <Label htmlFor="1000_to_4000">1,000 - 4,000 followers</Label>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="twitter">Twitter</Label>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <Input
+                  id="twitter"
+                  name="twitter"
+                  value={formData.twitter}
+                  onChange={handleChange}
+                  placeholder="@yourusername"
+                />
+                <Select
+                  value={formData.twitter_follower_range}
+                  onValueChange={(value) => handleRangeChange('twitter', value as FollowerCountRange)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Follower count" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {followerRangeOptions.map((option) => (
+                      <SelectItem key={`twitter-${option.value}`} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="4000_to_9000" id="4000_to_9000" />
-                <Label htmlFor="4000_to_9000">4,000 - 9,000 followers</Label>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="facebook">Facebook</Label>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <Input
+                  id="facebook"
+                  name="facebook"
+                  value={formData.facebook}
+                  onChange={handleChange}
+                  placeholder="Your page name"
+                />
+                <Select
+                  value={formData.facebook_follower_range}
+                  onValueChange={(value) => handleRangeChange('facebook', value as FollowerCountRange)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Follower count" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {followerRangeOptions.map((option) => (
+                      <SelectItem key={`facebook-${option.value}`} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="9000_to_20000" id="9000_to_20000" />
-                <Label htmlFor="9000_to_20000">9,000 - 20,000 followers</Label>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="strava">Strava</Label>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <Input
+                  id="strava"
+                  name="strava"
+                  value={formData.strava}
+                  onChange={handleChange}
+                  placeholder="Your club name"
+                />
+                <Select
+                  value={formData.strava_follower_range}
+                  onValueChange={(value) => handleRangeChange('strava', value as FollowerCountRange)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Follower count" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {followerRangeOptions.map((option) => (
+                      <SelectItem key={`strava-${option.value}`} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="over_20000" id="over_20000" />
-                <Label htmlFor="over_20000">20,000+ followers</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="instagram">Instagram</Label>
-            <Input
-              id="instagram"
-              name="instagram"
-              value={formData.instagram}
-              onChange={handleChange}
-              placeholder="@yourusername"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="twitter">Twitter</Label>
-            <Input
-              id="twitter"
-              name="twitter"
-              value={formData.twitter}
-              onChange={handleChange}
-              placeholder="@yourusername"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="facebook">Facebook</Label>
-            <Input
-              id="facebook"
-              name="facebook"
-              value={formData.facebook}
-              onChange={handleChange}
-              placeholder="Your page name"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="strava">Strava</Label>
-            <Input
-              id="strava"
-              name="strava"
-              value={formData.strava}
-              onChange={handleChange}
-              placeholder="Your club name"
-            />
+            </div>
           </div>
         </div>
         <DialogFooter>
