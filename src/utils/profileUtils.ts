@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { BrandProfile, RunClubProfile } from "@/types";
+import { BrandProfile, RunClubProfile, UserType } from "@/types";
 
 export const fetchRunClubProfile = async (userId: string) => {
   const { data, error } = await supabase
@@ -24,7 +24,7 @@ export const fetchRunClubProfile = async (userId: string) => {
     return {
       id: data.id,
       user_id: userId,
-      user_type: 'run_club',
+      user_type: 'run_club' as UserType, // Explicitly cast to UserType
       created_at: new Date().toISOString(),
       club_name: data.club_name || '',
       description: data.description || '',
@@ -66,7 +66,7 @@ export const fetchBrandProfile = async (userId: string) => {
     return {
       id: data.id,
       user_id: userId,
-      user_type: 'brand',
+      user_type: 'brand' as UserType, // Explicitly cast to UserType
       created_at: new Date().toISOString(),
       company_name: data.company_name || '',
       description: data.description || '',
