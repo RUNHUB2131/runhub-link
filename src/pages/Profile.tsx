@@ -89,8 +89,28 @@ const Profile = () => {
         if (error) throw error;
         
         if (data) {
-          // Transform data to match BrandProfile type
-          setBrandProfile(data);
+          // Transform data to match BrandProfile type with proper type casting
+          const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
+            ? data.social_media as Record<string, string>
+            : {};
+            
+          setBrandProfile({
+            id: data.id,
+            user_id: user.id,
+            user_type: 'brand',
+            created_at: new Date().toISOString(),
+            company_name: data.company_name || '',
+            description: data.description || '',
+            industry: data.industry || '',
+            website: data.website || '',
+            logo_url: data.logo_url || '',
+            social_media: {
+              instagram: socialMediaData.instagram || '',
+              facebook: socialMediaData.facebook || '',
+              twitter: socialMediaData.twitter || '',
+              linkedin: socialMediaData.linkedin || '',
+            }
+          });
         }
       }
     } catch (error: any) {
