@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useState } from "react";
 import { Opportunity, RunClubProfile } from "@/types";
 import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
+import OpportunityBrandInfo from "./OpportunityBrandInfo";
 
 interface BrowseOpportunityCardProps {
   opportunity: Opportunity;
@@ -49,25 +51,8 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
         onClick={handleViewOpportunity}
       >
         <CardHeader className="pb-2">
-          <div className="flex items-center mb-2">
-            {opportunity.brand?.logo_url ? (
-              <div className="w-8 h-8 rounded overflow-hidden mr-2 bg-gray-100 flex-shrink-0">
-                <img 
-                  src={opportunity.brand.logo_url} 
-                  alt={opportunity.brand.company_name || "Brand logo"}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            ) : (
-              <div className="w-8 h-8 rounded bg-primary-100 text-primary-800 flex items-center justify-center mr-2 flex-shrink-0">
-                {(opportunity.brand?.company_name?.[0] || "B").toUpperCase()}
-              </div>
-            )}
-            <span className="text-sm font-medium text-gray-600">
-              {opportunity.brand?.company_name || "Unknown Brand"}
-            </span>
-          </div>
-          <CardTitle className="line-clamp-2">{opportunity.title}</CardTitle>
+          <OpportunityBrandInfo opportunity={opportunity} />
+          <CardTitle className="line-clamp-2 mt-2">{opportunity.title}</CardTitle>
         </CardHeader>
         
         <CardContent>
