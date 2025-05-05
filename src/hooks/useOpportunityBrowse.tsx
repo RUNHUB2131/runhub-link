@@ -11,19 +11,20 @@ export const useOpportunityBrowse = () => {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userApplications, setUserApplications] = useState<string[]>([]);
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   useEffect(() => {
     if (user?.id) {
       fetchUserApplications();
     }
-  }, [user?.id]);
+  }, [user?.id, lastRefresh]);
 
   // Update to fetch opportunities AFTER we have user applications
   useEffect(() => {
     if (user?.id) {
       fetchOpportunities();
     }
-  }, [userApplications]); // Depend on userApplications instead of user.id
+  }, [userApplications, lastRefresh]); // Depend on userApplications instead of user.id
 
   const fetchUserApplications = async () => {
     if (!user?.id) return;
@@ -101,7 +102,7 @@ export const useOpportunityBrowse = () => {
 
   // Add a method to refresh the data when an application is withdrawn
   const refreshAfterWithdrawal = () => {
-    fetchUserApplications();
+    setLastRefresh(Date.now()); // This will trigger both useEffects
   };
 
   return {

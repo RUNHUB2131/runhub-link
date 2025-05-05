@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchRunClubApplications } from "@/services/applicationService";
+import { fetchRunClubApplications, withdrawApplication } from "@/services/applicationService";
 import { Application } from "@/types";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
@@ -9,6 +8,7 @@ import ApplicationsList from "@/components/applications/ApplicationsList";
 import ApplicationsEmptyState from "@/components/applications/ApplicationsEmptyState";
 import ApplicationsLoadingSkeleton from "@/components/applications/ApplicationsLoadingSkeleton";
 import { AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 // We keep the interface here since it's used across multiple components
 interface ApplicationWithOpportunity extends Application {
@@ -29,31 +29,53 @@ interface ApplicationWithOpportunity extends Application {
 
 const MyApplications = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [applications, setApplications] = useState<ApplicationWithOpportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
 
-  useEffect(() => {
-    const loadApplications = async () => {
-      if (!user?.id) return;
-      
-      try {
-        setIsLoading(true);
-        const data = await fetchRunClubApplications(user.id);
-        setApplications(data || []);
-      } catch (error) {
-        console.error("Error loading applications:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadApplications = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const data = await fetchRunClubApplications(user.id);
+      setApplications(data || []);
+    } catch (error) {
+      console.error("Error loading applications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load your applications"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadApplications();
   }, [user?.id]);
 
-  const handleWithdrawApplication = (applicationId: string) => {
-    // Remove the application from the local state
-    setApplications(applications.filter(app => app.id !== applicationId));
+  const handleWithdrawApplication = async (applicationId: string) => {
+    try {
+      // Call the API to withdraw the application
+      await withdrawApplication(applicationId);
+      
+      // Remove the application from the local state
+      setApplications(applications.filter(app => app.id !== applicationId));
+      
+      toast({
+        title: "Application withdrawn",
+        description: "The opportunity is now available in Browse Opportunities"
+      });
+    } catch (error) {
+      console.error("Error withdrawing application:", error);
+      toast({
+        title: "Error",
+        description: "Failed to withdraw application",
+        variant: "destructive",
+      });
+    }
   };
 
   const pendingApplications = applications.filter(app => app.status === 'pending');
@@ -109,7 +131,6 @@ const MyApplications = () => {
               {acceptedApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={acceptedApplications}
-                  onWithdraw={handleWithdrawApplication}
                 />
               ) : (
                 <ApplicationsEmptyState message="You don't have any accepted applications" />
@@ -120,7 +141,6 @@ const MyApplications = () => {
               {rejectedApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={rejectedApplications}
-                  onWithdraw={handleWithdrawApplication}
                 />
               ) : (
                 <ApplicationsEmptyState message="You don't have any rejected applications" />

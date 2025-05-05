@@ -1,5 +1,6 @@
 
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOpportunityBrowse } from "@/hooks/useOpportunityBrowse";
@@ -10,13 +11,25 @@ const BrowseOpportunities = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { 
     opportunities, 
     isLoading, 
     userApplications, 
     setUserApplications,
-    setOpportunities 
+    setOpportunities,
+    refreshAfterWithdrawal
   } = useOpportunityBrowse();
+
+  // Check if we've been redirected from the applications page
+  useEffect(() => {
+    const shouldRefresh = location.state?.fromWithdraw;
+    if (shouldRefresh) {
+      refreshAfterWithdrawal();
+      // Clean up the state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   const handleApply = async (opportunityId: string) => {
     if (!user?.id) return;

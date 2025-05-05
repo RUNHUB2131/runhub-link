@@ -51,7 +51,7 @@ const ApplicationsList = ({ applications, onWithdraw }: ApplicationsListProps) =
         <motion.div key={application.id} variants={item}>
           <ApplicationCard 
             application={application} 
-            onWithdraw={onWithdraw}
+            onWithdraw={application.status === 'pending' ? onWithdraw : undefined}
           />
         </motion.div>
       ))}
