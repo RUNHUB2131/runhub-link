@@ -69,12 +69,23 @@ export const useOpportunityBrowse = () => {
             .eq('id', opp.brand_id)
             .single();
           
+          if (brandError) {
+            console.error(`Error fetching brand info for opportunity ${opp.id}:`, brandError);
+            return {
+              ...opp,
+              brand: {
+                company_name: "Unknown Brand",
+                logo_url: undefined
+              }
+            } as Opportunity;
+          }
+          
           return {
             ...opp,
-            brand: brandError ? {
-              company_name: "Unknown Brand",
-              logo_url: undefined
-            } : brandData
+            brand: {
+              company_name: brandData?.company_name || "Unknown Brand",
+              logo_url: brandData?.logo_url
+            }
           } as Opportunity;
         })
       );
@@ -85,6 +96,7 @@ export const useOpportunityBrowse = () => {
       );
       
       console.log("Filtered opportunities:", filteredOpportunities.length);
+      console.log("Sample opportunity with brand:", filteredOpportunities[0]);
       setOpportunities(filteredOpportunities);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);

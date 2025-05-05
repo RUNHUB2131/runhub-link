@@ -70,7 +70,7 @@ export interface Opportunity {
   brand?: {
     company_name: string;
     logo_url?: string;
-  } | null;
+  };
 }
 
 export interface Application {
