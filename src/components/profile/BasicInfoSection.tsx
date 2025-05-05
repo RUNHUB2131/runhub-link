@@ -9,6 +9,9 @@ interface BasicInfoSectionProps {
 
 export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
   const clubInitial = profile.club_name ? profile.club_name.charAt(0).toUpperCase() : "C";
+  const locationDisplay = profile.city && profile.state 
+    ? `${profile.city}, ${profile.state}` 
+    : "No location specified";
   
   return (
     <div className="space-y-6">
@@ -21,7 +24,7 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
         </Avatar>
         <div>
           <h2 className="text-2xl font-bold">{profile.club_name || "Not specified"}</h2>
-          <p className="text-muted-foreground">{profile.location || "No location specified"}</p>
+          <p className="text-muted-foreground">{locationDisplay}</p>
         </div>
       </div>
 

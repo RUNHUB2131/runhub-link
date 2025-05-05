@@ -27,6 +27,20 @@ export const fetchRunClubProfile = async (userId: string) => {
     const validateFollowerRange = (range?: string): FollowerCountRange | undefined => {
       return range && validRanges.includes(range as FollowerCountRange) ? range as FollowerCountRange : undefined;
     };
+
+    // Support for backwards compatibility with existing data
+    // Parse location into city and state if they don't exist
+    let city = data.city || '';
+    let state = data.state || '';
+    if (data.location && (!city || !state)) {
+      const locationParts = data.location.split(',').map(part => part.trim());
+      if (locationParts.length >= 2) {
+        city = city || locationParts[0];
+        state = state || locationParts[1];
+      } else if (locationParts.length === 1) {
+        city = city || locationParts[0];
+      }
+    }
       
     return {
       id: data.id,
@@ -35,8 +49,11 @@ export const fetchRunClubProfile = async (userId: string) => {
       created_at: new Date().toISOString(),
       club_name: data.club_name || '',
       description: data.description || '',
-      location: data.location || '',
+      city: city,
+      state: state,
       member_count: data.member_count || 0,
+      average_group_size: data.average_group_size || 0,
+      core_demographic: data.core_demographic || '',
       website: data.website || '',
       logo_url: data.logo_url || '',
       social_media: {
@@ -73,6 +90,12 @@ export const fetchBrandProfile = async (userId: string) => {
     const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
       ? data.social_media as Record<string, string>
       : {};
+
+    // Add https:// to website if not present
+    let website = data.website || '';
+    if (website && !website.match(/^https?:\/\//)) {
+      website = `https://${website}`;
+    }
       
     return {
       id: data.id,
@@ -82,7 +105,7 @@ export const fetchBrandProfile = async (userId: string) => {
       company_name: data.company_name || '',
       description: data.description || '',
       industry: data.industry || '',
-      website: data.website || '',
+      website: website,
       logo_url: data.logo_url || '',
       social_media: {
         instagram: socialMediaData.instagram || '',
@@ -97,9 +120,15 @@ export const fetchBrandProfile = async (userId: string) => {
 };
 
 export const saveRunClubBasicInfo = async (userId: string, data: Partial<RunClubProfile>) => {
+  // Process website URL before saving
+  let processedData = { ...data };
+  if (processedData.website && !processedData.website.match(/^https?:\/\//)) {
+    processedData.website = `https://${processedData.website}`;
+  }
+
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(data)
+    .update(processedData)
     .eq('id', userId);
   
   if (error) throw error;

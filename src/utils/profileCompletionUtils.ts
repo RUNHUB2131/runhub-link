@@ -9,25 +9,28 @@ export const isProfileComplete = (profile: Partial<RunClubProfile>): boolean => 
   // Required fields - medium enforcement level
   const requiredFields = [
     !!profile.club_name,
-    !!profile.location,
-    profile.member_count !== undefined && profile.member_count > 0,
+    !!profile.city,
+    !!profile.state,
     !!profile.description,
+    profile.member_count !== undefined && profile.member_count > 0,
+    profile.average_group_size !== undefined && profile.average_group_size > 0,
+    !!profile.core_demographic
   ];
   
   // Social media - medium enforcement - at least one platform should be added
   const hasSocialMedia = profile.social_media && 
-    Object.values(profile.social_media).some(value => !!value && typeof value === 'string' && value.trim() !== '');
-    
-  // Community data - medium enforcement - at least some run types should be selected
-  const hasRunTypes = profile.community_data?.run_types && 
-    Array.isArray(profile.community_data.run_types) && 
-    profile.community_data.run_types.length > 0;
+    Object.entries(profile.social_media).some(([key, value]) => 
+      key !== 'instagram_follower_range' && 
+      key !== 'facebook_follower_range' && 
+      key !== 'tiktok_follower_range' && 
+      key !== 'strava_follower_range' && 
+      !!value && typeof value === 'string' && value.trim() !== ''
+    );
   
   // Check if all required base fields are completed
   const allRequiredFieldsComplete = requiredFields.every(field => field === true);
   
-  // For medium enforcement, require basic fields AND at least one of: social media or run types
-  return allRequiredFieldsComplete && (hasSocialMedia || hasRunTypes);
+  return allRequiredFieldsComplete && hasSocialMedia;
 };
 
 /**
@@ -37,22 +40,25 @@ export const getMissingProfileFields = (profile: Partial<RunClubProfile>): strin
   const missingFields: string[] = [];
   
   if (!profile.club_name) missingFields.push("Club Name");
-  if (!profile.location) missingFields.push("Location");
-  if (!profile.member_count || profile.member_count <= 0) missingFields.push("Member Count");
+  if (!profile.city) missingFields.push("City");
+  if (!profile.state) missingFields.push("State");
   if (!profile.description) missingFields.push("Description");
+  if (!profile.member_count || profile.member_count <= 0) missingFields.push("Member Count");
+  if (!profile.average_group_size || profile.average_group_size <= 0) missingFields.push("Average Group Size");
+  if (!profile.core_demographic) missingFields.push("Core Demographic");
   
   // Check if at least one social media platform is added
   const hasSocialMedia = profile.social_media && 
-    Object.values(profile.social_media).some(value => !!value && typeof value === 'string' && value.trim() !== '');
-    
-  // Check if at least some run types are selected
-  const hasRunTypes = profile.community_data?.run_types && 
-    Array.isArray(profile.community_data.run_types) && 
-    profile.community_data.run_types.length > 0;
+    Object.entries(profile.social_media).some(([key, value]) => 
+      key !== 'instagram_follower_range' && 
+      key !== 'facebook_follower_range' && 
+      key !== 'tiktok_follower_range' && 
+      key !== 'strava_follower_range' && 
+      !!value && typeof value === 'string' && value.trim() !== ''
+    );
   
-  // Add additional category requirements for medium enforcement
-  if (!hasSocialMedia && !hasRunTypes) {
-    missingFields.push("At least one Social Media platform or Run Type");
+  if (!hasSocialMedia) {
+    missingFields.push("At least one Social Media platform");
   }
   
   return missingFields;
