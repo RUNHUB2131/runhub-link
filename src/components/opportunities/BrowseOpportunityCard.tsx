@@ -63,7 +63,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
           </p>
           <p className="line-clamp-3 text-sm">{opportunity.description}</p>
           <div className="mt-3 py-2 px-3 bg-primary-50 rounded-md">
-            <p className="font-medium">Reward: {opportunity.reward}</p>
+            <p className="font-medium">Incentive: {opportunity.reward}</p>
           </div>
           {opportunity.deadline && (
             <p className="text-sm mt-3">

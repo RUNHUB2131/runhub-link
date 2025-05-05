@@ -19,7 +19,7 @@ const OpportunityDetailsContent = ({ opportunity }: OpportunityDetailsContentPro
         </div>
         
         <div>
-          <h3 className="font-semibold text-lg">Reward</h3>
+          <h3 className="font-semibold text-lg">Incentive</h3>
           <div className="mt-2 py-3 px-4 bg-primary/5 rounded-md inline-block">
             <p className="font-medium">{opportunity?.reward}</p>
           </div>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -120,7 +119,7 @@ export const AddOpportunityForm = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="reward">Reward</Label>
+            <Label htmlFor="reward">Incentive</Label>
             <Input
               id="reward"
               name="reward"
