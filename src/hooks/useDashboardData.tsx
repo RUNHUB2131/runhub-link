@@ -52,6 +52,25 @@ export const useDashboardData = () => {
           ...prev,
           applications: applicationsData?.length || 0
         }));
+        
+        // Fetch available opportunities count for run clubs
+        // First, get all the opportunities they've already applied to
+        const appliedOpportunityIds = applicationsData?.map(app => app.opportunity_id) || [];
+        
+        // Then, count all opportunities that they haven't applied to yet
+        const { count: opportunitiesCount, error: opportunitiesError } = await supabase
+          .from('opportunities')
+          .select('*', { count: 'exact', head: true })
+          .not('id', 'in', appliedOpportunityIds.length > 0 ? appliedOpportunityIds : ['00000000-0000-0000-0000-000000000000']);
+        
+        if (opportunitiesError) {
+          console.error("Error fetching opportunities count:", opportunitiesError);
+        } else {
+          setStats(prev => ({
+            ...prev,
+            opportunities: opportunitiesCount || 0
+          }));
+        }
       } else if (userType === 'brand') {
         const { data: profileData } = await supabase
           .from('brand_profiles')

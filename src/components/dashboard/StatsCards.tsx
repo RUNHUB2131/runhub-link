@@ -34,7 +34,10 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
   if (userType === 'run_club') {
     return (
       <>
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+        <Card 
+          className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+          onClick={handleOpportunitiesClick}
+        >
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Open Opportunities</CardTitle>
@@ -44,7 +47,7 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary-500">
-              {isLoading ? <Skeleton className="h-10 w-16" /> : "—"}
+              {isLoading ? <Skeleton className="h-10 w-16" /> : stats.opportunities}
             </div>
           </CardContent>
         </Card>
