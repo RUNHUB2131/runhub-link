@@ -16,11 +16,11 @@ export interface Chat {
   brand_profile?: {
     company_name: string;
     logo_url?: string;
-  };
+  } | null;
   run_club_profile?: {
     club_name: string;
     logo_url?: string;
-  };
+  } | null;
   unread_count?: number;
 }
 
@@ -70,7 +70,8 @@ export const fetchChats = async (userId: string, userType: 'brand' | 'run_club')
       })
     );
     
-    return chatsWithUnreadCount as Chat[];
+    // Type assertion to ensure compatibility
+    return chatsWithUnreadCount as unknown as Chat[];
   } catch (error: any) {
     console.error("Error fetching chats:", error);
     toast({
@@ -98,7 +99,8 @@ export const fetchChatById = async (chatId: string) => {
     
     if (error) throw error;
     
-    return data as Chat;
+    // Type assertion to ensure compatibility
+    return data as unknown as Chat;
   } catch (error: any) {
     console.error("Error fetching chat details:", error);
     toast({
