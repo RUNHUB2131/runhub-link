@@ -1,7 +1,7 @@
 
 import { BrandProfile } from "@/types";
 import { Card } from "@/components/ui/card";
-import { Globe, Building2, GraduationCap } from "lucide-react";
+import { Globe, Building2 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
 interface BrandBasicInfoSectionProps {
@@ -18,6 +18,20 @@ export const BrandBasicInfoSection = ({ profile }: BrandBasicInfoSectionProps) =
       </Card>
     );
   }
+
+  // Helper function to format the website URL
+  const formatWebsiteUrl = (website: string): string => {
+    if (!website) return '';
+    return website.startsWith('http://') || website.startsWith('https://') 
+      ? website 
+      : `https://${website}`;
+  };
+
+  // Helper function to display the website without protocol
+  const displayWebsite = (website: string): string => {
+    if (!website) return '';
+    return website.replace(/^https?:\/\//, '');
+  };
 
   return (
     <div className="space-y-5">
@@ -47,12 +61,12 @@ export const BrandBasicInfoSection = ({ profile }: BrandBasicInfoSectionProps) =
         <div className="flex items-center text-muted-foreground">
           <Globe className="h-4 w-4 mr-2" />
           <a 
-            href={profile.website} 
+            href={formatWebsiteUrl(profile.website)} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-primary hover:underline"
           >
-            {profile.website.replace(/^https?:\/\//, '')}
+            {displayWebsite(profile.website)}
           </a>
         </div>
       )}

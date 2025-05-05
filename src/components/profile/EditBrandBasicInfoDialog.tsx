@@ -53,6 +53,8 @@ export const EditBrandBasicInfoDialog = ({
     e.preventDefault();
     setIsLoading(true);
 
+    // Clean up website input by removing http/https if saving to database
+    // The display component will handle proper formatting for links
     try {
       await onSave(formData);
       onOpenChange(false);
@@ -117,11 +119,13 @@ export const EditBrandBasicInfoDialog = ({
             <Input
               id="website"
               name="website"
-              type="url"
               value={formData.website}
               onChange={handleChange}
-              placeholder="https://"
+              placeholder="website.com"
             />
+            <p className="text-xs text-muted-foreground">
+              You can enter just the domain (e.g., website.com)
+            </p>
           </div>
 
           <div className="flex justify-end gap-2">

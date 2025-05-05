@@ -151,8 +151,11 @@ export const BrandProfileForm = ({
               name="website"
               value={formData.website}
               onChange={handleChange}
-              placeholder="https://"
+              placeholder="website.com"
             />
+            <p className="text-xs text-muted-foreground">
+              You can enter just the domain (e.g., website.com)
+            </p>
           </div>
           
           <Button 
