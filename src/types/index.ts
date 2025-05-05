@@ -22,7 +22,7 @@ export interface RunClubProfile extends Profile {
   city?: string;
   state?: string;
   member_count?: number;
-  average_group_size?: number;
+  average_group_size?: string; // Changed from number to string
   core_demographic?: string;
   website?: string;
   logo_url?: string;

@@ -30,7 +30,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
           <div>
             <p className="text-sm text-muted-foreground">Average Group Size</p>
             <p className="text-3xl font-semibold">
-              {demographics.average_group_size || "Not specified"}
+              {profile.average_group_size || "Not specified"}
             </p>
           </div>
         </div>
@@ -39,7 +39,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
           <div>
             <p className="text-sm text-muted-foreground">Core Demographic</p>
             <p className="text-3xl font-semibold">
-              {demographics.core_demographic || "Not specified"}
+              {profile.core_demographic || "Not specified"}
             </p>
           </div>
         </div>
