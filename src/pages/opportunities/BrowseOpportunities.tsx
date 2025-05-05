@@ -1,141 +1,142 @@
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import OpportunityCard from "@/components/opportunities/OpportunityCard";
-import { RunClubProfile, Opportunity } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOpportunityBrowse } from "@/hooks/useOpportunityBrowse";
+import { supabase } from "@/integrations/supabase/client";
+import BrowseOpportunityList from "@/components/opportunities/BrowseOpportunityList";
+import { RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
-import { getMissingProfileFields } from "@/utils/profileCompletionUtils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 
 const BrowseOpportunities = () => {
-  const { user, userType } = useAuth();
   const { toast } = useToast();
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { 
+    opportunities, 
+    isLoading, 
+    userApplications, 
+    setUserApplications,
+    setOpportunities,
+    refreshAfterWithdrawal,
+    refresh
+  } = useOpportunityBrowse();
+  
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
-  const [isLoading, setIsLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [isProfileIncompleteDialogOpen, setIsProfileIncompleteDialogOpen] = useState(false);
-  const [missingFields, setMissingFields] = useState<string[]>([]);
 
+  // Check if we've been redirected from the applications page with withdrawal info
   useEffect(() => {
-    const loadRunClubProfile = async () => {
-      if (userType === 'run_club' && user) {
-        try {
-          setProfileLoading(true);
-          const profileData = await fetchRunClubProfile(user.id);
-          if (profileData) {
-            // Use type assertion to handle the type mismatch
-            setRunClubProfile(profileData as Partial<RunClubProfile>);
-          }
-        } catch (error) {
-          console.error("Error fetching run club profile:", error);
-        } finally {
-          setProfileLoading(false);
-        }
-      }
-    };
+    // Get state from location if it exists
+    const state = location.state || {};
+    const shouldRefresh = state.fromWithdraw;
+    const opportunityId = state.opportunityId;
     
-    const fetchOpportunities = async () => {
-      setIsLoading(true);
+    if (shouldRefresh) {
+      console.log("Refreshing after withdrawal, opportunity ID:", opportunityId);
+      refreshAfterWithdrawal();
+      
+      // Clean up the state
+      navigate(location.pathname, { replace: true, state: {} });
+      
+      // Show a success message to the user
+      toast({
+        title: "Application withdrawn",
+        description: "The opportunity has been added back to your browse list",
+      });
+    }
+  }, [location.state, navigate, refreshAfterWithdrawal, toast]);
+
+  // Additional refresh when component mounts
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+  
+  // Fetch the run club profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id) return;
+      
       try {
-        const { data, error } = await supabase
-          .from('opportunities')
-          .select(`
-            *,
-            brand:brand_id (
-              company_name,
-              logo_url
-            )
-          `);
-        
-        if (error) {
-          console.error("Error fetching opportunities:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load opportunities",
-            variant: "destructive",
-          });
-        } else {
-          setOpportunities(data as Opportunity[] || []);
+        setProfileLoading(true);
+        const profileData = await fetchRunClubProfile(user.id);
+        if (profileData) {
+          setRunClubProfile(profileData);
         }
       } catch (error) {
-        console.error("Error fetching opportunities:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load opportunities",
-          variant: "destructive",
-        });
+        console.error("Error fetching run club profile:", error);
       } finally {
-        setIsLoading(false);
+        setProfileLoading(false);
       }
     };
     
-    loadRunClubProfile();
-    fetchOpportunities();
-  }, [user, userType, toast]);
+    loadProfile();
+  }, [user?.id]);
 
-  useEffect(() => {
-    if (runClubProfile && Object.keys(runClubProfile).length > 0) {
-      const isComplete = isProfileComplete(runClubProfile);
-      if (!isComplete) {
-        const missing = getMissingProfileFields(runClubProfile);
-        setMissingFields(missing);
-        setIsProfileIncompleteDialogOpen(true);
-      } else {
-        setIsProfileIncompleteDialogOpen(false);
-        setMissingFields([]);
-      }
+  const handleApply = async (opportunityId: string) => {
+    if (!user?.id) return;
+    
+    // Double-check profile completion before submitting application
+    if (!isProfileComplete(runClubProfile)) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile before applying",
+        variant: "destructive",
+      });
+      return;
     }
-  }, [runClubProfile]);
+    
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .insert({
+          opportunity_id: opportunityId,
+          run_club_id: user.id,
+          status: 'pending'
+        });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Application Submitted",
+        description: "Your application has been successfully submitted",
+      });
+      
+      // Update the userApplications state
+      setUserApplications([...userApplications, opportunityId]);
+      
+      // Remove the opportunity from the list
+      setOpportunities(opportunities.filter(opp => opp.id !== opportunityId));
+      
+      // Redirect to applications page
+      navigate('/applications');
+      
+    } catch (error: any) {
+      console.error("Error applying to opportunity:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-4">Browse Opportunities</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Browse Opportunities</h1>
+        <p className="text-gray-500 mt-2">Find sponsorship opportunities for your run club</p>
+      </div>
       
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {opportunities.map((opportunity) => (
-            <OpportunityCard key={opportunity.id} opportunity={opportunity} profile={runClubProfile} />
-          ))}
-        </div>
-      )}
-
-      <Dialog open={isProfileIncompleteDialogOpen} onOpenChange={setIsProfileIncompleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Incomplete Profile</DialogTitle>
-            <DialogDescription>
-              To apply for opportunities, please complete your profile.
-              Missing fields: {missingFields.join(', ')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <p>Please fill in the missing information to continue.</p>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Link to="/profile">
-              <Button variant="outline">
-                Go to Profile
-              </Button>
-            </Link>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <BrowseOpportunityList 
+        opportunities={opportunities}
+        isLoading={isLoading || profileLoading}
+        onApply={handleApply}
+        runClubProfile={runClubProfile}
+      />
     </div>
   );
 };

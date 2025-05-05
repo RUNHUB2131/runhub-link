@@ -186,48 +186,36 @@ export type Database = {
       }
       run_club_profiles: {
         Row: {
-          average_group_size: number | null
-          city: string | null
           club_name: string | null
           community_data: Json | null
-          core_demographic: string | null
           description: string | null
           id: string
           location: string | null
           logo_url: string | null
           member_count: number | null
           social_media: Json | null
-          state: string | null
           website: string | null
         }
         Insert: {
-          average_group_size?: number | null
-          city?: string | null
           club_name?: string | null
           community_data?: Json | null
-          core_demographic?: string | null
           description?: string | null
           id: string
           location?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null
-          state?: string | null
           website?: string | null
         }
         Update: {
-          average_group_size?: number | null
-          city?: string | null
           club_name?: string | null
           community_data?: Json | null
-          core_demographic?: string | null
           description?: string | null
           id?: string
           location?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null
-          state?: string | null
           website?: string | null
         }
         Relationships: [

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -30,8 +29,7 @@ const Profile = () => {
       if (userType === 'run_club') {
         const profileData = await fetchRunClubProfile(user.id);
         if (profileData) {
-          // Use type assertion to handle the type mismatch
-          setRunClubProfile(profileData as Partial<RunClubProfile>);
+          setRunClubProfile(profileData);
         }
       } else if (userType === 'brand') {
         const profileData = await fetchBrandProfile(user.id);

@@ -1,141 +1,177 @@
 
-import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { RunClubProfile } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Instagram, Facebook, Globe } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { MapPin, Users, Globe, Instagram, Facebook } from "lucide-react";
+import { RunClubProfile } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RunClubProfileDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   runClubId: string;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function RunClubProfileDialog({
-  open,
-  onOpenChange,
-  runClubId
-}: RunClubProfileDialogProps) {
-  const [profile, setProfile] = useState<Partial<RunClubProfile>>({});
+const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfileDialogProps) => {
+  const [profile, setProfile] = useState<Partial<RunClubProfile> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch the run club profile details when the dialog opens
   useEffect(() => {
-    if (open && runClubId) {
+    if (isOpen && runClubId) {
       setIsLoading(true);
-      supabase
-        .from('run_club_profiles')
-        .select('*')
-        .eq('id', runClubId)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error fetching run club profile:", error);
-          } else if (data) {
-            // Convert average_group_size to string if needed
-            const profileData = { ...data };
-            if (typeof profileData.average_group_size === 'number') {
-              profileData.average_group_size = String(profileData.average_group_size);
+      
+      // Fetch the run club profile from Supabase
+      import("@/integrations/supabase/client").then(({ supabase }) => {
+        supabase
+          .from("run_club_profiles")
+          .select("*")
+          .eq("id", runClubId)
+          .single()
+          .then(({ data, error }) => {
+            if (error) {
+              console.error("Error fetching run club profile:", error);
+            } else {
+              setProfile(data as Partial<RunClubProfile>);
             }
-            
-            // Use type assertion to handle the type mismatch
-            setProfile(profileData as unknown as Partial<RunClubProfile>);
-          }
-          setIsLoading(false);
-        });
+            setIsLoading(false);
+          });
+      });
     }
-  }, [open, runClubId]);
+  }, [isOpen, runClubId]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Run Club Profile</DialogTitle>
         </DialogHeader>
+
         {isLoading ? (
-          <div className="grid gap-4">
-            <Skeleton className="h-4 w-[250px]" />
-            <Skeleton className="h-4 w-[200px]" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-[300px]" />
-          </div>
-        ) : profile ? (
           <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold">{profile.club_name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {profile.city}, {profile.state}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Description:</p>
-              <p className="text-muted-foreground">{profile.description || "Not available"}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium">Member Count:</p>
-                <p className="text-muted-foreground">{profile.member_count || "Not specified"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Average Group Size:</p>
-                <p className="text-muted-foreground">{profile.average_group_size || "Not specified"}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Core Demographic:</p>
-                <p className="text-muted-foreground">{profile.core_demographic || "Not specified"}</p>
+            <div className="flex items-center space-x-4">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-28" />
               </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">Social Media:</p>
-              <div className="flex items-center space-x-2">
-                {profile.website && (
-                  <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
-                    <Globe className="h-4 w-4 mr-1" />
-                    Website
-                  </a>
-                )}
-                {profile.social_media?.instagram && (
-                  <a href={profile.social_media.instagram} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
-                    <Instagram className="h-4 w-4 mr-1" />
-                    Instagram
-                  </a>
-                )}
-                {profile.social_media?.facebook && (
-                  <a href={profile.social_media.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center">
-                    <Facebook className="h-4 w-4 mr-1" />
-                    Facebook
-                  </a>
-                )}
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Run Types:</p>
-              <div className="flex flex-wrap gap-2">
-                {profile.community_data?.run_types && profile.community_data.run_types.length > 0 ? (
-                  profile.community_data.run_types.map((type, index) => (
-                    <Badge key={index} variant="secondary">
-                      {type}
-                    </Badge>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">No run types specified</p>
-                )}
-              </div>
+            <Skeleton className="h-24 w-full" />
+            <div className="grid grid-cols-2 gap-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
             </div>
           </div>
         ) : (
-          <p>No profile data found.</p>
+          <div className="space-y-6">
+            {/* Club header with logo and name */}
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                {profile?.logo_url ? (
+                  <img src={profile.logo_url} alt={`${profile.club_name} logo`} />
+                ) : (
+                  <div className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
+                    {profile?.club_name?.charAt(0) || "R"}
+                  </div>
+                )}
+              </Avatar>
+              <div>
+                <h3 className="text-xl font-bold">{profile?.club_name || "Unknown Club"}</h3>
+                {profile?.location && (
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            {profile?.description && (
+              <Card className="p-4 bg-muted/30">
+                <p className="text-sm">{profile.description}</p>
+              </Card>
+            )}
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="font-medium">Members</span>
+                </div>
+                <p className="text-2xl font-bold mt-1">{profile?.member_count || 0}</p>
+              </div>
+              
+              {profile?.community_data?.run_types && (
+                <div className="bg-muted/30 p-3 rounded-md">
+                  <div className="font-medium mb-2">Run Types</div>
+                  <div className="flex flex-wrap gap-1">
+                    {(profile.community_data.run_types as string[]).map((type, i) => (
+                      <Badge key={i} variant="secondary">
+                        {type}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Website and Social Links */}
+            <div className="space-y-2">
+              {profile?.website && (
+                <a 
+                  href={profile.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:underline"
+                >
+                  <Globe className="h-4 w-4" />
+                  {profile.website}
+                </a>
+              )}
+              
+              {/* Social Media Links */}
+              <div className="flex gap-3">
+                {profile?.social_media?.instagram && (
+                  <a 
+                    href={`https://instagram.com/${profile.social_media.instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {profile?.social_media?.facebook && (
+                  <a 
+                    href={`https://facebook.com/${profile.social_media.facebook}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {profile?.social_media?.tiktok && (
+                  <a 
+                    href={`https://tiktok.com/@${profile.social_media.tiktok}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    <span className="flex items-center justify-center h-5 w-5 font-bold">T</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export default RunClubProfileDialog;

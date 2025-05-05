@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,24 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { RunClubProfile } from "@/types";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-
-const AUSTRALIAN_STATES = [
-  { value: "ACT", label: "ACT" },
-  { value: "NSW", label: "NSW" },
-  { value: "NT", label: "NT" },
-  { value: "QLD", label: "QLD" },
-  { value: "SA", label: "SA" },
-  { value: "TAS", label: "TAS" },
-  { value: "VIC", label: "VIC" },
-  { value: "WA", label: "WA" },
-];
 
 interface EditBasicInfoDialogProps {
   open: boolean;
@@ -50,8 +32,7 @@ export function EditBasicInfoDialog({
   const [formData, setFormData] = useState({
     club_name: profile.club_name || "",
     description: profile.description || "",
-    city: profile.city || "",
-    state: profile.state || "",
+    location: profile.location || "",
     website: profile.website || "",
     logo_url: profile.logo_url || "",
   });
@@ -65,13 +46,6 @@ export function EditBasicInfoDialog({
     }));
   };
 
-  const handleStateChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      state: value
-    }));
-  };
-
   const handleLogoUpload = (url: string) => {
     setFormData(prev => ({
       ...prev,
@@ -82,17 +56,7 @@ export function EditBasicInfoDialog({
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      // Process website URL before saving
-      let websiteWithProtocol = formData.website;
-      if (websiteWithProtocol && !websiteWithProtocol.match(/^https?:\/\//)) {
-        websiteWithProtocol = `https://${websiteWithProtocol}`;
-      }
-
-      await onSave({
-        ...formData,
-        website: websiteWithProtocol
-      });
-      
+      await onSave(formData);
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -101,27 +65,13 @@ export function EditBasicInfoDialog({
     }
   };
 
-  useEffect(() => {
-    // Update form data when profile changes
-    if (open) {
-      setFormData({
-        club_name: profile.club_name || "",
-        description: profile.description || "",
-        city: profile.city || "",
-        state: profile.state || "",
-        website: profile.website || "",
-        logo_url: profile.logo_url || "",
-      });
-    }
-  }, [profile, open]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Edit Basic Information</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-4 py-4">
           <div className="flex justify-center mb-4">
             <ImageUpload 
               userId={user?.id || ''}
@@ -132,48 +82,25 @@ export function EditBasicInfoDialog({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="club_name">Club Name*</Label>
+            <Label htmlFor="club_name">Club Name</Label>
             <Input
               id="club_name"
               name="club_name"
               value={formData.club_name}
               onChange={handleChange}
               placeholder="Your run club name"
-              required
             />
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City*</Label>
-              <Input
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="Enter city"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="state">State*</Label>
-              <Select 
-                value={formData.state} 
-                onValueChange={handleStateChange}
-              >
-                <SelectTrigger id="state">
-                  <SelectValue placeholder="Select state" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AUSTRALIAN_STATES.map((state) => (
-                    <SelectItem key={state.value} value={state.value}>
-                      {state.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              placeholder="City, State"
+            />
           </div>
           
           <div className="space-y-2">
@@ -183,13 +110,12 @@ export function EditBasicInfoDialog({
               name="website"
               value={formData.website}
               onChange={handleChange}
-              placeholder="yourwebsite.com"
+              placeholder="https://"
             />
-            <p className="text-xs text-muted-foreground">https:// will be added automatically if not included</p>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description*</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               name="description"
@@ -197,7 +123,6 @@ export function EditBasicInfoDialog({
               onChange={handleChange}
               placeholder="Tell us about your run club"
               rows={4}
-              required
             />
           </div>
         </div>

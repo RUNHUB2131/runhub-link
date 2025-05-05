@@ -1,3 +1,4 @@
+
 import { RunClubProfile } from "@/types";
 import { useState } from "react";
 import { DemographicSelections } from "./DemographicSelections";
@@ -25,7 +26,7 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
   const [formData, setFormData] = useState({
     member_count: profile.member_count || 0,
     average_group_size: demographics.average_group_size || "",
-    core_demographic: profile.core_demographic || "",
+    core_demographic: demographics.core_demographic || "",
   });
   
   const [runTypes, setRunTypes] = useState<string[]>(initialRunTypes);

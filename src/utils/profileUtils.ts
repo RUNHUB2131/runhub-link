@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { BrandProfile, RunClubProfile, UserType, FollowerCountRange } from "@/types";
 
@@ -26,30 +27,6 @@ export const fetchRunClubProfile = async (userId: string) => {
     const validateFollowerRange = (range?: string): FollowerCountRange | undefined => {
       return range && validRanges.includes(range as FollowerCountRange) ? range as FollowerCountRange : undefined;
     };
-
-    // Support for backwards compatibility with existing data
-    // Use city and state from the database, or parse from location if they don't exist
-    let city = data.city || '';
-    let state = data.state || '';
-    
-    if (!city || !state) {
-      // If city or state are missing but location exists, try to parse them
-      if (data.location) {
-        const locationParts = data.location.split(',').map(part => part.trim());
-        if (locationParts.length >= 2) {
-          city = city || locationParts[0];
-          state = state || locationParts[1];
-        } else if (locationParts.length === 1) {
-          city = city || locationParts[0];
-        }
-      }
-    }
-
-    // Always convert average_group_size to string
-    let averageGroupSize = data.average_group_size;
-    if (averageGroupSize !== null && averageGroupSize !== undefined) {
-      averageGroupSize = String(averageGroupSize);
-    }
       
     return {
       id: data.id,
@@ -58,11 +35,8 @@ export const fetchRunClubProfile = async (userId: string) => {
       created_at: new Date().toISOString(),
       club_name: data.club_name || '',
       description: data.description || '',
-      city: city,
-      state: state,
+      location: data.location || '',
       member_count: data.member_count || 0,
-      average_group_size: averageGroupSize || '',
-      core_demographic: data.core_demographic || '',
       website: data.website || '',
       logo_url: data.logo_url || '',
       social_media: {
@@ -99,12 +73,6 @@ export const fetchBrandProfile = async (userId: string) => {
     const socialMediaData = typeof data.social_media === 'object' && data.social_media !== null
       ? data.social_media as Record<string, string>
       : {};
-
-    // Add https:// to website if not present
-    let website = data.website || '';
-    if (website && !website.match(/^https?:\/\//)) {
-      website = `https://${website}`;
-    }
       
     return {
       id: data.id,
@@ -114,7 +82,7 @@ export const fetchBrandProfile = async (userId: string) => {
       company_name: data.company_name || '',
       description: data.description || '',
       industry: data.industry || '',
-      website: website,
+      website: data.website || '',
       logo_url: data.logo_url || '',
       social_media: {
         instagram: socialMediaData.instagram || '',
@@ -129,26 +97,9 @@ export const fetchBrandProfile = async (userId: string) => {
 };
 
 export const saveRunClubBasicInfo = async (userId: string, data: Partial<RunClubProfile>) => {
-  // Process website URL before saving
-  let processedData = { ...data };
-  if (processedData.website && !processedData.website.match(/^https?:\/\//)) {
-    processedData.website = `https://${processedData.website}`;
-  }
-
-  // Convert average_group_size to the right type for database
-  const dataToUpdate: any = { ...processedData };
-  
-  // If we're sending average_group_size as a string, convert to number for DB
-  if (typeof dataToUpdate.average_group_size === 'string' && dataToUpdate.average_group_size) {
-    const parsed = parseInt(dataToUpdate.average_group_size);
-    if (!isNaN(parsed)) {
-      dataToUpdate.average_group_size = parsed;
-    }
-  }
-  
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(dataToUpdate)
+    .update(data)
     .eq('id', userId);
   
   if (error) throw error;
@@ -166,26 +117,11 @@ export const saveRunClubSocialMedia = async (userId: string, socialMediaData: Pa
 };
 
 export const saveRunClubCommunityInfo = async (userId: string, communityData: Partial<RunClubProfile>) => {
-  // Create an update object with all community related fields
-  const updateData: any = {
-    member_count: communityData.member_count,
-    core_demographic: communityData.core_demographic,
-    community_data: communityData.community_data
-  };
-
-  // Convert average_group_size to number for database
-  if (typeof communityData.average_group_size === 'string' && communityData.average_group_size) {
-    const parsed = parseInt(communityData.average_group_size);
-    if (!isNaN(parsed)) {
-      updateData.average_group_size = parsed;
-    }
-  } else {
-    updateData.average_group_size = communityData.average_group_size;
-  }
-
   const { error } = await supabase
     .from('run_club_profiles')
-    .update(updateData)
+    .update({
+      community_data: communityData.community_data
+    })
     .eq('id', userId);
   
   if (error) throw error;

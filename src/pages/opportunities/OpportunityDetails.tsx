@@ -1,246 +1,202 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Opportunity, RunClubProfile } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertTriangle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Opportunity, Application, RunClubProfile } from "@/types";
+import OpportunityApplicationsTable from "@/components/opportunities/OpportunityApplicationsTable";
+import OpportunityDetailsSkeleton from "@/components/opportunities/OpportunityDetailsSkeleton";
+import OpportunityNotFound from "@/components/opportunities/OpportunityNotFound";
+import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
+import OpportunityActionButton from "@/components/opportunities/OpportunityActionButton";
+import OpportunityDetailsContent from "@/components/opportunities/OpportunityDetailsContent";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { isProfileComplete } from "@/utils/profileCompletionUtils";
 
 const OpportunityDetails = () => {
-  const { opportunityId } = useParams<{ opportunityId: string }>();
-  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { user, userType } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
-  const [hasApplied, setHasApplied] = useState(false);
-  const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
+  const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isApplying, setIsApplying] = useState(false);
+  const [showApplications, setShowApplications] = useState(false);
+  const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
 
   useEffect(() => {
-    const fetchOpportunity = async () => {
-      if (!opportunityId) {
-        toast({
-          title: "Error",
-          description: "Opportunity ID is missing.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setIsLoading(true);
-
+    if (id) {
+      fetchOpportunityDetails();
+    }
+  }, [id]);
+  
+  // Fetch the run club profile if the user is a run club
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id || userType !== 'run_club') return;
+      
       try {
-        const { data, error } = await supabase
-          .from('opportunities')
-          .select(`
-            *,
-            brand:brand_id (
-              company_name,
-              logo_url
-            )
-          `)
-          .eq('id', opportunityId)
-          .single();
-
-        if (error) {
-          throw error;
+        const profileData = await fetchRunClubProfile(user.id);
+        if (profileData) {
+          setRunClubProfile(profileData);
         }
-
-        if (data) {
-          setOpportunity(data as Opportunity);
-        } else {
-          toast({
-            title: "Not Found",
-            description: "Opportunity not found.",
-            variant: "destructive",
-          });
-          navigate("/opportunities");
-        }
-      } catch (error: any) {
-        console.error("Error fetching opportunity:", error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to load opportunity details.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching run club profile:", error);
       }
     };
+    
+    loadProfile();
+  }, [user?.id, userType]);
 
-    const fetchApplicationStatus = async () => {
-      if (user && opportunityId) {
-        try {
-          const { data, error } = await supabase
-            .from('applications')
-            .select('*')
-            .eq('opportunity_id', opportunityId)
-            .eq('run_club_id', user.id)
-            .maybeSingle();
-
-          if (error) {
-            throw error;
+  const fetchOpportunityDetails = async () => {
+    if (!id || !user) return;
+    
+    setIsLoading(true);
+    try {
+      // First fetch the opportunity
+      const { data: opportunityData, error: opportunityError } = await supabase
+        .from('opportunities')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (opportunityError) throw opportunityError;
+      
+      // Then fetch the brand information separately
+      const { data: brandData, error: brandError } = await supabase
+        .from('brand_profiles')
+        .select('company_name, logo_url')
+        .eq('id', opportunityData.brand_id)
+        .single();
+      
+      // Combine the data
+      const completeOpportunity: Opportunity = {
+        ...opportunityData,
+        brand: brandError ? {
+          company_name: "Unknown Brand",
+          logo_url: undefined
+        } : brandData
+      };
+      
+      setOpportunity(completeOpportunity);
+      
+      // For run clubs, check if they've already applied
+      if (userType === 'run_club') {
+        const { data: appData, error: appError } = await supabase
+          .from('applications')
+          .select('id, status, created_at, opportunity_id, run_club_id')
+          .eq('opportunity_id', id)
+          .eq('run_club_id', user.id)
+          .maybeSingle();
+        
+        if (appError) console.error("Error checking application:", appError);
+        
+        if (appData) {
+          // Ensure status is of the correct type
+          if (appData.status === 'pending' || appData.status === 'accepted' || appData.status === 'rejected') {
+            setApplication(appData as Application);
           }
-
-          if (data) {
-            setHasApplied(true);
-          }
-        } catch (error: any) {
-          console.error("Error fetching application status:", error);
-          toast({
-            title: "Error",
-            description: error.message || "Failed to check application status.",
-            variant: "destructive",
-          });
         }
       }
-    };
-
-    const fetchProfileData = async () => {
-      if (userType === 'run_club' && user) {
-        try {
-          const profileData = await fetchRunClubProfile(user.id);
-          if (profileData) {
-            // Use type assertion to handle the type mismatch
-            setRunClubProfile(profileData as Partial<RunClubProfile>);
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-        }
-      }
-    };
-
-    fetchOpportunity();
-    fetchApplicationStatus();
-    fetchProfileData();
-  }, [opportunityId, user, userType, navigate, toast]);
-
-  const handleApply = async () => {
-    if (!user || !opportunityId) {
+    } catch (error: any) {
+      console.error("Error fetching opportunity details:", error);
       toast({
         title: "Error",
-        description: "Missing user or opportunity information.",
+        description: "Failed to load opportunity details",
+        variant: "destructive",
+      });
+      navigate("/opportunities");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!user || !opportunity) return;
+    
+    // Check if profile is complete before applying
+    if (!isProfileComplete(runClubProfile)) {
+      toast({
+        title: "Profile Incomplete",
+        description: "Please complete your profile before applying",
         variant: "destructive",
       });
       return;
     }
-
+    
+    setIsApplying(true);
     try {
       const { error } = await supabase
         .from('applications')
-        .insert([{
-          opportunity_id: opportunityId,
+        .insert({
+          opportunity_id: opportunity.id,
           run_club_id: user.id,
           status: 'pending'
-        }]);
-
-      if (error) {
-        throw error;
-      }
-
+        });
+      
+      if (error) throw error;
+      
       toast({
-        title: "Application Submitted",
-        description: "Your application has been submitted successfully.",
+        title: "Application submitted",
+        description: "Your application has been successfully submitted",
       });
-      setHasApplied(true);
+      
+      setApplication({
+        id: 'new', // Placeholder ID until we refresh
+        opportunity_id: opportunity.id,
+        run_club_id: user.id,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
+      
+      // Redirect to my applications page after successful application
+      navigate('/applications');
     } catch (error: any) {
-      console.error("Error applying for opportunity:", error);
+      console.error("Error applying to opportunity:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to submit application. Please try again.",
+        description: "Failed to submit application. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsApplying(false);
     }
   };
 
   if (isLoading) {
-    return <div className="text-center">Loading...</div>;
+    return <OpportunityDetailsSkeleton />;
   }
 
   if (!opportunity) {
-    return <div className="text-center">Opportunity not found.</div>;
+    return <OpportunityNotFound />;
   }
 
-  const isProfileComplete = !!runClubProfile.club_name && !!runClubProfile.description && !!runClubProfile.city && !!runClubProfile.state && !!runClubProfile.member_count && !!runClubProfile.average_group_size && !!runClubProfile.core_demographic;
-
   return (
-    <div className="container mx-auto py-10">
-      <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">{opportunity.title}</CardTitle>
-          <CardDescription>
-            {opportunity.brand?.company_name && (
-              <div className="flex items-center space-x-2">
-                {opportunity.brand.logo_url && (
-                  <img src={opportunity.brand.logo_url} alt="Brand Logo" className="w-8 h-8 rounded-full" />
-                )}
-                <span>{opportunity.brand.company_name}</span>
-              </div>
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Description</h3>
-            <p>{opportunity.description}</p>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Reward</h3>
-            <p>{opportunity.reward}</p>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Deadline</h3>
-            <p>{opportunity.deadline ? new Date(opportunity.deadline).toLocaleDateString() : 'No Deadline'}</p>
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Duration</h3>
-            <p>{opportunity.duration || 'Not specified'}</p>
-          </div>
-          {opportunity.requirements && opportunity.requirements.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Requirements</h3>
-              <ul className="list-disc pl-5">
-                {opportunity.requirements.map((req, index) => (
-                  <li key={index}>{req}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-between items-center">
-          {userType === 'run_club' ? (
-            hasApplied ? (
-              <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Applied
-              </Badge>
-            ) : (
-              <>
-                {!isProfileComplete ? (
-                  <div className="flex items-center">
-                    <AlertTriangle className="mr-2 h-4 w-4 text-yellow-500" />
-                    <p className="text-sm text-yellow-500">
-                      Complete your profile to apply! <Link to="/profile" className="underline">Go to Profile</Link>
-                    </p>
-                  </div>
-                ) : (
-                  <Button onClick={handleApply}>Apply Now</Button>
-                )}
-              </>
-            )
-          ) : (
-            <Button asChild>
-              <Link to="/login">Login as Run Club to Apply</Link>
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{opportunity?.title}</h1>
+          <OpportunityBrandInfo opportunity={opportunity} />
+        </div>
+        
+        <OpportunityActionButton 
+          userType={userType}
+          userId={user?.id}
+          brandId={opportunity.brand_id}
+          opportunityId={opportunity.id}
+          application={application}
+          isApplying={isApplying}
+          handleApply={handleApply}
+          showApplications={showApplications}
+          setShowApplications={setShowApplications}
+          runClubProfile={runClubProfile}
+        />
+      </div>
+      
+      <OpportunityDetailsContent opportunity={opportunity} />
     </div>
   );
 };
