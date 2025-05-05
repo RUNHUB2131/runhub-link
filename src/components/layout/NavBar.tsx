@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, User } from "lucide-react";
+import { Menu, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +39,14 @@ export const NavBar = () => {
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={logout}
+                title="Sign out"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
             </>
           ) : (
             <Link to="/auth/login">
@@ -113,10 +121,11 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Button 
             variant="ghost" 
-            className="justify-start px-2"
+            className="justify-start px-2 text-sm font-medium text-destructive"
             onClick={handleSignOut}
           >
-            Log out
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign out
           </Button>
         </>
       ) : (
