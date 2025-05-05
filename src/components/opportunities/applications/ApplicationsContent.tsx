@@ -126,9 +126,9 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                     </Button>
                     
                     <ApplicationActionButtons 
-                      applicationStatus={app.status}
-                      onAccept={() => handleUpdateStatus(app.id, "accepted")}
-                      onReject={() => handleUpdateStatus(app.id, "rejected")}
+                      applicationId={app.id}
+                      status={app.status}
+                      onUpdateStatus={handleUpdateStatus}
                     />
                   </div>
                 </div>
