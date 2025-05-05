@@ -25,6 +25,8 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
       setIsLoading(true);
       setNotFound(false);
       
+      console.log("Fetching brand profile for brand ID:", brandId);
+      
       // Fetch the brand profile from Supabase
       supabase
         .from("brand_profiles")
@@ -39,6 +41,7 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
             console.log("No brand profile found for ID:", brandId);
             setNotFound(true);
           } else {
+            console.log("Brand profile found:", data);
             setProfile(data as Partial<BrandProfile>);
             setNotFound(false);
           }
@@ -81,7 +84,14 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 {profile?.logo_url ? (
-                  <img src={profile.logo_url} alt={`${profile.company_name} logo`} />
+                  <img 
+                    src={profile.logo_url} 
+                    alt={`${profile.company_name} logo`}
+                    onError={(e) => {
+                      console.log("Failed to load brand logo in dialog");
+                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150";
+                    }}
+                  />
                 ) : (
                   <div className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
                     {profile?.company_name?.charAt(0) || "B"}

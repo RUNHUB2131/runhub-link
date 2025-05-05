@@ -43,6 +43,8 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
     navigate('/profile');
   };
 
+  console.log("Rendering opportunity in BrowseOpportunityCard:", opportunity);
+
   return (
     <>
       <Card 

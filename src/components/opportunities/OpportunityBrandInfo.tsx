@@ -10,6 +10,8 @@ interface OpportunityBrandInfoProps {
 const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   const [showBrandProfile, setShowBrandProfile] = useState(false);
   
+  console.log("Brand info in OpportunityBrandInfo:", opportunity.brand);
+  
   return (
     <>
       <div className="flex items-center mt-2">
@@ -19,6 +21,10 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
               src={opportunity.brand.logo_url} 
               alt={opportunity.brand.company_name || "Brand logo"}
               className="w-full h-full object-contain"
+              onError={(e) => {
+                console.log("Failed to load brand logo");
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           </div>
         ) : (

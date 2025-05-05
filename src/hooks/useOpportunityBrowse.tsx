@@ -59,28 +59,45 @@ export const useOpportunityBrowse = () => {
         return;
       }
       
-      // Then, for each opportunity, fetch the brand information separately
+      // Then, for each opportunity, fetch the brand information
       const enhancedOpportunities = await Promise.all(
         opportunitiesData.map(async (opp) => {
-          // Get brand profile for each opportunity - using maybeSingle instead of single
-          // to prevent errors when the brand doesn't exist
-          const { data: brandData, error: brandError } = await supabase
-            .from('brand_profiles')
-            .select('company_name, logo_url')
-            .eq('id', opp.brand_id)
-            .maybeSingle();
-          
-          if (brandError) {
-            console.error(`Error fetching brand info for opportunity ${opp.id}:`, brandError);
-          }
-          
-          return {
-            ...opp,
-            brand: {
-              company_name: brandData?.company_name || "Unknown Brand",
-              logo_url: brandData?.logo_url || undefined
+          try {
+            console.log(`Fetching brand info for opportunity ${opp.id} with brand_id ${opp.brand_id}`);
+            
+            // Get brand profile for each opportunity
+            const { data: brandData, error: brandError } = await supabase
+              .from('brand_profiles')
+              .select('company_name, logo_url')
+              .eq('id', opp.brand_id)
+              .maybeSingle();
+            
+            if (brandError) {
+              console.error(`Error fetching brand info for opportunity ${opp.id}:`, brandError);
+              throw brandError;
             }
-          } as Opportunity;
+            
+            console.log(`Brand data for opportunity ${opp.id}:`, brandData);
+            
+            return {
+              ...opp,
+              brand_id: opp.brand_id,
+              brand: {
+                company_name: brandData?.company_name || "Unknown Brand",
+                logo_url: brandData?.logo_url || undefined
+              }
+            } as Opportunity;
+          } catch (error) {
+            console.error(`Error processing opportunity ${opp.id}:`, error);
+            return {
+              ...opp,
+              brand_id: opp.brand_id,
+              brand: {
+                company_name: "Unknown Brand",
+                logo_url: undefined
+              }
+            } as Opportunity;
+          }
         })
       );
       
