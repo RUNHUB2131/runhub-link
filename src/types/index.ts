@@ -19,8 +19,12 @@ export interface Profile {
 export interface RunClubProfile extends Profile {
   club_name: string;
   description?: string;
-  location?: string;
+  city?: string;
+  state?: string;
+  location?: string; // Legacy field, keeping for backward compatibility
   member_count?: number;
+  average_group_size?: number;
+  core_demographic?: string;
   website?: string;
   logo_url?: string;
   social_media?: {

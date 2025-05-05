@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Users, Globe, Instagram, Facebook } from "lucide-react";
+import { MapPin, Users, Globe, Instagram, Facebook, User } from "lucide-react";
 import { RunClubProfile } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -79,10 +79,12 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
               </Avatar>
               <div>
                 <h3 className="text-xl font-bold">{profile?.club_name || "Unknown Club"}</h3>
-                {profile?.location && (
+                {(profile?.city || profile?.state) && (
                   <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{profile.location}</span>
+                    <span>
+                      {profile.city}{profile.city && profile.state ? ", " : ""}{profile.state || ""}
+                    </span>
                   </div>
                 )}
               </div>
@@ -105,19 +107,36 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
                 <p className="text-2xl font-bold mt-1">{profile?.member_count || 0}</p>
               </div>
               
-              {profile?.community_data?.run_types && (
-                <div className="bg-muted/30 p-3 rounded-md">
-                  <div className="font-medium mb-2">Run Types</div>
-                  <div className="flex flex-wrap gap-1">
-                    {(profile.community_data.run_types as string[]).map((type, i) => (
-                      <Badge key={i} variant="secondary">
-                        {type}
-                      </Badge>
-                    ))}
-                  </div>
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="font-medium">Avg. Group</span>
                 </div>
-              )}
+                <p className="text-2xl font-bold mt-1">{profile?.average_group_size || 0}</p>
+              </div>
             </div>
+            
+            {/* Core demographic */}
+            {profile?.core_demographic && (
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <span>Core demographic: {profile.core_demographic}</span>
+              </div>
+            )}
+
+            {/* Run types */}
+            {profile?.community_data?.run_types && profile.community_data.run_types.length > 0 && (
+              <div className="space-y-2">
+                <div className="font-medium">Run Types</div>
+                <div className="flex flex-wrap gap-1">
+                  {(profile.community_data.run_types as string[]).map((type, i) => (
+                    <Badge key={i} variant="secondary">
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Website and Social Links */}
             <div className="space-y-2">
@@ -129,7 +148,7 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
                   className="flex items-center gap-2 text-sm hover:underline"
                 >
                   <Globe className="h-4 w-4" />
-                  {profile.website}
+                  {profile.website.replace(/^https?:\/\//, '')}
                 </a>
               )}
               

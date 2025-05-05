@@ -10,6 +10,25 @@ import { RunClubProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Australian states
+const AUSTRALIAN_STATES = [
+  "ACT",
+  "NSW",
+  "NT",
+  "QLD",
+  "SA",
+  "TAS",
+  "VIC",
+  "WA",
+];
 
 interface RunClubProfileFormProps {
   initialData?: Partial<RunClubProfile>;
@@ -23,8 +42,11 @@ export const RunClubProfileForm = ({
   const [formData, setFormData] = useState({
     club_name: initialData.club_name || "",
     description: initialData.description || "",
-    location: initialData.location || "",
+    city: initialData.city || "",
+    state: initialData.state || "",
     member_count: initialData.member_count || 0,
+    average_group_size: initialData.average_group_size || 0,
+    core_demographic: initialData.core_demographic || "",
     website: initialData.website || "",
     logo_url: initialData.logo_url || "",
   });
@@ -37,7 +59,30 @@ export const RunClubProfileForm = ({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "member_count" ? parseInt(value) || 0 : value,
+      [name]: name === "member_count" || name === "average_group_size" 
+        ? parseInt(value) || 0 
+        : value,
+    }));
+  };
+
+  const handleStateChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      state: value
+    }));
+  };
+
+  const handleWebsiteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let { value } = e.target;
+    
+    // Only add https:// if there isn't already a protocol
+    if (value && value.trim() !== "" && !value.match(/^https?:\/\//)) {
+      value = `https://${value}`;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      website: value
     }));
   };
 
@@ -56,13 +101,19 @@ export const RunClubProfileForm = ({
     setIsLoading(true);
     
     try {
+      // Combine city and state into location for backward compatibility
+      const dataToSave = {
+        ...formData,
+        location: formData.city && formData.state ? `${formData.city}, ${formData.state}` : undefined
+      };
+      
       if (onSave) {
-        await onSave(formData);
+        await onSave(dataToSave);
       } else {
         // Save to Supabase
         const { error } = await supabase
           .from('run_club_profiles')
-          .update(formData)
+          .update(dataToSave)
           .eq('id', user.id);
         
         if (error) throw error;
@@ -94,7 +145,7 @@ export const RunClubProfileForm = ({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="club_name">Name</Label>
+            <Label htmlFor="club_name">Name *</Label>
             <Input
               id="club_name"
               name="club_name"
@@ -105,8 +156,41 @@ export const RunClubProfileForm = ({
             />
           </div>
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="City"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="state">State *</Label>
+              <Select 
+                value={formData.state} 
+                onValueChange={handleStateChange}
+              >
+                <SelectTrigger id="state">
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AUSTRALIAN_STATES.map((state) => (
+                    <SelectItem key={state} value={state}>
+                      {state}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               name="description"
@@ -114,22 +198,12 @@ export const RunClubProfileForm = ({
               onChange={handleChange}
               placeholder="Tell us about your run club"
               rows={5}
+              required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="City, State"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="member_count">Number of Members</Label>
+            <Label htmlFor="member_count">Total Member Count *</Label>
             <Input
               id="member_count"
               name="member_count"
@@ -137,6 +211,32 @@ export const RunClubProfileForm = ({
               value={formData.member_count}
               onChange={handleChange}
               min="0"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="average_group_size">Average Group Size *</Label>
+            <Input
+              id="average_group_size"
+              name="average_group_size"
+              type="number"
+              value={formData.average_group_size}
+              onChange={handleChange}
+              min="0"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="core_demographic">Core Demographic *</Label>
+            <Input
+              id="core_demographic"
+              name="core_demographic"
+              value={formData.core_demographic}
+              onChange={handleChange}
+              placeholder="e.g., Women 25-40, Mixed all ages, etc."
+              required
             />
           </div>
           
@@ -146,20 +246,12 @@ export const RunClubProfileForm = ({
               id="website"
               name="website"
               value={formData.website}
-              onChange={handleChange}
-              placeholder="https://"
+              onChange={handleWebsiteChange}
+              placeholder="yourwebsite.com"
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="logo_url">Logo URL</Label>
-            <Input
-              id="logo_url"
-              name="logo_url"
-              value={formData.logo_url}
-              onChange={handleChange}
-              placeholder="https://"
-            />
+            <p className="text-xs text-muted-foreground">
+              https:// will be added automatically if not included
+            </p>
           </div>
           
           <Button 
