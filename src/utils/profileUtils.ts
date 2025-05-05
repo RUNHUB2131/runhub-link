@@ -120,7 +120,8 @@ export const saveRunClubCommunityInfo = async (userId: string, communityData: Pa
   const { error } = await supabase
     .from('run_club_profiles')
     .update({
-      community_data: communityData.community_data
+      community_data: communityData.community_data,
+      member_count: communityData.member_count
     })
     .eq('id', userId);
   

@@ -75,10 +75,10 @@ const OpportunityDetails = () => {
       // Combine the data
       const completeOpportunity: Opportunity = {
         ...opportunityData,
-        brand: brandError ? {
-          company_name: "Unknown Brand",
-          logo_url: undefined
-        } : brandData
+        brand: brandError ? null : { 
+          company_name: brandData.company_name || "Unknown Brand",
+          logo_url: brandData.logo_url
+        }
       };
       
       setOpportunity(completeOpportunity);

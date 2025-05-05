@@ -1,14 +1,16 @@
 
-import { Users, MapPin } from "lucide-react";
 import { useState } from "react";
-import { Application } from "@/types";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ApplicationStatusBadge from "./ApplicationStatusBadge";
+import ApplicationActionButtons from "./ApplicationActionButtons";
 import EmptyApplicationsState from "./EmptyApplicationsState";
 import RunClubProfileDialog from "./RunClubProfileDialog";
+import { MapPin, Users, Calendar } from "lucide-react";
+import { Application } from "@/types";
 
-interface RunClubApplication extends Application {
+export interface RunClubApplication extends Application {
   run_club_profile?: {
     club_name: string;
     location: string;
@@ -23,116 +25,124 @@ interface ApplicationsContentProps {
 }
 
 const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: ApplicationsContentProps) => {
-  const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
-  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedRunClubId, setSelectedRunClubId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
-  const handleViewProfile = (runClubId: string) => {
-    setSelectedClubId(runClubId);
-    setIsProfileDialogOpen(true);
+  // Filter applications based on active tab
+  const filteredApplications = applications.filter(app => {
+    if (activeTab === "all") return true;
+    if (activeTab === "pending") return app.status === "pending";
+    if (activeTab === "accepted") return app.status === "accepted";
+    if (activeTab === "rejected") return app.status === "rejected";
+    return true;
+  });
+
+  const openRunClubProfile = (runClubId: string) => {
+    setSelectedRunClubId(runClubId);
+    setProfileDialogOpen(true);
   };
 
-  return (
-    <div className="border rounded-lg p-6">
-      <div className="flex items-center mb-6">
-        <Users className="h-5 w-5 mr-3" />
-        <h2 className="text-xl font-bold">Run Club Applications ({applications.length})</h2>
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 mt-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-4 animate-pulse">
+            <div className="bg-gray-200 h-16 rounded-md"></div>
+          </Card>
+        ))}
       </div>
+    );
+  }
 
-      {isLoading ? (
-        <div className="text-center py-8">Loading applications...</div>
-      ) : applications.length > 0 ? (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Run Club</TableHead>
-              <TableHead className="w-[200px]">Location</TableHead>
-              <TableHead className="w-[100px]">Members</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[150px]">Applied On</TableHead>
-              <TableHead className="w-[150px]">Actions</TableHead>
-              <TableHead className="text-right">Manage</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {applications.map((application) => (
-              <TableRow key={application.id}>
-                <TableCell className="font-medium">
-                  {application.run_club_profile?.club_name || "Unnamed Run Club"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1 text-gray-500" />
-                    {application.run_club_profile?.location || "Unknown"}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-1 text-gray-500" />
-                    {application.run_club_profile?.member_count || 0}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={application.status === 'pending' ? 'outline' : 
-                            application.status === 'accepted' ? 'secondary' : 'destructive'}
-                    className={application.status === 'pending' ? 'bg-[#FEC6A1] text-[#7d4829] hover:bg-[#FEC6A1]' : 
-                              application.status === 'accepted' ? 'bg-[#F2FCE2] text-[#4c7520] hover:bg-[#F2FCE2]' : ''}
-                  >
-                    {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {new Date(application.created_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                  })}
-                </TableCell>
-                <TableCell>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="px-0"
-                    onClick={() => handleViewProfile(application.run_club_id)}
-                  >
-                    View Profile
-                  </Button>
-                </TableCell>
-                <TableCell className="text-right">
-                  {application.status === "pending" && (
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleUpdateStatus(application.id, "accepted")}
-                        className="border-green-500 text-green-500 hover:bg-green-50"
-                      >
-                        Accept
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleUpdateStatus(application.id, "rejected")}
-                        className="border-red-500 text-red-500 hover:bg-red-50"
-                      >
-                        Reject
-                      </Button>
+  if (applications.length === 0) {
+    return <EmptyApplicationsState />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="all">
+            All ({applications.length})
+          </TabsTrigger>
+          <TabsTrigger value="pending">
+            Pending ({applications.filter(app => app.status === "pending").length})
+          </TabsTrigger>
+          <TabsTrigger value="accepted">
+            Accepted ({applications.filter(app => app.status === "accepted").length})
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rejected ({applications.filter(app => app.status === "rejected").length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="space-y-4 mt-4">
+          {filteredApplications.length === 0 ? (
+            <div className="text-center p-8 border rounded-md">
+              <p className="text-muted-foreground">No {activeTab} applications found</p>
+            </div>
+          ) : (
+            filteredApplications.map(app => (
+              <Card key={app.id} className="p-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold">
+                        {app.run_club_profile?.club_name || "Unknown Run Club"}
+                      </h3>
+                      <ApplicationStatusBadge status={app.status} />
                     </div>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <EmptyApplicationsState />
-      )}
+                    
+                    <div className="flex flex-col md:flex-row gap-4 text-sm text-muted-foreground">
+                      {app.run_club_profile?.location && (
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {app.run_club_profile.location}
+                        </div>
+                      )}
+                      
+                      {app.run_club_profile?.member_count && (
+                        <div className="flex items-center">
+                          <Users className="h-4 w-4 mr-1" />
+                          {app.run_club_profile.member_count} members
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Applied {new Date(app.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 self-end md:self-auto">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => openRunClubProfile(app.run_club_id)}
+                    >
+                      View Profile
+                    </Button>
+                    
+                    <ApplicationActionButtons 
+                      applicationStatus={app.status}
+                      onAccept={() => handleUpdateStatus(app.id, "accepted")}
+                      onReject={() => handleUpdateStatus(app.id, "rejected")}
+                    />
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+      </Tabs>
       
-      {selectedClubId && (
-        <RunClubProfileDialog
-          runClubId={selectedClubId}
-          isOpen={isProfileDialogOpen}
-          onOpenChange={setIsProfileDialogOpen}
+      {selectedRunClubId && (
+        <RunClubProfileDialog 
+          runClubId={selectedRunClubId} 
+          isOpen={profileDialogOpen} 
+          onOpenChange={setProfileDialogOpen} 
         />
       )}
     </div>

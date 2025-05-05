@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOpportunityBrowse } from "@/hooks/useOpportunityBrowse";
 import { supabase } from "@/integrations/supabase/client";
 import BrowseOpportunityList from "@/components/opportunities/BrowseOpportunityList";
-import { RunClubProfile } from "@/types";
+import { RunClubProfile, Opportunity } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
 
@@ -132,10 +132,10 @@ const BrowseOpportunities = () => {
       </div>
       
       <BrowseOpportunityList 
-        opportunities={opportunities}
+        opportunities={opportunities as Opportunity[]}
         isLoading={isLoading || profileLoading}
         onApply={handleApply}
-        runClubProfile={runClubProfile}
+        runClubProfile={runClubProfile} 
       />
     </div>
   );

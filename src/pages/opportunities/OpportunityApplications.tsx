@@ -3,15 +3,15 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Application } from "@/types";
-import {
-  fetchOpportunityDetails,
-  fetchApplications,
-  updateApplicationStatus,
-  RunClubApplication,
-  Opportunity
-} from "@/services/applicationService";
+import { supabase } from "@/integrations/supabase/client";
 import ApplicationsHeader from "@/components/opportunities/applications/ApplicationsHeader";
-import ApplicationsContent from "@/components/opportunities/applications/ApplicationsContent";
+import ApplicationsContent, { RunClubApplication } from "@/components/opportunities/applications/ApplicationsContent";
+
+interface Opportunity {
+  id: string;
+  title: string;
+  description: string;
+}
 
 const OpportunityApplications = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,15 +23,23 @@ const OpportunityApplications = () => {
 
   useEffect(() => {
     if (id) {
-      fetchOpportunityDetails(id)
-        .then(setOpportunity)
-        .catch((error) => {
-          console.error("Error fetching opportunity details:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load opportunity details",
-            variant: "destructive",
-          });
+      // Fetch opportunity details
+      supabase
+        .from('opportunities')
+        .select('id, title, description')
+        .eq('id', id)
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching opportunity details:", error);
+            toast({
+              title: "Error",
+              description: "Failed to load opportunity details",
+              variant: "destructive",
+            });
+          } else {
+            setOpportunity(data as Opportunity);
+          }
         });
         
       loadApplications();
@@ -43,8 +51,37 @@ const OpportunityApplications = () => {
     
     setIsLoading(true);
     try {
-      const applicationsData = await fetchApplications(id);
-      setApplications(applicationsData);
+      // First fetch the applications
+      const { data: appData, error: appError } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('opportunity_id', id);
+
+      if (appError) throw appError;
+
+      // Initialize applications array with proper typing for status
+      const initialApps: RunClubApplication[] = (appData || []).map(app => ({
+        ...app,
+        status: app.status as "pending" | "accepted" | "rejected"
+      }));
+      
+      // Now fetch the run club profile data separately for each application
+      const appsWithProfiles = await Promise.all(
+        initialApps.map(async (app) => {
+          const { data: profileData, error: profileError } = await supabase
+            .from('run_club_profiles')
+            .select('club_name, location, member_count')
+            .eq('id', app.run_club_id)
+            .single();
+
+          return {
+            ...app,
+            run_club_profile: profileError ? null : profileData
+          };
+        })
+      );
+
+      setApplications(appsWithProfiles);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -62,7 +99,10 @@ const OpportunityApplications = () => {
 
   const handleUpdateStatus = async (applicationId: string, status: "accepted" | "rejected") => {
     try {
-      await updateApplicationStatus(applicationId, status);
+      await supabase
+        .from('applications')
+        .update({ status })
+        .eq('id', applicationId);
 
       // Update local state to reflect the change
       setApplications(applications.map(app => 

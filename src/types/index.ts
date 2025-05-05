@@ -35,7 +35,11 @@ export interface RunClubProfile extends Profile {
   };
   community_data?: {
     run_types?: string[];
-    demographics?: Record<string, any>;
+    demographics?: {
+      average_group_size?: string;
+      core_demographic?: string;
+      event_experience?: string[];
+    };
   };
 }
 
@@ -75,4 +79,9 @@ export interface Application {
   run_club_id: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
+  run_club_profile?: {
+    club_name: string;
+    location: string;
+    member_count: number;
+  } | null;
 }
