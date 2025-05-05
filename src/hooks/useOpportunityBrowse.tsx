@@ -105,12 +105,18 @@ export const useOpportunityBrowse = () => {
     setLastRefresh(Date.now()); // This will trigger both useEffects
   };
 
+  // Add a simple method to force a refresh
+  const refresh = () => {
+    setLastRefresh(Date.now());
+  };
+
   return {
     opportunities,
     isLoading,
     userApplications,
     setUserApplications,
     setOpportunities,
-    refreshAfterWithdrawal
+    refreshAfterWithdrawal,
+    refresh
   };
 };

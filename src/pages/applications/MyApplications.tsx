@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchRunClubApplications, withdrawApplication } from "@/services/applicationService";
 import { Application } from "@/types";
@@ -30,9 +32,11 @@ interface ApplicationWithOpportunity extends Application {
 const MyApplications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [applications, setApplications] = useState<ApplicationWithOpportunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [withdrawnApplications, setWithdrawnApplications] = useState<Set<string>>(new Set());
 
   const loadApplications = async () => {
     if (!user?.id) return;
@@ -40,7 +44,10 @@ const MyApplications = () => {
     try {
       setIsLoading(true);
       const data = await fetchRunClubApplications(user.id);
-      setApplications(data || []);
+      
+      // Filter out applications that have been withdrawn in the current session
+      const filteredData = data.filter(app => !withdrawnApplications.has(app.id));
+      setApplications(filteredData || []);
     } catch (error) {
       console.error("Error loading applications:", error);
       toast({
@@ -54,12 +61,18 @@ const MyApplications = () => {
 
   useEffect(() => {
     loadApplications();
-  }, [user?.id]);
+  }, [user?.id, withdrawnApplications]);
 
   const handleWithdrawApplication = async (applicationId: string) => {
     try {
       // Call the API to withdraw the application
-      await withdrawApplication(applicationId);
+      const result = await withdrawApplication(applicationId);
+      
+      // Find the withdrawn application to get its opportunity ID
+      const withdrawnApp = applications.find(app => app.id === applicationId);
+      
+      // Add to withdrawn applications set
+      setWithdrawnApplications(prev => new Set(prev).add(applicationId));
       
       // Remove the application from the local state
       setApplications(applications.filter(app => app.id !== applicationId));
@@ -68,6 +81,13 @@ const MyApplications = () => {
         title: "Application withdrawn",
         description: "The opportunity is now available in Browse Opportunities"
       });
+      
+      // Navigate to Browse Opportunities with state to trigger refresh
+      if (withdrawnApp) {
+        navigate('/opportunities/browse', { 
+          state: { fromWithdraw: true, opportunityId: withdrawnApp.opportunity_id } 
+        });
+      }
     } catch (error) {
       console.error("Error withdrawing application:", error);
       toast({

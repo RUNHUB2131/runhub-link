@@ -18,7 +18,8 @@ const BrowseOpportunities = () => {
     userApplications, 
     setUserApplications,
     setOpportunities,
-    refreshAfterWithdrawal
+    refreshAfterWithdrawal,
+    refresh
   } = useOpportunityBrowse();
 
   // Check if we've been redirected from the applications page
@@ -30,6 +31,11 @@ const BrowseOpportunities = () => {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state]);
+
+  // Additional refresh when component mounts
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleApply = async (opportunityId: string) => {
     if (!user?.id) return;
