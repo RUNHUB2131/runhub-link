@@ -4,7 +4,6 @@ import {
   Drawer,
   DrawerContent,
   DrawerHeader,
-  DrawerTitle,
 } from "@/components/ui/drawer";
 import { useChat } from "@/hooks/useChat";
 import ChatHeader from "./ChatHeader";

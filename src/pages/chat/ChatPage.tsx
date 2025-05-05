@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useChatList, useChat } from "@/hooks/useChat";
+import { useAuth } from "@/contexts/AuthContext";
 import ChatHeader from "@/components/chat/ChatHeader";
 import ChatMessages from "@/components/chat/ChatMessages";
 import ChatMessageInput from "@/components/chat/ChatMessageInput";
@@ -13,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ChatPage = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const navigate = useNavigate();
+  const { userType } = useAuth();
   const { chats, isLoading: isLoadingChats } = useChatList();
   const {
     chat,
@@ -39,13 +41,17 @@ const ChatPage = () => {
       ));
     }
     
+    const emptyStateMessage = userType === 'brand' 
+      ? "When you accept run club applications, chats will appear here." 
+      : "When brands accept your applications, chats will appear here.";
+    
     if (chats.length === 0) {
       return (
         <div className="p-6 text-center">
           <MessageCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
           <h3 className="font-medium">No chats yet</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            When you have accepted applications, chats will appear here.
+            {emptyStateMessage}
           </p>
         </div>
       );

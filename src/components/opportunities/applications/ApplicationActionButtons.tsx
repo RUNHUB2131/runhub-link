@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { checkChatExistsForApplication } from "@/services/chatService";
@@ -18,6 +19,7 @@ const ApplicationActionButtons = ({
   onUpdateStatus
 }: ApplicationActionButtonsProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [chatId, setChatId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
@@ -30,6 +32,31 @@ const ApplicationActionButtons = ({
       if (existingChatId) {
         setChatId(existingChatId);
         setIsDrawerOpen(true);
+      } else {
+        toast({
+          title: "Chat Not Available",
+          description: "The chat for this application cannot be found.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking chat existence:", error);
+      toast({
+        title: "Error",
+        description: "Failed to open chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleOpenFullChat = async () => {
+    if (status !== 'accepted') return;
+    
+    try {
+      const existingChatId = await checkChatExistsForApplication(applicationId);
+      
+      if (existingChatId) {
+        navigate(`/chat/${existingChatId}`);
       } else {
         toast({
           title: "Chat Not Available",
@@ -72,7 +99,7 @@ const ApplicationActionButtons = ({
   
   if (status === "accepted") {
     return (
-      <>
+      <div className="space-x-2">
         <Button 
           variant="outline"
           size="sm"
@@ -80,7 +107,17 @@ const ApplicationActionButtons = ({
           onClick={handleChatClick}
         >
           <MessageCircle className="h-4 w-4" />
-          Chat
+          Quick Chat
+        </Button>
+        
+        <Button 
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-1"
+          onClick={handleOpenFullChat}
+        >
+          <MessageCircle className="h-4 w-4" />
+          Open Full Chat
         </Button>
         
         <ChatDrawer 
@@ -88,7 +125,7 @@ const ApplicationActionButtons = ({
           isOpen={isDrawerOpen} 
           onOpenChange={setIsDrawerOpen}
         />
-      </>
+      </div>
     );
   }
   
