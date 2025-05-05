@@ -28,9 +28,9 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
         <div className="p-6 border rounded-lg flex items-center">
           <Users className="h-10 w-10 text-green-500 mr-4" />
           <div>
-            <p className="text-sm text-muted-foreground">Core Demographic</p>
+            <p className="text-sm text-muted-foreground">Total Member Count</p>
             <p className="text-3xl font-semibold">
-              {demographics.core_demographic || "Not specified"}
+              {profile.member_count ? `${profile.member_count} members` : "Not specified"}
             </p>
           </div>
         </div>

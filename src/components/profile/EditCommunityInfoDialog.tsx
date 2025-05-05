@@ -8,6 +8,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RunClubProfile } from "@/types";
@@ -33,6 +40,7 @@ export function EditCommunityInfoDialog({
   const initialEventExperience = Array.isArray(demographics.event_experience) ? demographics.event_experience : [];
   
   const [formData, setFormData] = useState({
+    member_count: profile.member_count || 0,
     average_group_size: demographics.average_group_size || "",
     core_demographic: demographics.core_demographic || "",
   });
@@ -43,12 +51,13 @@ export function EditCommunityInfoDialog({
 
   const availableRunTypes = ["Road", "Trail", "Track", "Urban"];
   const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
+  const groupSizeRanges = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "member_count" ? parseInt(value) || 0 : value,
     }));
   };
 
@@ -68,10 +77,18 @@ export function EditCommunityInfoDialog({
     );
   };
 
+  const handleGroupSizeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      average_group_size: value,
+    }));
+  };
+
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
       await onSave({
+        member_count: formData.member_count,
         community_data: {
           run_types: runTypes,
           demographics: {
@@ -98,14 +115,35 @@ export function EditCommunityInfoDialog({
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="average_group_size">Average Group Size</Label>
+            <Label htmlFor="member_count">Total Member Count</Label>
             <Input
-              id="average_group_size"
-              name="average_group_size"
-              value={formData.average_group_size}
+              id="member_count"
+              name="member_count"
+              type="number"
+              value={formData.member_count}
               onChange={handleChange}
-              placeholder="e.g., 25 runners"
+              min="0"
+              placeholder="Enter total number of members"
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="average_group_size">Average Group Size</Label>
+            <Select
+              value={formData.average_group_size}
+              onValueChange={handleGroupSizeChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select average group size range" />
+              </SelectTrigger>
+              <SelectContent>
+                {groupSizeRanges.map((range) => (
+                  <SelectItem key={range} value={range}>
+                    {range}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">

@@ -33,7 +33,6 @@ export function EditBasicInfoDialog({
     club_name: profile.club_name || "",
     description: profile.description || "",
     location: profile.location || "",
-    member_count: profile.member_count || 0,
     website: profile.website || "",
     logo_url: profile.logo_url || "",
   });
@@ -43,7 +42,7 @@ export function EditBasicInfoDialog({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "member_count" ? parseInt(value) || 0 : value,
+      [name]: value,
     }));
   };
 
@@ -101,18 +100,6 @@ export function EditBasicInfoDialog({
               value={formData.location}
               onChange={handleChange}
               placeholder="City, State"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="member_count">Number of Members</Label>
-            <Input
-              id="member_count"
-              name="member_count"
-              type="number"
-              value={formData.member_count}
-              onChange={handleChange}
-              min="0"
             />
           </div>
           
