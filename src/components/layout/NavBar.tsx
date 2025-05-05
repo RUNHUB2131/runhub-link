@@ -8,8 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import NotificationsDropdown from "@/components/notifications/NotificationsDropdown";
 import ChatIndicator from "@/components/chat/ChatIndicator";
 
-const NavBar = () => {
-  const { user, userType, signOut } = useAuth();
+export const NavBar = () => {
+  const { user, userType, logout } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
@@ -58,10 +58,10 @@ const NavBar = () => {
 };
 
 const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
-  const { user, userType, signOut } = useAuth();
+  const { user, userType, logout } = useAuth();
   
   const handleSignOut = () => {
-    signOut();
+    logout();
     closeSheet();
   };
   
