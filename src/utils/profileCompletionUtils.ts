@@ -13,8 +13,8 @@ export const isProfileComplete = (profile: Partial<RunClubProfile>): boolean => 
     !!profile.state,
     !!profile.description,
     profile.member_count !== undefined && profile.member_count > 0,
-    profile.average_group_size !== undefined && profile.average_group_size > 0,
-    !!profile.core_demographic
+    !!profile.core_demographic,
+    !!profile.average_group_size
   ];
   
   // Social media - medium enforcement - at least one platform should be added
@@ -44,7 +44,7 @@ export const getMissingProfileFields = (profile: Partial<RunClubProfile>): strin
   if (!profile.state) missingFields.push("State");
   if (!profile.description) missingFields.push("Description");
   if (!profile.member_count || profile.member_count <= 0) missingFields.push("Member Count");
-  if (!profile.average_group_size || profile.average_group_size <= 0) missingFields.push("Average Group Size");
+  if (!profile.average_group_size) missingFields.push("Average Group Size");
   if (!profile.core_demographic) missingFields.push("Core Demographic");
   
   // Check if at least one social media platform is added

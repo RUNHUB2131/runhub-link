@@ -33,7 +33,7 @@ export function DemographicSelections({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="member_count">Total Member Count</Label>
+        <Label htmlFor="member_count">Total Member Count*</Label>
         <Input
           id="member_count"
           name="member_count"
@@ -42,14 +42,16 @@ export function DemographicSelections({
           onChange={onMemberCountChange}
           min="0"
           placeholder="Enter total number of members"
+          required
         />
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="average_group_size">Average Group Size</Label>
+        <Label htmlFor="average_group_size">Average Group Size*</Label>
         <Select
           value={averageGroupSize}
           onValueChange={onGroupSizeChange}
+          required
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select average group size range" />
@@ -65,10 +67,11 @@ export function DemographicSelections({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="core_demographic">Core Demographic (Age)</Label>
+        <Label htmlFor="core_demographic">Core Demographic (Age)*</Label>
         <Select
           value={coreDemographic}
           onValueChange={onDemographicChange}
+          required
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select core demographic age range" />

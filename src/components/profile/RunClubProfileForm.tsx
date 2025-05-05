@@ -29,6 +29,10 @@ const AUSTRALIAN_STATES = [
   { value: "WA", label: "WA" },
 ];
 
+// Community info constants
+const GROUP_SIZE_RANGES = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
+const DEMOGRAPHIC_RANGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+
 interface RunClubProfileFormProps {
   initialData?: Partial<RunClubProfile>;
   onSave?: (profile: Partial<RunClubProfile>) => Promise<void>;
@@ -43,12 +47,15 @@ export const RunClubProfileForm = ({
     description: initialData.description || "",
     city: initialData.city || "",
     state: initialData.state || "",
+    website: initialData.website || "",
+    logo_url: initialData.logo_url || "",
+    
+    // Community info fields
     member_count: initialData.member_count || 0,
     average_group_size: initialData.average_group_size || 0,
     core_demographic: initialData.core_demographic || "",
-    website: initialData.website || "",
-    logo_url: initialData.logo_url || "",
   });
+  
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,7 +65,7 @@ export const RunClubProfileForm = ({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "member_count" || name === "average_group_size" ? parseInt(value) || 0 : value,
+      [name]: name === "member_count" ? parseInt(value) || 0 : value,
     }));
   };
 
@@ -66,6 +73,20 @@ export const RunClubProfileForm = ({
     setFormData(prev => ({
       ...prev,
       state: value
+    }));
+  };
+
+  const handleCoreDemographicChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      core_demographic: value
+    }));
+  };
+
+  const handleAverageGroupSizeChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      average_group_size: parseInt(value) || 0
     }));
   };
 
@@ -171,47 +192,7 @@ export const RunClubProfileForm = ({
               </Select>
             </div>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="member_count">Total Member Count*</Label>
-              <Input
-                id="member_count"
-                name="member_count"
-                type="number"
-                value={formData.member_count}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="average_group_size">Average Group Size*</Label>
-              <Input
-                id="average_group_size"
-                name="average_group_size"
-                type="number"
-                value={formData.average_group_size}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="core_demographic">Core Demographic*</Label>
-            <Input
-              id="core_demographic"
-              name="core_demographic"
-              value={formData.core_demographic}
-              onChange={handleChange}
-              placeholder="E.g., Women 25-40, Mixed beginners, etc."
-              required
-            />
-          </div>
-          
           <div className="space-y-2">
             <Label htmlFor="description">Description*</Label>
             <Textarea
@@ -246,6 +227,63 @@ export const RunClubProfileForm = ({
               onChange={handleChange}
               placeholder="https://"
             />
+          </div>
+
+          <div className="border-t pt-6 mt-8">
+            <h3 className="text-lg font-semibold mb-4">Community Information</h3>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="member_count">Total Member Count*</Label>
+                <Input
+                  id="member_count"
+                  name="member_count"
+                  type="number"
+                  value={formData.member_count}
+                  onChange={handleChange}
+                  min="0"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="average_group_size">Average Group Size*</Label>
+                <Select
+                  value={formData.average_group_size.toString()}
+                  onValueChange={handleAverageGroupSizeChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select average group size range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GROUP_SIZE_RANGES.map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="core_demographic">Core Demographic*</Label>
+                <Select
+                  value={formData.core_demographic}
+                  onValueChange={handleCoreDemographicChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select core demographic age range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEMOGRAPHIC_RANGES.map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
           
           <Button 

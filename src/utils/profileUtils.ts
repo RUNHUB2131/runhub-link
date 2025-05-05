@@ -150,11 +150,17 @@ export const saveRunClubSocialMedia = async (userId: string, socialMediaData: Pa
 };
 
 export const saveRunClubCommunityInfo = async (userId: string, communityData: Partial<RunClubProfile>) => {
+  // Create an update object with all community related fields
+  const updateData = {
+    member_count: communityData.member_count,
+    average_group_size: communityData.average_group_size,
+    core_demographic: communityData.core_demographic,
+    community_data: communityData.community_data
+  };
+
   const { error } = await supabase
     .from('run_club_profiles')
-    .update({
-      community_data: communityData.community_data
-    })
+    .update(updateData)
     .eq('id', userId);
   
   if (error) throw error;

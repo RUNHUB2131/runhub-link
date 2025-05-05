@@ -54,9 +54,6 @@ export function EditBasicInfoDialog({
     state: profile.state || "",
     website: profile.website || "",
     logo_url: profile.logo_url || "",
-    member_count: profile.member_count || 0,
-    average_group_size: profile.average_group_size || 0,
-    core_demographic: profile.core_demographic || "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,7 +61,7 @@ export function EditBasicInfoDialog({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name.includes('_count') || name.includes('_size') ? Number(value) || 0 : value,
+      [name]: value,
     }));
   };
 
@@ -114,9 +111,6 @@ export function EditBasicInfoDialog({
         state: profile.state || "",
         website: profile.website || "",
         logo_url: profile.logo_url || "",
-        member_count: profile.member_count || 0,
-        average_group_size: profile.average_group_size || 0,
-        core_demographic: profile.core_demographic || "",
       });
     }
   }, [profile, open]);
@@ -180,46 +174,6 @@ export function EditBasicInfoDialog({
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="member_count">Total Member Count*</Label>
-              <Input
-                id="member_count"
-                name="member_count"
-                type="number"
-                value={formData.member_count}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="average_group_size">Average Group Size*</Label>
-              <Input
-                id="average_group_size"
-                name="average_group_size"
-                type="number"
-                value={formData.average_group_size}
-                onChange={handleChange}
-                min="0"
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="core_demographic">Core Demographic*</Label>
-            <Input
-              id="core_demographic"
-              name="core_demographic"
-              value={formData.core_demographic}
-              onChange={handleChange}
-              placeholder="E.g., Women 25-40, Mixed beginners, etc."
-              required
-            />
           </div>
           
           <div className="space-y-2">

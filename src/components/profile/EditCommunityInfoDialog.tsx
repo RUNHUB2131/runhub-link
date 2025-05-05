@@ -40,12 +40,12 @@ export function EditCommunityInfoDialog({
     
     await onSave({
       member_count,
+      average_group_size,
+      core_demographic,
       community_data: {
         run_types: runTypes,
         demographics: {
           ...demographics,
-          average_group_size,
-          core_demographic,
           event_experience: eventExperience,
         },
       },
