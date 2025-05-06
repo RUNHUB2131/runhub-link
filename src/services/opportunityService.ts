@@ -41,7 +41,7 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
       .from('opportunities')
       .select(`
         *,
-        brand:brand_profiles!inner (
+        brand:brand_profiles (
           company_name, 
           logo_url
         )
@@ -92,13 +92,12 @@ export const fetchBrowseOpportunities = async () => {
   try {
     console.log("Fetching browse opportunities with brands");
     
-    // Use a JOIN query to get both opportunity and brand data in one request
-    // Use !inner join to ensure we only get opportunities with valid brand data
+    // Modified: Use LEFT JOIN instead of INNER JOIN to get all opportunities, even those with missing brand data
     const { data, error } = await supabase
       .from('opportunities')
       .select(`
         *,
-        brand:brand_profiles!inner (
+        brand:brand_profiles (
           company_name,
           logo_url
         )
