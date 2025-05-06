@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,13 +44,16 @@ export const useOpportunityDetails = (opportunityId: string) => {
     
     setIsLoading(true);
     try {
-      // Use the new function to fetch opportunity with brand info
+      console.log("Fetching opportunity details for ID:", opportunityId);
+      // Use the improved function to fetch opportunity with brand info
       const completeOpportunity = await fetchOpportunityWithBrand(opportunityId);
       
       if (!completeOpportunity) {
+        console.error("Failed to fetch opportunity with ID:", opportunityId);
         throw new Error("Failed to fetch opportunity");
       }
       
+      console.log("Fetched complete opportunity:", completeOpportunity);
       setOpportunity(completeOpportunity);
       
       // For run clubs, check if they've already applied

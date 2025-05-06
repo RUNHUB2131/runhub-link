@@ -46,72 +46,82 @@ export const fetchOpportunities = async (userId: string) => {
   return opportunitiesWithCounts;
 };
 
-// Add this new function to fetch opportunities with brand information
+// Improved function to fetch opportunity with brand information
 export const fetchOpportunityWithBrand = async (opportunityId: string) => {
   try {
-    // First, fetch the opportunity
+    console.log("Fetching opportunity with ID:", opportunityId);
+    
+    // Use a join to fetch the opportunity and brand data in a single query
     const { data: opportunityData, error: opportunityError } = await supabase
       .from('opportunities')
-      .select('*')
+      .select(`
+        *,
+        brand:brand_id (
+          company_name,
+          logo_url
+        )
+      `)
       .eq('id', opportunityId)
       .single();
     
-    if (opportunityError) throw opportunityError;
-    
-    // Then fetch the brand information
-    const { data: brandData, error: brandError } = await supabase
-      .from('brand_profiles')
-      .select('company_name, logo_url')
-      .eq('id', opportunityData.brand_id)
-      .single();
-    
-    if (brandError) {
-      console.error("Error fetching brand information:", brandError);
-      // Return the opportunity without brand info rather than failing completely
-      return opportunityData;
+    if (opportunityError) {
+      console.error("Error fetching opportunity with brand:", opportunityError);
+      throw opportunityError;
     }
     
-    // Combine the data
-    return {
-      ...opportunityData,
-      brand: brandData
-    };
+    console.log("Fetched opportunity with brand:", opportunityData);
+    
+    // Ensure we have a valid brand object even if some data is missing
+    if (!opportunityData.brand) {
+      opportunityData.brand = {
+        company_name: "Unknown Brand",
+        logo_url: undefined
+      };
+    }
+    
+    return opportunityData;
   } catch (error) {
-    console.error("Error fetching opportunity with brand:", error);
+    console.error("Error in fetchOpportunityWithBrand:", error);
     return null;
   }
 };
 
-// Add this function to fetch opportunities for browsing (with brand information)
+// Improved function to fetch opportunities for browsing (with brand information)
 export const fetchBrowseOpportunities = async () => {
   try {
-    // First fetch all opportunities
+    console.log("Fetching browse opportunities with brands");
+    
+    // Use a join to fetch all opportunities with their brand information in a single query
     const { data: opportunitiesData, error: opportunitiesError } = await supabase
       .from('opportunities')
-      .select('*')
+      .select(`
+        *,
+        brand:brand_id (
+          company_name,
+          logo_url
+        )
+      `)
       .order('created_at', { ascending: false });
     
-    if (opportunitiesError) throw opportunitiesError;
+    if (opportunitiesError) {
+      console.error("Error fetching browse opportunities:", opportunitiesError);
+      throw opportunitiesError;
+    }
     
-    // Then fetch brand information for each opportunity
-    const opportunitiesWithBrands = await Promise.all(
-      (opportunitiesData || []).map(async (opp) => {
-        const { data: brandData, error: brandError } = await supabase
-          .from('brand_profiles')
-          .select('company_name, logo_url')
-          .eq('id', opp.brand_id)
-          .single();
-        
-        return {
-          ...opp,
-          brand: brandError ? null : brandData
-        };
-      })
-    );
+    console.log("Fetched opportunities with brands:", opportunitiesData);
+    
+    // Ensure each opportunity has a valid brand object even if data is missing
+    const opportunitiesWithBrands = opportunitiesData.map(opp => ({
+      ...opp,
+      brand: opp.brand || {
+        company_name: "Unknown Brand",
+        logo_url: undefined
+      }
+    }));
     
     return opportunitiesWithBrands;
   } catch (error) {
-    console.error("Error fetching browse opportunities:", error);
+    console.error("Error in fetchBrowseOpportunities:", error);
     return [];
   }
 };

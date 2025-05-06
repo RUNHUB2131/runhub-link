@@ -12,9 +12,14 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   
   // Debug logging
   console.log("Brand info in OpportunityBrandInfo:", opportunity.brand);
+  console.log("Complete opportunity object:", opportunity);
   
-  // Check if brand information exists
-  if (!opportunity.brand) {
+  // Fallback for missing brand data
+  const brandName = opportunity.brand?.company_name || "Unknown Brand";
+  const brandLogo = opportunity.brand?.logo_url;
+  const brandId = opportunity.brand_id;
+  
+  if (!brandId) {
     return (
       <div className="text-sm text-muted-foreground mt-2">
         Brand information unavailable
@@ -25,11 +30,11 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   return (
     <>
       <div className="flex items-center mt-2">
-        {opportunity.brand?.logo_url ? (
+        {brandLogo ? (
           <div className="w-6 h-6 rounded overflow-hidden mr-2 bg-gray-100">
             <img 
-              src={opportunity.brand.logo_url} 
-              alt={opportunity.brand.company_name || "Brand logo"}
+              src={brandLogo} 
+              alt={brandName + " logo"}
               className="w-full h-full object-contain"
               onError={(e) => {
                 console.log("Failed to load brand logo");
@@ -39,7 +44,7 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
           </div>
         ) : (
           <div className="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center mr-2">
-            {(opportunity.brand?.company_name?.[0] || "B").toUpperCase()}
+            {(brandName[0] || "B").toUpperCase()}
           </div>
         )}
         <button 
@@ -49,12 +54,12 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
           }}
           className="text-sm font-medium text-gray-600 hover:text-primary hover:underline"
         >
-          {opportunity.brand?.company_name || "Unknown Brand"}
+          {brandName}
         </button>
       </div>
       
       <BrandProfileDialog 
-        brandId={opportunity.brand_id} 
+        brandId={brandId} 
         isOpen={showBrandProfile} 
         onOpenChange={setShowBrandProfile} 
       />
