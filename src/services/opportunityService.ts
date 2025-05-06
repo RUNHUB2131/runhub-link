@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Opportunity } from "@/types";
@@ -42,7 +41,7 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
       .from('opportunities')
       .select(`
         *,
-        brand:brand_profiles (
+        brand:brand_profiles!inner (
           company_name, 
           logo_url
         )
@@ -61,7 +60,6 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
     }
     
     // Check if brand data exists and has the expected structure
-    // If brand is an error object or doesn't exist, provide fallback values
     const brandData = data.brand !== null && 
       typeof data.brand === 'object' && 
       data.brand ? 
@@ -95,11 +93,12 @@ export const fetchBrowseOpportunities = async () => {
     console.log("Fetching browse opportunities with brands");
     
     // Use a JOIN query to get both opportunity and brand data in one request
+    // Use !inner join to ensure we only get opportunities with valid brand data
     const { data, error } = await supabase
       .from('opportunities')
       .select(`
         *,
-        brand:brand_profiles (
+        brand:brand_profiles!inner (
           company_name,
           logo_url
         )
@@ -119,7 +118,6 @@ export const fetchBrowseOpportunities = async () => {
     // Transform the data to match the expected Opportunity type
     const opportunitiesWithBrands: Opportunity[] = data.map(opp => {
       // Check if brand data exists and has the expected structure
-      // If brand is an error object or doesn't exist, provide fallback values
       const brandData = opp.brand !== null && 
         typeof opp.brand === 'object' && 
         opp.brand ? 

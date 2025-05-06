@@ -25,7 +25,7 @@ export const fetchChatById = async (chatId: string) => {
         .single()
         .then(res => res.data),
       
-      // Get brand profile info
+      // Get brand profile info - make sure to fetch this regardless of user type
       supabase
         .from('brand_profiles')
         .select('company_name, logo_url')
@@ -33,7 +33,7 @@ export const fetchChatById = async (chatId: string) => {
         .single()
         .then(res => res.data),
       
-      // Get run club profile info
+      // Get run club profile info - make sure to fetch this regardless of user type
       supabase
         .from('run_club_profiles')
         .select('club_name, logo_url')
@@ -50,6 +50,7 @@ export const fetchChatById = async (chatId: string) => {
       run_club_profile: runClubData
     };
     
+    console.log("Fetched chat with all profiles:", enrichedChat);
     return enrichedChat;
   } catch (error: any) {
     console.error("Error fetching chat details:", error);

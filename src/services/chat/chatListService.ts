@@ -27,14 +27,14 @@ export const fetchChats = async (userId: string, userType: 'brand' | 'run_club')
           .eq('id', chat.opportunity_id)
           .single();
         
-        // Get brand profile info
+        // Get brand profile info - always fetch this regardless of user type
         const { data: brandData } = await supabase
           .from('brand_profiles')
           .select('company_name, logo_url')
           .eq('id', chat.brand_id)
           .single();
         
-        // Get run club profile info
+        // Get run club profile info - always fetch this regardless of user type
         const { data: runClubData } = await supabase
           .from('run_club_profiles')
           .select('club_name, logo_url')
