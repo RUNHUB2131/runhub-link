@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
-import { fetchOpportunities, Opportunity } from "@/services/opportunityService";
+import { fetchOpportunities } from "@/services/opportunityService";
+import { Opportunity } from "@/types"; // Import from types instead of service
 import OpportunityCard from "@/components/opportunities/OpportunityCard";
 import EmptyOpportunities from "@/components/opportunities/EmptyOpportunities";
 import OpportunitiesLoading from "@/components/opportunities/OpportunitiesLoading";
