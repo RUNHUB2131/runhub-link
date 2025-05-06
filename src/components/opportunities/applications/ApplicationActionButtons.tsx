@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-import { checkChatExistsForApplication } from "@/services/chatService";
+import { checkChatExistsForApplication } from "@/services/chat";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,

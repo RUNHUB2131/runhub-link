@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
 import { Application, RunClubProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { checkChatExistsForApplication } from "@/services/chatService";
+import { checkChatExistsForApplication } from "@/services/chat";
 
 interface OpportunityActionButtonProps {
   userType: 'run_club' | 'brand' | undefined;

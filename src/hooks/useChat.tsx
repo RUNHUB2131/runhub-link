@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,8 +7,9 @@ import {
   sendMessage, 
   fetchChatById,
   Chat,
-  ChatMessage
-} from "@/services/chatService";
+  ChatMessage,
+  fetchChats
+} from "@/services/chat";
 
 export const useChat = (chatId: string) => {
   const { user, userType } = useAuth();
