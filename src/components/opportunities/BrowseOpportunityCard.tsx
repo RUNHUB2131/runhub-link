@@ -43,9 +43,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
     navigate('/profile');
   };
 
-  // Debug logging to verify brand information is available
   console.log("Rendering opportunity in BrowseOpportunityCard:", opportunity);
-  console.log("Brand info available:", opportunity.brand);
 
   return (
     <>

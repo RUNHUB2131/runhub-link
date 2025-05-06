@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Opportunity, Application, RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
-import { fetchOpportunityWithBrand } from "@/services/opportunityService";
 
 export const useOpportunityDetails = (opportunityId: string) => {
   const { user, userType } = useAuth();
@@ -43,18 +43,31 @@ export const useOpportunityDetails = (opportunityId: string) => {
     
     setIsLoading(true);
     try {
-      console.log("Fetching opportunity details for ID:", opportunityId);
+      // First fetch the opportunity
+      const { data: opportunityData, error: opportunityError } = await supabase
+        .from('opportunities')
+        .select('*')
+        .eq('id', opportunityId)
+        .single();
       
-      // Use the improved function to fetch opportunity with brand info
-      const completeOpportunity = await fetchOpportunityWithBrand(opportunityId);
+      if (opportunityError) throw opportunityError;
       
-      if (!completeOpportunity) {
-        console.error("Failed to fetch opportunity with ID:", opportunityId);
-        throw new Error("Failed to fetch opportunity");
-      }
+      // Then fetch the brand information separately
+      const { data: brandData, error: brandError } = await supabase
+        .from('brand_profiles')
+        .select('company_name, logo_url')
+        .eq('id', opportunityData.brand_id)
+        .maybeSingle();
       
-      console.log("Fetched complete opportunity:", completeOpportunity);
-      console.log("Brand info available:", completeOpportunity.brand);
+      // Combine the data
+      const completeOpportunity: Opportunity = {
+        ...opportunityData,
+        brand: brandError ? null : { 
+          company_name: brandData?.company_name || "Unknown Brand",
+          logo_url: brandData?.logo_url
+        }
+      };
+      
       setOpportunity(completeOpportunity);
       
       // For run clubs, check if they've already applied
@@ -88,87 +101,50 @@ export const useOpportunityDetails = (opportunityId: string) => {
     }
   };
 
-  // const handleApply = async () => {
-  //   if (!user || !opportunity) return false;
+  const handleApply = async () => {
+    if (!user || !opportunity) return;
     
-  //   try {
-  //     const { error } = await supabase
-  //       .from('applications')
-  //       .insert({
-  //         opportunity_id: opportunity.id,
-  //         run_club_id: user.id,
-  //         status: 'pending'
-  //       });
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .insert({
+          opportunity_id: opportunity.id,
+          run_club_id: user.id,
+          status: 'pending'
+        });
       
-  //     if (error) throw error;
+      if (error) throw error;
       
-  //     toast({
-  //       title: "Application submitted",
-  //       description: "Your application has been successfully submitted",
-  //     });
+      toast({
+        title: "Application submitted",
+        description: "Your application has been successfully submitted",
+      });
       
-  //     setApplication({
-  //       id: 'new', // Placeholder ID until we refresh
-  //       opportunity_id: opportunity.id,
-  //       run_club_id: user.id,
-  //       status: 'pending',
-  //       created_at: new Date().toISOString()
-  //     });
+      setApplication({
+        id: 'new', // Placeholder ID until we refresh
+        opportunity_id: opportunity.id,
+        run_club_id: user.id,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
       
-  //     return true;
-  //   } catch (error: any) {
-  //     console.error("Error applying to opportunity:", error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to submit application. Please try again.",
-  //       variant: "destructive",
-  //     });
-  //     return false;
-  //   }
-  // };
+      return true;
+    } catch (error: any) {
+      console.error("Error applying to opportunity:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
 
   return {
     opportunity,
     application,
     isLoading,
     runClubProfile,
-    handleApply: async () => {
-      if (!user || !opportunity) return false;
-      
-      try {
-        const { error } = await supabase
-          .from('applications')
-          .insert({
-            opportunity_id: opportunity.id,
-            run_club_id: user.id,
-            status: 'pending'
-          });
-        
-        if (error) throw error;
-        
-        toast({
-          title: "Application submitted",
-          description: "Your application has been successfully submitted",
-        });
-        
-        setApplication({
-          id: 'new', // Placeholder ID until we refresh
-          opportunity_id: opportunity.id,
-          run_club_id: user.id,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        });
-        
-        return true;
-      } catch (error: any) {
-        console.error("Error applying to opportunity:", error);
-        toast({
-          title: "Error",
-          description: "Failed to submit application. Please try again.",
-          variant: "destructive",
-        });
-        return false;
-      }
-    },
+    handleApply,
   };
 };

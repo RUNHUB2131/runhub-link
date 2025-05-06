@@ -1,6 +1,17 @@
+
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Opportunity } from "@/types";
+
+export interface Opportunity {
+  id: string;
+  title: string;
+  description: string;
+  reward: string;
+  deadline: string | null;
+  duration: string | null;
+  created_at: string;
+  applications_count?: number;
+}
 
 export const fetchOpportunities = async (userId: string) => {
   // Fetch opportunities created by this brand
@@ -22,129 +33,10 @@ export const fetchOpportunities = async (userId: string) => {
       
       return {
         ...opp,
-        applications_count: count || 0,
-        requirements: opp.requirements || null, // Ensure requirements is included even if null
-      } as Opportunity;
+        applications_count: count || 0
+      };
     })
   );
   
   return opportunitiesWithCounts;
-};
-
-// Improved function to fetch opportunity with brand information
-export const fetchOpportunityWithBrand = async (opportunityId: string) => {
-  try {
-    console.log("Fetching opportunity with ID:", opportunityId);
-    
-    // Use a JOIN query to get both opportunity and brand data in one request
-    const { data, error } = await supabase
-      .from('opportunities')
-      .select(`
-        *,
-        brand:brand_profiles (
-          company_name, 
-          logo_url
-        )
-      `)
-      .eq('id', opportunityId)
-      .single();
-    
-    if (error) {
-      console.error("Error fetching opportunity with brand:", error);
-      throw error;
-    }
-    
-    if (!data) {
-      console.error("No opportunity found with ID:", opportunityId);
-      return null;
-    }
-    
-    // Check if brand data exists and has the expected structure
-    const brandData = data.brand !== null && 
-      typeof data.brand === 'object' && 
-      data.brand ? 
-      {
-        company_name: (data.brand as any).company_name || "Unknown Brand",
-        logo_url: (data.brand as any).logo_url
-      } : 
-      {
-        company_name: "Unknown Brand",
-        logo_url: undefined
-      };
-    
-    // Ensure proper structure and handle missing brand data
-    const completeOpportunity: Opportunity = {
-      ...data,
-      requirements: data.requirements || null, // Ensure requirements exists
-      brand: brandData
-    };
-    
-    console.log("Fetched complete opportunity with brand:", completeOpportunity);
-    return completeOpportunity;
-  } catch (error) {
-    console.error("Error in fetchOpportunityWithBrand:", error);
-    return null;
-  }
-};
-
-// Improved function to fetch opportunities for browsing (with brand information)
-export const fetchBrowseOpportunities = async () => {
-  try {
-    console.log("Fetching browse opportunities with brands");
-    
-    // Modified: Use LEFT JOIN instead of INNER JOIN to get all opportunities, even those with missing brand data
-    const { data, error } = await supabase
-      .from('opportunities')
-      .select(`
-        *,
-        brand:brand_profiles (
-          company_name,
-          logo_url
-        )
-      `)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error("Error fetching opportunities with brands:", error);
-      throw error;
-    }
-    
-    if (!data || data.length === 0) {
-      console.log("No opportunities found");
-      return [];
-    }
-    
-    // Transform the data to match the expected Opportunity type
-    const opportunitiesWithBrands: Opportunity[] = data.map(opp => {
-      // Check if brand data exists and has the expected structure
-      const brandData = opp.brand !== null && 
-        typeof opp.brand === 'object' && 
-        opp.brand ? 
-        {
-          company_name: (opp.brand as any).company_name || "Unknown Brand",
-          logo_url: (opp.brand as any).logo_url
-        } : 
-        {
-          company_name: "Unknown Brand",
-          logo_url: undefined
-        };
-      
-      return {
-        ...opp,
-        requirements: opp.requirements || null, // Ensure requirements exists
-        brand: brandData
-      };
-    });
-    
-    console.log("Processed opportunities with brands:", opportunitiesWithBrands.length);
-    // Debug log the first item to verify structure
-    if (opportunitiesWithBrands.length > 0) {
-      console.log("Sample opportunity with brand:", opportunitiesWithBrands[0]);
-    }
-    
-    return opportunitiesWithBrands;
-  } catch (error) {
-    console.error("Error in fetchBrowseOpportunities:", error);
-    return [];
-  }
 };
