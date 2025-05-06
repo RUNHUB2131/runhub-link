@@ -26,6 +26,10 @@ const OpportunityDetailsHeader = ({
   setShowApplications,
   runClubProfile
 }: OpportunityDetailsHeaderProps) => {
+  // Log the opportunity to debug
+  console.log("Opportunity in header:", opportunity);
+  console.log("Brand information:", opportunity.brand);
+  
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>

@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Opportunity, Application, RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { fetchOpportunityWithBrand } from "@/services/opportunityService";
 
 export const useOpportunityDetails = (opportunityId: string) => {
   const { user, userType } = useAuth();
@@ -43,30 +43,12 @@ export const useOpportunityDetails = (opportunityId: string) => {
     
     setIsLoading(true);
     try {
-      // First fetch the opportunity
-      const { data: opportunityData, error: opportunityError } = await supabase
-        .from('opportunities')
-        .select('*')
-        .eq('id', opportunityId)
-        .single();
+      // Use the new function to fetch opportunity with brand info
+      const completeOpportunity = await fetchOpportunityWithBrand(opportunityId);
       
-      if (opportunityError) throw opportunityError;
-      
-      // Then fetch the brand information separately
-      const { data: brandData, error: brandError } = await supabase
-        .from('brand_profiles')
-        .select('company_name, logo_url')
-        .eq('id', opportunityData.brand_id)
-        .maybeSingle();
-      
-      // Combine the data
-      const completeOpportunity: Opportunity = {
-        ...opportunityData,
-        brand: brandError ? null : { 
-          company_name: brandData?.company_name || "Unknown Brand",
-          logo_url: brandData?.logo_url
-        }
-      };
+      if (!completeOpportunity) {
+        throw new Error("Failed to fetch opportunity");
+      }
       
       setOpportunity(completeOpportunity);
       

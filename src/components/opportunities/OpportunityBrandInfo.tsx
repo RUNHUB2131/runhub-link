@@ -10,7 +10,17 @@ interface OpportunityBrandInfoProps {
 const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   const [showBrandProfile, setShowBrandProfile] = useState(false);
   
+  // Debug logging
   console.log("Brand info in OpportunityBrandInfo:", opportunity.brand);
+  
+  // Check if brand information exists
+  if (!opportunity.brand) {
+    return (
+      <div className="text-sm text-muted-foreground mt-2">
+        Brand information unavailable
+      </div>
+    );
+  }
   
   return (
     <>
