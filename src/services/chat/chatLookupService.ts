@@ -18,3 +18,21 @@ export const findChatByApplicationId = async (applicationId: string) => {
     return null;
   }
 };
+
+// Mark all messages in a chat as read for a specific user
+export const markChatMessagesAsRead = async (chatId: string, userId: string) => {
+  try {
+    const { error } = await supabase
+      .from('chat_messages')
+      .update({ read: true })
+      .eq('chat_id', chatId)
+      .not('sender_id', 'eq', userId);
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error("Error marking chat messages as read:", error);
+    return false;
+  }
+};

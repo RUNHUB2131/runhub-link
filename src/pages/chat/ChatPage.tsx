@@ -16,7 +16,7 @@ const ChatPage = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const navigate = useNavigate();
   const { userType, user } = useAuth();
-  const { chats, isLoading: isLoadingChats } = useChatList();
+  const { chats, isLoading: isLoadingChats, refreshChats } = useChatList();
   const {
     chat,
     messages,
@@ -25,36 +25,48 @@ const ChatPage = () => {
     sendMessage
   } = useChat(chatId || '');
   
-  // Mark chat-related notifications as read when viewing a chat
+  // Mark messages as read when viewing a chat
   useEffect(() => {
-    if (user?.id && chatId && chat?.application_id) {
-      const markChatNotificationsAsRead = async () => {
+    if (user?.id && chatId) {
+      const markMessagesAsRead = async () => {
         try {
-          // Find chat notifications
-          const { data: notifications } = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('type', 'new_chat')
-            .eq('related_id', chat.application_id)
-            .eq('read', false);
+          // Mark all messages in this chat as read
+          await supabase
+            .from('chat_messages')
+            .update({ read: true })
+            .eq('chat_id', chatId)
+            .not('sender_id', 'eq', user.id);
           
-          if (notifications && notifications.length > 0) {
-            // Mark notifications as read
-            const notificationIds = notifications.map(notif => notif.id);
-            await supabase
+          // Refresh the chat list to update unread indicators
+          refreshChats();
+          
+          // Mark chat-related notifications as read
+          if (chat?.application_id) {
+            const { data: notifications } = await supabase
               .from('notifications')
-              .update({ read: true })
-              .in('id', notificationIds);
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('type', 'new_chat')
+              .eq('related_id', chat.application_id)
+              .eq('read', false);
+            
+            if (notifications && notifications.length > 0) {
+              // Mark notifications as read
+              const notificationIds = notifications.map(notif => notif.id);
+              await supabase
+                .from('notifications')
+                .update({ read: true })
+                .in('id', notificationIds);
+            }
           }
         } catch (error) {
-          console.error("Error marking chat notifications as read:", error);
+          console.error("Error marking messages as read:", error);
         }
       };
       
-      markChatNotificationsAsRead();
+      markMessagesAsRead();
     }
-  }, [chatId, user?.id, chat?.application_id]);
+  }, [chatId, user?.id, chat?.application_id, refreshChats]);
   
   const handleChatSelect = (id: string) => {
     navigate(`/chat/${id}`);

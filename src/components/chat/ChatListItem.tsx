@@ -47,29 +47,45 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
 
   // Handler for clicking on a chat
   const handleChatClick = async () => {
-    // Clear notification indicators
-    if (user?.id && chat.unread_count && chat.unread_count > 0) {
-      try {
-        // Get notifications related to this chat
-        const { data: notifications } = await supabase
-          .from('notifications')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('type', 'new_chat')
-          .eq('related_id', chat.application_id)
-          .eq('read', false);
-        
-        if (notifications && notifications.length > 0) {
-          // Mark notifications as read
-          const notificationIds = notifications.map(notif => notif.id);
-          await supabase
+    if (!user?.id || !chat.id) {
+      onClick();
+      return;
+    }
+    
+    try {
+      // Mark all messages in this chat as read when clicking on it
+      await supabase
+        .from('chat_messages')
+        .update({ read: true })
+        .eq('chat_id', chat.id)
+        .not('sender_id', 'eq', user.id);
+      
+      // Clear notification indicators
+      if (chat.application_id) {
+        try {
+          // Get notifications related to this chat
+          const { data: notifications } = await supabase
             .from('notifications')
-            .update({ read: true })
-            .in('id', notificationIds);
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('type', 'new_chat')
+            .eq('related_id', chat.application_id)
+            .eq('read', false);
+          
+          if (notifications && notifications.length > 0) {
+            // Mark notifications as read
+            const notificationIds = notifications.map(notif => notif.id);
+            await supabase
+              .from('notifications')
+              .update({ read: true })
+              .in('id', notificationIds);
+          }
+        } catch (error) {
+          console.error("Error marking chat notifications as read:", error);
         }
-      } catch (error) {
-        console.error("Error marking chat notifications as read:", error);
       }
+    } catch (error) {
+      console.error("Error marking chat messages as read:", error);
     }
     
     // Call the original onClick handler

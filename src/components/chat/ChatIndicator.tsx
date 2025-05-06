@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 const ChatIndicator = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
   
   useEffect(() => {
@@ -84,10 +85,34 @@ const ChatIndicator = () => {
       )
       .subscribe();
     
+    // Check if the user is on a chat page and mark messages as read
+    if (location.pathname.includes('/chat/') && user) {
+      const chatId = location.pathname.split('/').pop();
+      if (chatId) {
+        // Mark messages as read
+        const markMessagesAsRead = async () => {
+          try {
+            await supabase
+              .from('chat_messages')
+              .update({ read: true })
+              .eq('chat_id', chatId)
+              .not('sender_id', 'eq', user.id);
+              
+            // Update the unread count
+            fetchUnreadCount();
+          } catch (error) {
+            console.error("Error marking messages as read:", error);
+          }
+        };
+        
+        markMessagesAsRead();
+      }
+    }
+    
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, location.pathname]);
 
   const handleChatClick = () => {
     navigate("/chat");
