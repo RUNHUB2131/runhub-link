@@ -62,9 +62,9 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
     
     // Check if brand data exists and has the expected structure
     // If brand is an error object or doesn't exist, provide fallback values
-    const brandData = data.brand && 
-      // Check if brand is not a SelectQueryError by checking for expected properties
+    const brandData = data.brand !== null && 
       typeof data.brand === 'object' && 
+      data.brand && // Extra null check to satisfy TypeScript
       'company_name' in data.brand 
         ? {
             company_name: data.brand.company_name || "Unknown Brand",
@@ -121,9 +121,9 @@ export const fetchBrowseOpportunities = async () => {
     const opportunitiesWithBrands: Opportunity[] = data.map(opp => {
       // Check if brand data exists and has the expected structure
       // If brand is an error object or doesn't exist, provide fallback values
-      const brandData = opp.brand && 
-        // Check if brand is not a SelectQueryError by checking for expected properties
+      const brandData = opp.brand !== null && 
         typeof opp.brand === 'object' && 
+        opp.brand && // Extra null check to satisfy TypeScript
         'company_name' in opp.brand 
           ? {
               company_name: opp.brand.company_name || "Unknown Brand",
