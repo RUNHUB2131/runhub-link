@@ -1,3 +1,4 @@
+
 import { RunClubProfile, BrandProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -69,9 +70,12 @@ export const saveRunClubSocialMedia = async (profileId: string, data: Partial<Ru
 };
 
 export const saveRunClubCommunityInfo = async (profileId: string, data: Partial<RunClubProfile>) => {
+  console.log("Saving community info with member count:", data.member_count);
+  
   const { error } = await supabase
     .from('run_club_profiles')
     .update({
+      member_count: data.member_count,
       community_data: data.community_data,
     })
     .eq('id', profileId);

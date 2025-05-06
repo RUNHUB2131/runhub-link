@@ -1,4 +1,6 @@
 
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +8,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { RunClubProfile } from "@/types";
 import { CommunityDataForm } from "./community/CommunityDataForm";
 
@@ -23,45 +24,29 @@ export function EditCommunityInfoDialog({
   profile,
   onSave,
 }: EditCommunityInfoDialogProps) {
-  const handleSave = async ({
-    member_count,
-    average_group_size,
-    core_demographic,
-    runTypes,
-    eventExperience,
-  }: {
-    member_count: number;
-    average_group_size: string;
-    core_demographic: string;
-    runTypes: string[];
-    eventExperience: string[];
-  }) => {
-    const demographics = profile.community_data?.demographics || {};
-    
-    await onSave({
-      member_count,
-      community_data: {
-        run_types: runTypes,
-        demographics: {
-          ...demographics,
-          average_group_size,
-          core_demographic,
-          event_experience: eventExperience,
-        },
-      },
-    });
-    
-    onOpenChange(false);
-  };
-
   const { formComponents, handleSubmit, isLoading } = CommunityDataForm({
     profile,
-    onSaveData: handleSave,
+    onSaveData: async (data) => {
+      const communityData = {
+        run_types: data.runTypes,
+        demographics: {
+          average_group_size: data.average_group_size,
+          core_demographic: data.core_demographic,
+          event_experience: data.eventExperience,
+        },
+      };
+      
+      // Include member_count at the top level of the profile object
+      await onSave({
+        member_count: data.member_count,
+        community_data: communityData,
+      });
+    },
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Edit Community Information</DialogTitle>
         </DialogHeader>
