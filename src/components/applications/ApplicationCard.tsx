@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Application } from "@/types";
-import { checkChatExistsForApplication } from "@/services/chatService";
+import { checkChatExistsForApplication } from "@/services/chat";
 import { useToast } from "@/hooks/use-toast";
 import { useChat } from "@/hooks/useChat";
 import {

@@ -1,5 +1,6 @@
+
 import { format } from "date-fns";
-import { Chat } from "@/services/chatService";
+import { Chat } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

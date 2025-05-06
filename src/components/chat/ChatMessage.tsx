@@ -1,7 +1,7 @@
 
 import { format } from "date-fns";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChatMessage as ChatMessageType } from "@/services/chatService";
+import { ChatMessage as ChatMessageType } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 

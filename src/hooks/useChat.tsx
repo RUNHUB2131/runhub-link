@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,8 +115,6 @@ export const useChatList = () => {
     
     setIsLoading(true);
     try {
-      // Import inside callback to avoid circular dependency
-      const { fetchChats } = await import("@/services/chatService");
       const userChats = await fetchChats(user.id, userType as 'brand' | 'run_club');
       setChats(userChats);
     } catch (error) {

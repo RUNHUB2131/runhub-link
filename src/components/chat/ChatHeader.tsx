@@ -1,6 +1,6 @@
 
 import { ArrowLeft, X } from "lucide-react";
-import { Chat } from "@/services/chatService";
+import { Chat } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
