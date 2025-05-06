@@ -60,17 +60,26 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
       return null;
     }
     
+    // Check if brand data exists and has the expected structure
+    // If brand is an error object or doesn't exist, provide fallback values
+    const brandData = data.brand && 
+      // Check if brand is not a SelectQueryError by checking for expected properties
+      typeof data.brand === 'object' && 
+      'company_name' in data.brand 
+        ? {
+            company_name: data.brand.company_name || "Unknown Brand",
+            logo_url: data.brand.logo_url
+          }
+        : {
+            company_name: "Unknown Brand",
+            logo_url: undefined
+          };
+    
     // Ensure proper structure and handle missing brand data
     const completeOpportunity: Opportunity = {
       ...data,
       requirements: data.requirements || null, // Ensure requirements exists
-      brand: data.brand ? {
-        company_name: data.brand.company_name || "Unknown Brand",
-        logo_url: data.brand.logo_url
-      } : {
-        company_name: "Unknown Brand",
-        logo_url: undefined
-      }
+      brand: brandData
     };
     
     console.log("Fetched complete opportunity with brand:", completeOpportunity);
@@ -110,16 +119,25 @@ export const fetchBrowseOpportunities = async () => {
     
     // Transform the data to match the expected Opportunity type
     const opportunitiesWithBrands: Opportunity[] = data.map(opp => {
+      // Check if brand data exists and has the expected structure
+      // If brand is an error object or doesn't exist, provide fallback values
+      const brandData = opp.brand && 
+        // Check if brand is not a SelectQueryError by checking for expected properties
+        typeof opp.brand === 'object' && 
+        'company_name' in opp.brand 
+          ? {
+              company_name: opp.brand.company_name || "Unknown Brand",
+              logo_url: opp.brand.logo_url
+            }
+          : {
+              company_name: "Unknown Brand",
+              logo_url: undefined
+            };
+      
       return {
         ...opp,
         requirements: opp.requirements || null, // Ensure requirements exists
-        brand: opp.brand ? {
-          company_name: opp.brand.company_name || "Unknown Brand",
-          logo_url: opp.brand.logo_url
-        } : {
-          company_name: "Unknown Brand",
-          logo_url: undefined
-        }
+        brand: brandData
       };
     });
     
