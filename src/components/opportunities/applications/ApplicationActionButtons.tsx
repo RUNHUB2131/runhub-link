@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { checkChatExistsForApplication } from "@/services/chatService";
@@ -25,6 +26,7 @@ const ApplicationActionButtons = ({
   status,
   onUpdateStatus
 }: ApplicationActionButtonsProps) => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [chatId, setChatId] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -44,8 +46,8 @@ const ApplicationActionButtons = ({
       const existingChatId = await checkChatExistsForApplication(applicationId);
       
       if (existingChatId) {
-        setChatId(existingChatId);
-        setIsChatOpen(true);
+        // Navigate to the chat page with the chat ID
+        navigate(`/chat/${existingChatId}`);
       } else {
         toast({
           title: "Chat Not Available",
@@ -98,32 +100,6 @@ const ApplicationActionButtons = ({
           <MessageCircle className="h-4 w-4" />
           Chat
         </Button>
-        
-        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-          <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>
-                {chat?.brand_profile?.company_name || chat?.run_club_profile?.club_name || "Chat"}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="flex-1 overflow-hidden flex flex-col">
-              <ChatMessages 
-                messages={messages} 
-                chatParticipants={{
-                  brand: chat?.brand_profile,
-                  runClub: chat?.run_club_profile
-                }} 
-                isLoading={isLoading} 
-              />
-              
-              <ChatMessageInput 
-                onSendMessage={sendMessage} 
-                isSending={isSending} 
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     );
   }

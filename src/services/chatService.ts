@@ -39,24 +39,41 @@ export const fetchChats = async (userId: string, userType: 'brand' | 'run_club')
   try {
     const idField = userType === 'brand' ? 'brand_id' : 'run_club_id';
     
-    // Query chats with additional information
+    // Query chats for the current user first
     const { data, error } = await supabase
       .from('chats')
-      .select(`
-        *,
-        opportunity:opportunities(title),
-        brand_profile:brand_profiles!brand_id(company_name, logo_url),
-        run_club_profile:run_club_profiles!run_club_id(club_name, logo_url)
-      `)
+      .select('*')
       .eq(idField, userId)
       .order('updated_at', { ascending: false });
     
     if (error) throw error;
-
-    // Get unread messages count for each chat
-    const chatsWithUnreadCount = await Promise.all(
+    
+    // Then fetch related data for each chat
+    const enrichedChats = await Promise.all(
       (data || []).map(async (chat) => {
-        const { count, error: countError } = await supabase
+        // Get opportunity info
+        const { data: oppData } = await supabase
+          .from('opportunities')
+          .select('title')
+          .eq('id', chat.opportunity_id)
+          .single();
+        
+        // Get brand profile info
+        const { data: brandData } = await supabase
+          .from('brand_profiles')
+          .select('company_name, logo_url')
+          .eq('id', chat.brand_id)
+          .single();
+        
+        // Get run club profile info
+        const { data: runClubData } = await supabase
+          .from('run_club_profiles')
+          .select('club_name, logo_url')
+          .eq('id', chat.run_club_id)
+          .single();
+        
+        // Get unread count
+        const { count } = await supabase
           .from('chat_messages')
           .select('*', { count: 'exact', head: true })
           .eq('chat_id', chat.id)
@@ -65,13 +82,15 @@ export const fetchChats = async (userId: string, userType: 'brand' | 'run_club')
         
         return {
           ...chat,
+          opportunity: oppData,
+          brand_profile: brandData,
+          run_club_profile: runClubData,
           unread_count: count || 0
         };
       })
     );
     
-    // Type assertion to ensure compatibility
-    return chatsWithUnreadCount as unknown as Chat[];
+    return enrichedChats as Chat[];
   } catch (error: any) {
     console.error("Error fetching chats:", error);
     toast({
