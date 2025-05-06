@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { checkChatExistsForApplication } from "@/services/chatService";
-import ChatDrawer from "@/components/chat/ChatDrawer";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
