@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -13,7 +14,7 @@ interface ChatListItemProps {
 }
 
 const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) => {
-  const { userType } = useAuth();
+  const { userType, user } = useAuth();
   
   // Determine which participant to show (the other party)
   const isBrand = userType === "brand";
@@ -43,6 +44,37 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
     // Otherwise show the date
     return format(date, "MMM d");
   };
+
+  // Handler for clicking on a chat
+  const handleChatClick = async () => {
+    // Clear notification indicators
+    if (user?.id && chat.unread_count && chat.unread_count > 0) {
+      try {
+        // Get notifications related to this chat
+        const { data: notifications } = await supabase
+          .from('notifications')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('type', 'new_chat')
+          .eq('related_id', chat.application_id)
+          .eq('read', false);
+        
+        if (notifications && notifications.length > 0) {
+          // Mark notifications as read
+          const notificationIds = notifications.map(notif => notif.id);
+          await supabase
+            .from('notifications')
+            .update({ read: true })
+            .in('id', notificationIds);
+        }
+      } catch (error) {
+        console.error("Error marking chat notifications as read:", error);
+      }
+    }
+    
+    // Call the original onClick handler
+    onClick();
+  };
   
   return (
     <div 
@@ -50,7 +82,7 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
         "p-3 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors",
         isActive && "bg-muted"
       )}
-      onClick={onClick}
+      onClick={handleChatClick}
     >
       <Avatar className="h-12 w-12">
         {otherPartyLogo ? (

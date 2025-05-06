@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 const ChatIndicator = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   
   useEffect(() => {
@@ -87,10 +88,14 @@ const ChatIndicator = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  const handleChatClick = () => {
+    navigate("/chat");
+  };
   
   return (
     <Button variant="ghost" size="icon" asChild className="relative">
-      <Link to="/chat">
+      <div onClick={handleChatClick}>
         <MessageCircle className="h-5 w-5" />
         {unreadCount > 0 && (
           <Badge 
@@ -100,7 +105,7 @@ const ChatIndicator = () => {
             {unreadCount > 9 ? '9+' : unreadCount}
           </Badge>
         )}
-      </Link>
+      </div>
     </Button>
   );
 };

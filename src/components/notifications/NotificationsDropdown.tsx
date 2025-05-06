@@ -1,9 +1,11 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
+import { findChatByApplicationId } from "@/services/chat/chatLookupService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const NotificationsDropdown = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { 
     notifications, 
     unreadCount, 
@@ -24,8 +27,23 @@ const NotificationsDropdown = () => {
   } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleNotificationClick = async (notificationId: string) => {
+  const handleNotificationClick = async (notificationId: string, type: string, relatedId: string | null) => {
     await markAsRead(notificationId);
+    
+    // If this is a chat notification, navigate to the appropriate chat
+    if (type === 'new_chat' && relatedId) {
+      // For chat notifications, the related_id is the application_id
+      // We need to find the chat with this application_id
+      try {
+        const chatData = await findChatByApplicationId(relatedId);
+        if (chatData && chatData.id) {
+          setIsOpen(false); // Close the dropdown
+          navigate(`/chat/${chatData.id}`);
+        }
+      } catch (error) {
+        console.error("Error finding chat:", error);
+      }
+    }
   };
 
   const handleMarkAllAsRead = async (e: React.MouseEvent) => {
@@ -81,7 +99,7 @@ const NotificationsDropdown = () => {
               <DropdownMenuItem 
                 key={notification.id} 
                 className={`p-3 cursor-pointer flex flex-col items-start gap-1 ${!notification.read ? 'bg-slate-50' : ''}`}
-                onClick={() => handleNotificationClick(notification.id)}
+                onClick={() => handleNotificationClick(notification.id, notification.type, notification.related_id)}
               >
                 <div className="flex justify-between w-full">
                   <span className="font-medium text-sm">{notification.title}</span>

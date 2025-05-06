@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useChatList, useChat } from "@/hooks/useChat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,11 +10,12 @@ import ChatListItem from "@/components/chat/ChatListItem";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 
 const ChatPage = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const navigate = useNavigate();
-  const { userType } = useAuth();
+  const { userType, user } = useAuth();
   const { chats, isLoading: isLoadingChats } = useChatList();
   const {
     chat,
@@ -23,6 +24,37 @@ const ChatPage = () => {
     isSending,
     sendMessage
   } = useChat(chatId || '');
+  
+  // Mark chat-related notifications as read when viewing a chat
+  useEffect(() => {
+    if (user?.id && chatId && chat?.application_id) {
+      const markChatNotificationsAsRead = async () => {
+        try {
+          // Find chat notifications
+          const { data: notifications } = await supabase
+            .from('notifications')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('type', 'new_chat')
+            .eq('related_id', chat.application_id)
+            .eq('read', false);
+          
+          if (notifications && notifications.length > 0) {
+            // Mark notifications as read
+            const notificationIds = notifications.map(notif => notif.id);
+            await supabase
+              .from('notifications')
+              .update({ read: true })
+              .in('id', notificationIds);
+          }
+        } catch (error) {
+          console.error("Error marking chat notifications as read:", error);
+        }
+      };
+      
+      markChatNotificationsAsRead();
+    }
+  }, [chatId, user?.id, chat?.application_id]);
   
   const handleChatSelect = (id: string) => {
     navigate(`/chat/${id}`);
