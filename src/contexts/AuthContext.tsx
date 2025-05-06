@@ -163,13 +163,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
+      // We need to set the session to null first to prevent the "Auth session missing!" error
       setUser(null);
       setUserType(null);
       setSession(null);
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
       
     } catch (error: any) {
       console.error("Logout error:", error);

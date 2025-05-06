@@ -1,6 +1,6 @@
 
 import { useCallback, useMemo } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { 
   Home, 
   User, 
@@ -18,6 +18,16 @@ import { Button } from "@/components/ui/button";
 
 export function SideBar() {
   const { userType, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   const renderNavLink = useCallback(
     (to: string, icon: React.ReactNode, label: string) => (
@@ -103,7 +113,7 @@ export function SideBar() {
           <Button 
             variant="ghost" 
             className="w-full justify-start text-destructive" 
-            onClick={logout}
+            onClick={handleLogout}
           >
             <LogOut className="h-5 w-5 mr-2" />
             <span>Sign out</span>

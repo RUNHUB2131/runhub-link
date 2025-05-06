@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,6 +10,16 @@ import ChatIndicator from "@/components/chat/ChatIndicator";
 export const NavBar = () => {
   const { user, userType, logout } = useAuth();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
@@ -42,7 +51,7 @@ export const NavBar = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={logout}
+                onClick={handleLogout}
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5" />
@@ -61,10 +70,16 @@ export const NavBar = () => {
 
 const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
   const { user, userType, logout } = useAuth();
+  const navigate = useNavigate();
   
-  const handleSignOut = () => {
-    logout();
-    closeSheet();
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      closeSheet();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
   
   return (
