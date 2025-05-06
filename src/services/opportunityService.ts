@@ -64,16 +64,15 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
     // If brand is an error object or doesn't exist, provide fallback values
     const brandData = data.brand !== null && 
       typeof data.brand === 'object' && 
-      data.brand && // Extra null check to satisfy TypeScript
-      'company_name' in data.brand 
-        ? {
-            company_name: data.brand.company_name || "Unknown Brand",
-            logo_url: data.brand.logo_url
-          }
-        : {
-            company_name: "Unknown Brand",
-            logo_url: undefined
-          };
+      data.brand ? 
+      {
+        company_name: (data.brand as any).company_name || "Unknown Brand",
+        logo_url: (data.brand as any).logo_url
+      } : 
+      {
+        company_name: "Unknown Brand",
+        logo_url: undefined
+      };
     
     // Ensure proper structure and handle missing brand data
     const completeOpportunity: Opportunity = {
@@ -123,16 +122,15 @@ export const fetchBrowseOpportunities = async () => {
       // If brand is an error object or doesn't exist, provide fallback values
       const brandData = opp.brand !== null && 
         typeof opp.brand === 'object' && 
-        opp.brand && // Extra null check to satisfy TypeScript
-        'company_name' in opp.brand 
-          ? {
-              company_name: opp.brand.company_name || "Unknown Brand",
-              logo_url: opp.brand.logo_url
-            }
-          : {
-              company_name: "Unknown Brand",
-              logo_url: undefined
-            };
+        opp.brand ? 
+        {
+          company_name: (opp.brand as any).company_name || "Unknown Brand",
+          logo_url: (opp.brand as any).logo_url
+        } : 
+        {
+          company_name: "Unknown Brand",
+          logo_url: undefined
+        };
       
       return {
         ...opp,
