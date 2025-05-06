@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,10 +47,14 @@ export const useOpportunityBrowse = () => {
       const opportunitiesData = await fetchBrowseOpportunities();
       
       if (!opportunitiesData || opportunitiesData.length === 0) {
+        console.log("No opportunities returned from service");
         setOpportunities([]);
         setIsLoading(false);
         return;
       }
+      
+      console.log("Opportunities fetched successfully:", opportunitiesData.length);
+      console.log("First opportunity example:", opportunitiesData[0]);
       
       // Filter out opportunities the user has already applied for
       const filteredOpportunities = opportunitiesData.filter(
@@ -59,8 +62,11 @@ export const useOpportunityBrowse = () => {
       );
       
       console.log("Filtered opportunities:", filteredOpportunities.length);
-      console.log("Sample opportunity with brand:", filteredOpportunities[0]);
-      setOpportunities(filteredOpportunities as Opportunity[]);
+      if (filteredOpportunities.length > 0) {
+        console.log("Sample opportunity with brand:", filteredOpportunities[0]);
+      }
+      
+      setOpportunities(filteredOpportunities);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({
@@ -104,7 +110,13 @@ export const useOpportunityBrowse = () => {
     userApplications,
     setUserApplications,
     setOpportunities,
-    refreshAfterWithdrawal,
-    refresh
+    refreshAfterWithdrawal: useCallback(() => {
+      console.log("Refreshing after withdrawal");
+      setLastRefresh(Date.now()); // This will trigger both useEffects
+    }, []),
+    refresh: useCallback(() => {
+      console.log("Manual refresh triggered");
+      setLastRefresh(Date.now());
+    }, [])
   };
 };

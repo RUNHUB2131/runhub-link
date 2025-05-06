@@ -12,12 +12,11 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   
   // Debug logging
   console.log("Brand info in OpportunityBrandInfo:", opportunity.brand);
-  console.log("Complete opportunity object:", opportunity);
   
-  // Fallback for missing brand data
+  // Safely access brand data with fallbacks
+  const brandId = opportunity.brand_id;
   const brandName = opportunity.brand?.company_name || "Unknown Brand";
   const brandLogo = opportunity.brand?.logo_url;
-  const brandId = opportunity.brand_id;
   
   if (!brandId) {
     return (

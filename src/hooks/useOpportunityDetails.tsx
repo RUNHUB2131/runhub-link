@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,7 +54,8 @@ export const useOpportunityDetails = (opportunityId: string) => {
       }
       
       console.log("Fetched complete opportunity:", completeOpportunity);
-      setOpportunity(completeOpportunity as Opportunity);
+      console.log("Brand info available:", completeOpportunity.brand);
+      setOpportunity(completeOpportunity);
       
       // For run clubs, check if they've already applied
       if (userType === 'run_club') {
@@ -88,50 +88,87 @@ export const useOpportunityDetails = (opportunityId: string) => {
     }
   };
 
-  const handleApply = async () => {
-    if (!user || !opportunity) return false;
+  // const handleApply = async () => {
+  //   if (!user || !opportunity) return false;
     
-    try {
-      const { error } = await supabase
-        .from('applications')
-        .insert({
-          opportunity_id: opportunity.id,
-          run_club_id: user.id,
-          status: 'pending'
-        });
+  //   try {
+  //     const { error } = await supabase
+  //       .from('applications')
+  //       .insert({
+  //         opportunity_id: opportunity.id,
+  //         run_club_id: user.id,
+  //         status: 'pending'
+  //       });
       
-      if (error) throw error;
+  //     if (error) throw error;
       
-      toast({
-        title: "Application submitted",
-        description: "Your application has been successfully submitted",
-      });
+  //     toast({
+  //       title: "Application submitted",
+  //       description: "Your application has been successfully submitted",
+  //     });
       
-      setApplication({
-        id: 'new', // Placeholder ID until we refresh
-        opportunity_id: opportunity.id,
-        run_club_id: user.id,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      });
+  //     setApplication({
+  //       id: 'new', // Placeholder ID until we refresh
+  //       opportunity_id: opportunity.id,
+  //       run_club_id: user.id,
+  //       status: 'pending',
+  //       created_at: new Date().toISOString()
+  //     });
       
-      return true;
-    } catch (error: any) {
-      console.error("Error applying to opportunity:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit application. Please try again.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
+  //     return true;
+  //   } catch (error: any) {
+  //     console.error("Error applying to opportunity:", error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to submit application. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //     return false;
+  //   }
+  // };
 
   return {
     opportunity,
     application,
     isLoading,
     runClubProfile,
-    handleApply,
+    handleApply: async () => {
+      if (!user || !opportunity) return false;
+      
+      try {
+        const { error } = await supabase
+          .from('applications')
+          .insert({
+            opportunity_id: opportunity.id,
+            run_club_id: user.id,
+            status: 'pending'
+          });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Application submitted",
+          description: "Your application has been successfully submitted",
+        });
+        
+        setApplication({
+          id: 'new', // Placeholder ID until we refresh
+          opportunity_id: opportunity.id,
+          run_club_id: user.id,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+        
+        return true;
+      } catch (error: any) {
+        console.error("Error applying to opportunity:", error);
+        toast({
+          title: "Error",
+          description: "Failed to submit application. Please try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    },
   };
 };
