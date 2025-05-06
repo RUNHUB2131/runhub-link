@@ -8,7 +8,15 @@ import { isProfileComplete } from "@/utils/profileCompletionUtils";
 import { Application, RunClubProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { checkChatExistsForApplication } from "@/services/chatService";
-import ChatDrawer from "@/components/chat/ChatDrawer";
+import { useChat } from "@/hooks/useChat";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import ChatMessages from "@/components/chat/ChatMessages";
+import ChatMessageInput from "@/components/chat/ChatMessageInput";
 
 interface OpportunityActionButtonProps {
   userType: 'run_club' | 'brand' | undefined;
@@ -37,23 +45,40 @@ const OpportunityActionButton = ({
 }: OpportunityActionButtonProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
+  
+  const {
+    chat,
+    messages,
+    isLoading,
+    isSending,
+    sendMessage
+  } = useChat(chatId || '');
   
   const handleChatClick = async () => {
     if (!application || application.status !== 'accepted') return;
     
     // Check if chat exists
-    const existingChatId = await checkChatExistsForApplication(application.id);
-    
-    if (existingChatId) {
-      setChatId(existingChatId);
-      setIsDrawerOpen(true);
-    } else {
-      // This shouldn't happen as chat is created automatically on acceptance
+    try {
+      const existingChatId = await checkChatExistsForApplication(application.id);
+      
+      if (existingChatId) {
+        setChatId(existingChatId);
+        setIsChatOpen(true);
+      } else {
+        // This shouldn't happen as chat is created automatically on acceptance
+        toast({
+          title: "Chat Not Found",
+          description: "The chat for this application cannot be found.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking chat existence:", error);
       toast({
-        title: "Chat Not Found",
-        description: "The chat for this application cannot be found.",
+        title: "Error",
+        description: "Failed to open chat. Please try again.",
         variant: "destructive",
       });
     }
@@ -86,29 +111,51 @@ const OpportunityActionButton = ({
           <Button {...buttonProps} />
           
           {application.status === 'accepted' && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={handleChatClick}
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Chat with the brand</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={handleChatClick}
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Chat with the brand</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+                <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {chat?.brand_profile?.company_name || "Chat with Brand"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  
+                  <div className="flex-1 overflow-hidden flex flex-col">
+                    <ChatMessages 
+                      messages={messages} 
+                      chatParticipants={{
+                        brand: chat?.brand_profile,
+                        runClub: chat?.run_club_profile
+                      }} 
+                      isLoading={isLoading} 
+                    />
+                    
+                    <ChatMessageInput 
+                      onSendMessage={sendMessage} 
+                      isSending={isSending} 
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
-          
-          <ChatDrawer 
-            chatId={chatId} 
-            isOpen={isDrawerOpen} 
-            onOpenChange={setIsDrawerOpen} 
-          />
         </div>
       );
     }

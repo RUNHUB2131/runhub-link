@@ -1,11 +1,19 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { checkChatExistsForApplication } from "@/services/chatService";
 import ChatDrawer from "@/components/chat/ChatDrawer";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import ChatMessages from "@/components/chat/ChatMessages";
+import ChatMessageInput from "@/components/chat/ChatMessageInput";
+import { useChat } from "@/hooks/useChat";
 
 interface ApplicationActionButtonsProps {
   applicationId: string;
@@ -19,9 +27,16 @@ const ApplicationActionButtons = ({
   onUpdateStatus
 }: ApplicationActionButtonsProps) => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [chatId, setChatId] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  const {
+    chat,
+    messages,
+    isLoading,
+    isSending,
+    sendMessage
+  } = useChat(chatId || '');
   
   const handleChatClick = async () => {
     if (status !== 'accepted') return;
@@ -31,32 +46,7 @@ const ApplicationActionButtons = ({
       
       if (existingChatId) {
         setChatId(existingChatId);
-        setIsDrawerOpen(true);
-      } else {
-        toast({
-          title: "Chat Not Available",
-          description: "The chat for this application cannot be found.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Error checking chat existence:", error);
-      toast({
-        title: "Error",
-        description: "Failed to open chat. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  const handleOpenFullChat = async () => {
-    if (status !== 'accepted') return;
-    
-    try {
-      const existingChatId = await checkChatExistsForApplication(applicationId);
-      
-      if (existingChatId) {
-        navigate(`/chat/${existingChatId}`);
+        setIsChatOpen(true);
       } else {
         toast({
           title: "Chat Not Available",
@@ -107,24 +97,34 @@ const ApplicationActionButtons = ({
           onClick={handleChatClick}
         >
           <MessageCircle className="h-4 w-4" />
-          Quick Chat
+          Chat
         </Button>
         
-        <Button 
-          variant="secondary"
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={handleOpenFullChat}
-        >
-          <MessageCircle className="h-4 w-4" />
-          Open Full Chat
-        </Button>
-        
-        <ChatDrawer 
-          chatId={chatId} 
-          isOpen={isDrawerOpen} 
-          onOpenChange={setIsDrawerOpen}
-        />
+        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>
+                {chat?.brand_profile?.company_name || chat?.run_club_profile?.club_name || "Chat"}
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <ChatMessages 
+                messages={messages} 
+                chatParticipants={{
+                  brand: chat?.brand_profile,
+                  runClub: chat?.run_club_profile
+                }} 
+                isLoading={isLoading} 
+              />
+              
+              <ChatMessageInput 
+                onSendMessage={sendMessage} 
+                isSending={isSending} 
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

@@ -8,8 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Application } from "@/types";
 import { checkChatExistsForApplication } from "@/services/chatService";
-import ChatDrawer from "@/components/chat/ChatDrawer";
 import { useToast } from "@/hooks/use-toast";
+import { useChat } from "@/hooks/useChat";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import ChatMessages from "@/components/chat/ChatMessages";
+import ChatMessageInput from "@/components/chat/ChatMessageInput";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -36,7 +44,15 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const { toast } = useToast();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  const {
+    chat,
+    messages,
+    isLoading,
+    isSending,
+    sendMessage
+  } = useChat(chatId || '');
   
   const getStatusIcon = (status: string) => {
     switch(status) {
@@ -75,7 +91,7 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
       
       if (existingChatId) {
         setChatId(existingChatId);
-        setIsDrawerOpen(true);
+        setIsChatOpen(true);
       } else {
         toast({
           title: "Chat Not Available",
@@ -148,23 +164,45 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
         </div>
         
         {application.status === "accepted" && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1"
-            onClick={handleChatClick}
-          >
-            <MessageCircle className="h-4 w-4" />
-            Chat
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={handleChatClick}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Chat
+            </Button>
+            
+            <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+              <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>
+                    {application.opportunities?.brand?.company_name || "Chat"}
+                  </DialogTitle>
+                </DialogHeader>
+                
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  <ChatMessages 
+                    messages={messages} 
+                    chatParticipants={{
+                      brand: chat?.brand_profile,
+                      runClub: chat?.run_club_profile
+                    }} 
+                    isLoading={isLoading} 
+                  />
+                  
+                  <ChatMessageInput 
+                    onSendMessage={sendMessage} 
+                    isSending={isSending} 
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
         )}
       </CardFooter>
-      
-      <ChatDrawer 
-        chatId={chatId} 
-        isOpen={isDrawerOpen} 
-        onOpenChange={setIsDrawerOpen}
-      />
     </Card>
   );
 };
