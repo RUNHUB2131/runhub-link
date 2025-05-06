@@ -2,7 +2,7 @@
 import { BrandProfile } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Globe, Building2 } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface BrandBasicInfoSectionProps {
   profile: Partial<BrandProfile>;
@@ -38,11 +38,11 @@ export const BrandBasicInfoSection = ({ profile }: BrandBasicInfoSectionProps) =
       <div className="flex items-center gap-4">
         <Avatar className="h-16 w-16 border">
           {profile.logo_url ? (
-            <img src={profile.logo_url} alt="Brand logo" className="aspect-square object-cover" />
+            <AvatarImage src={profile.logo_url} alt="Brand logo" />
           ) : (
-            <div className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
+            <AvatarFallback className="h-full w-full flex items-center justify-center text-xl font-bold">
               {profile.company_name?.charAt(0) || "B"}
-            </div>
+            </AvatarFallback>
           )}
         </Avatar>
         <div>

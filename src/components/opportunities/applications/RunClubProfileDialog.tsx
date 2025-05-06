@@ -70,11 +70,11 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 {profile?.logo_url ? (
-                  <img src={profile.logo_url} alt={`${profile.club_name} logo`} />
+                  <AvatarImage src={profile.logo_url} alt={`${profile.club_name} logo`} />
                 ) : (
-                  <div className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
+                  <AvatarFallback className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
                     {profile?.club_name?.charAt(0) || "R"}
-                  </div>
+                  </AvatarFallback>
                 )}
               </Avatar>
               <div>

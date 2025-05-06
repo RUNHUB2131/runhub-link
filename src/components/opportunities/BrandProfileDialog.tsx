@@ -84,18 +84,19 @@ const BrandProfileDialog = ({ brandId, isOpen, onOpenChange }: BrandProfileDialo
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16">
                 {profile?.logo_url ? (
-                  <img 
+                  <AvatarImage 
                     src={profile.logo_url} 
                     alt={`${profile.company_name} logo`}
                     onError={(e) => {
                       console.log("Failed to load brand logo in dialog");
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150";
+                      const imgElement = e.target as HTMLImageElement;
+                      imgElement.style.display = 'none';
                     }}
                   />
                 ) : (
-                  <div className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
+                  <AvatarFallback className="bg-primary/10 h-full w-full flex items-center justify-center text-xl font-bold">
                     {profile?.company_name?.charAt(0) || "B"}
-                  </div>
+                  </AvatarFallback>
                 )}
               </Avatar>
               <div>
