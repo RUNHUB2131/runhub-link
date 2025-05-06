@@ -45,6 +45,7 @@ export const useOpportunityDetails = (opportunityId: string) => {
     setIsLoading(true);
     try {
       console.log("Fetching opportunity details for ID:", opportunityId);
+      
       // Use the improved function to fetch opportunity with brand info
       const completeOpportunity = await fetchOpportunityWithBrand(opportunityId);
       
@@ -88,7 +89,7 @@ export const useOpportunityDetails = (opportunityId: string) => {
   };
 
   const handleApply = async () => {
-    if (!user || !opportunity) return;
+    if (!user || !opportunity) return false;
     
     try {
       const { error } = await supabase

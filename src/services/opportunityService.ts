@@ -51,35 +51,44 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
   try {
     console.log("Fetching opportunity with ID:", opportunityId);
     
-    // Use a join to fetch the opportunity and brand data in a single query
+    // Fetch the opportunity first
     const { data: opportunityData, error: opportunityError } = await supabase
       .from('opportunities')
-      .select(`
-        *,
-        brand:brand_id (
-          company_name,
-          logo_url
-        )
-      `)
+      .select('*')
       .eq('id', opportunityId)
       .single();
     
     if (opportunityError) {
-      console.error("Error fetching opportunity with brand:", opportunityError);
+      console.error("Error fetching opportunity:", opportunityError);
       throw opportunityError;
     }
     
-    console.log("Fetched opportunity with brand:", opportunityData);
-    
-    // Ensure we have a valid brand object even if some data is missing
-    if (!opportunityData.brand) {
-      opportunityData.brand = {
-        company_name: "Unknown Brand",
-        logo_url: undefined
-      };
+    if (!opportunityData) {
+      console.error("No opportunity found with ID:", opportunityId);
+      return null;
     }
     
-    return opportunityData;
+    // Then fetch the brand data separately
+    const { data: brandData, error: brandError } = await supabase
+      .from('brand_profiles')
+      .select('company_name, logo_url')
+      .eq('id', opportunityData.brand_id)
+      .maybeSingle();
+    
+    // Combine the data
+    const completeOpportunity: Opportunity = {
+      ...opportunityData,
+      brand: brandData ? {
+        company_name: brandData.company_name || "Unknown Brand",
+        logo_url: brandData.logo_url
+      } : {
+        company_name: "Unknown Brand",
+        logo_url: undefined
+      }
+    };
+    
+    console.log("Fetched complete opportunity:", completeOpportunity);
+    return completeOpportunity;
   } catch (error) {
     console.error("Error in fetchOpportunityWithBrand:", error);
     return null;
@@ -91,34 +100,57 @@ export const fetchBrowseOpportunities = async () => {
   try {
     console.log("Fetching browse opportunities with brands");
     
-    // Use a join to fetch all opportunities with their brand information in a single query
+    // First fetch all opportunities
     const { data: opportunitiesData, error: opportunitiesError } = await supabase
       .from('opportunities')
-      .select(`
-        *,
-        brand:brand_id (
-          company_name,
-          logo_url
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
     
     if (opportunitiesError) {
-      console.error("Error fetching browse opportunities:", opportunitiesError);
+      console.error("Error fetching opportunities:", opportunitiesError);
       throw opportunitiesError;
     }
     
-    console.log("Fetched opportunities with brands:", opportunitiesData);
+    if (!opportunitiesData || opportunitiesData.length === 0) {
+      return [];
+    }
     
-    // Ensure each opportunity has a valid brand object even if data is missing
-    const opportunitiesWithBrands = opportunitiesData.map(opp => ({
-      ...opp,
-      brand: opp.brand || {
+    // Then fetch all brand profiles needed
+    const brandIds = [...new Set(opportunitiesData.map(opp => opp.brand_id))];
+    const { data: brandsData, error: brandsError } = await supabase
+      .from('brand_profiles')
+      .select('id, company_name, logo_url')
+      .in('id', brandIds);
+    
+    if (brandsError) {
+      console.error("Error fetching brands:", brandsError);
+    }
+    
+    // Create a map for quick brand lookups
+    const brandsMap = new Map();
+    if (brandsData) {
+      brandsData.forEach(brand => {
+        brandsMap.set(brand.id, {
+          company_name: brand.company_name || "Unknown Brand",
+          logo_url: brand.logo_url
+        });
+      });
+    }
+    
+    // Combine opportunity data with brand data
+    const opportunitiesWithBrands: Opportunity[] = opportunitiesData.map(opp => {
+      const brandInfo = brandsMap.get(opp.brand_id) || {
         company_name: "Unknown Brand",
         logo_url: undefined
-      }
-    }));
+      };
+      
+      return {
+        ...opp,
+        brand: brandInfo
+      };
+    });
     
+    console.log("Processed opportunities with brands:", opportunitiesWithBrands);
     return opportunitiesWithBrands;
   } catch (error) {
     console.error("Error in fetchBrowseOpportunities:", error);
