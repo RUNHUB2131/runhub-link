@@ -60,7 +60,7 @@ export const useOpportunityBrowse = () => {
       
       console.log("Filtered opportunities:", filteredOpportunities.length);
       console.log("Sample opportunity with brand:", filteredOpportunities[0]);
-      setOpportunities(filteredOpportunities);
+      setOpportunities(filteredOpportunities as Opportunity[]);
     } catch (error: any) {
       console.error("Error fetching opportunities:", error);
       toast({

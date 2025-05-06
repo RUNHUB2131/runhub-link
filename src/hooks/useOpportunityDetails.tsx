@@ -55,7 +55,7 @@ export const useOpportunityDetails = (opportunityId: string) => {
       }
       
       console.log("Fetched complete opportunity:", completeOpportunity);
-      setOpportunity(completeOpportunity);
+      setOpportunity(completeOpportunity as Opportunity);
       
       // For run clubs, check if they've already applied
       if (userType === 'run_club') {

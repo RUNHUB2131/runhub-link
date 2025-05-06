@@ -1,22 +1,24 @@
 
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Opportunity as OpportunityType } from "@/types";
 
-export interface Opportunity {
-  id: string;
-  title: string;
-  description: string;
-  reward: string;
-  deadline: string | null;
-  duration: string | null;
-  created_at: string;
-  applications_count?: number;
-  brand_id: string;
-  brand?: {
-    company_name: string;
-    logo_url?: string;
-  };
-}
+// Remove this interface since we're importing from types
+// export interface Opportunity {
+//   id: string;
+//   title: string;
+//   description: string;
+//   reward: string;
+//   deadline: string | null;
+//   duration: string | null;
+//   created_at: string;
+//   applications_count?: number;
+//   brand_id: string;
+//   brand?: {
+//     company_name: string;
+//     logo_url?: string;
+//   };
+// }
 
 export const fetchOpportunities = async (userId: string) => {
   // Fetch opportunities created by this brand
@@ -38,8 +40,9 @@ export const fetchOpportunities = async (userId: string) => {
       
       return {
         ...opp,
-        applications_count: count || 0
-      };
+        applications_count: count || 0,
+        requirements: opp.requirements || null, // Ensure requirements is included even if null
+      } as OpportunityType;
     })
   );
   
@@ -76,8 +79,9 @@ export const fetchOpportunityWithBrand = async (opportunityId: string) => {
       .maybeSingle();
     
     // Combine the data
-    const completeOpportunity: Opportunity = {
+    const completeOpportunity: OpportunityType = {
       ...opportunityData,
+      requirements: opportunityData.requirements || null, // Ensure requirements exists
       brand: brandData ? {
         company_name: brandData.company_name || "Unknown Brand",
         logo_url: brandData.logo_url
@@ -138,7 +142,7 @@ export const fetchBrowseOpportunities = async () => {
     }
     
     // Combine opportunity data with brand data
-    const opportunitiesWithBrands: Opportunity[] = opportunitiesData.map(opp => {
+    const opportunitiesWithBrands: OpportunityType[] = opportunitiesData.map(opp => {
       const brandInfo = brandsMap.get(opp.brand_id) || {
         company_name: "Unknown Brand",
         logo_url: undefined
@@ -146,6 +150,7 @@ export const fetchBrowseOpportunities = async () => {
       
       return {
         ...opp,
+        requirements: opp.requirements || null, // Ensure requirements exists
         brand: brandInfo
       };
     });
