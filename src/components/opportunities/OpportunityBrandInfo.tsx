@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Opportunity } from "@/types";
 import BrandProfileDialog from "./BrandProfileDialog";
 
@@ -10,7 +9,19 @@ interface OpportunityBrandInfoProps {
 const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
   const [showBrandProfile, setShowBrandProfile] = useState(false);
   
-  console.log("Brand info in OpportunityBrandInfo:", opportunity.brand);
+  useEffect(() => {
+    console.log("\n=== OpportunityBrandInfo Component ===");
+    console.log("Full opportunity object:", opportunity);
+    console.log("Brand ID:", opportunity.brand_id);
+    console.log("Brand data:", opportunity.brand);
+    console.log("Company name:", opportunity.brand?.company_name);
+    console.log("Logo URL:", opportunity.brand?.logo_url);
+  }, [opportunity]);
+  
+  if (!opportunity.brand_id) {
+    console.log("No brand_id provided to OpportunityBrandInfo");
+    return <div className="text-sm text-gray-500">Loading brand info...</div>;
+  }
   
   return (
     <>
@@ -22,7 +33,7 @@ const OpportunityBrandInfo = ({ opportunity }: OpportunityBrandInfoProps) => {
               alt={opportunity.brand.company_name || "Brand logo"}
               className="w-full h-full object-contain"
               onError={(e) => {
-                console.log("Failed to load brand logo");
+                console.log("Failed to load brand logo for:", opportunity.brand?.company_name);
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />

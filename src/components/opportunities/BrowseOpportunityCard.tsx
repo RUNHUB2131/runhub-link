@@ -1,11 +1,10 @@
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Opportunity, RunClubProfile } from "@/types";
 import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
 import OpportunityBrandInfo from "./OpportunityBrandInfo";
@@ -19,22 +18,44 @@ interface BrowseOpportunityCardProps {
 const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: BrowseOpportunityCardProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userType } = useAuth();
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   
   const profileComplete = isProfileComplete(runClubProfile);
   const missingFields = getMissingProfileFields(runClubProfile);
 
+  useEffect(() => {
+    console.log("\n=== BrowseOpportunityCard Component ===");
+    console.log("Opportunity data:", opportunity);
+    console.log("Brand ID:", opportunity.brand_id);
+    console.log("Brand data:", opportunity.brand);
+    console.log("User type:", userType);
+  }, [opportunity, userType]);
+
   const handleViewOpportunity = () => {
+    console.log("Navigating to opportunity:", opportunity.id);
     navigate(`/opportunities/${opportunity.id}`);
   };
 
-  const handleApply = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent navigation to details page
+  const handleApply = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    console.log("Apply clicked for opportunity:", opportunity.id);
     
-    if (profileComplete) {
-      onApply(opportunity.id);
-    } else {
+    if (!userType) {
+      console.log("No user type, showing profile dialog");
       setShowProfileDialog(true);
+      return;
+    }
+    
+    if (userType === 'run_club') {
+      if (!isProfileComplete(runClubProfile)) {
+        console.log("Profile incomplete, showing profile dialog");
+        setShowProfileDialog(true);
+        return;
+      }
+      console.log("Showing apply dialog");
+      setShowApplyDialog(true);
     }
   };
 
