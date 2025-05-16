@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, CheckCheck } from "lucide-react";
@@ -28,12 +27,17 @@ const NotificationsDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNotificationClick = async (notificationId: string, type: string, relatedId: string | null) => {
-    await markAsRead(notificationId);
+    // Find the notification to check if it's already read
+    const notification = notifications.find(n => n.id === notificationId);
+    if (!notification) return;
+
+    // Only mark as read if it's not already read
+    if (!notification.read) {
+      await markAsRead(notificationId);
+    }
     
     // If this is a chat notification, navigate to the appropriate chat
     if (type === 'new_chat' && relatedId) {
-      // For chat notifications, the related_id is the application_id
-      // We need to find the chat with this application_id
       try {
         const chatData = await findChatByApplicationId(relatedId);
         if (chatData && chatData.id) {
@@ -42,17 +46,33 @@ const NotificationsDropdown = () => {
         }
       } catch (error) {
         console.error("Error finding chat:", error);
+        toast({
+          title: "Error",
+          description: "Failed to navigate to chat",
+          variant: "destructive",
+        });
       }
     }
   };
 
   const handleMarkAllAsRead = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await markAllAsRead();
-    toast({
-      title: "Success",
-      description: "All notifications marked as read",
-    });
+    if (unreadCount === 0) return; // Don't proceed if there are no unread notifications
+    
+    try {
+      await markAllAsRead();
+      toast({
+        title: "Success",
+        description: "All notifications marked as read",
+      });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark all notifications as read",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -63,7 +83,7 @@ const NotificationsDropdown = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full relative">
+        <Button variant="ghost" size="icon" className="rounded-full relative focus:outline-none focus:ring-0 notification-bell-btn">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">

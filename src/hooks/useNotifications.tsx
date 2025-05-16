@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,33 +14,67 @@ export const useNotifications = () => {
     if (!user?.id) return;
     
     setIsLoading(true);
-    const data = await fetchNotifications(user.id);
-    setNotifications(data);
-    setUnreadCount(data.filter(notif => !notif.read).length);
-    setIsLoading(false);
+    try {
+      const data = await fetchNotifications(user.id);
+      setNotifications(data);
+      setUnreadCount(data.filter(notif => !notif.read).length);
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load notifications",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const markAsRead = async (notificationId: string) => {
-    const success = await markNotificationAsRead(notificationId);
-    if (success) {
-      setNotifications(prevNotifs => 
-        prevNotifs.map(notif => 
-          notif.id === notificationId ? { ...notif, read: true } : notif
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+    // First check if the notification is already read
+    const notification = notifications.find(notif => notif.id === notificationId);
+    if (!notification || notification.read) {
+      return; // Don't proceed if notification doesn't exist or is already read
+    }
+
+    try {
+      const success = await markNotificationAsRead(notificationId);
+      if (success) {
+        setNotifications(prevNotifs => 
+          prevNotifs.map(notif => 
+            notif.id === notificationId ? { ...notif, read: true } : notif
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark notification as read",
+        variant: "destructive",
+      });
     }
   };
 
   const markAllAsRead = async () => {
     if (!user?.id) return;
     
-    const success = await markAllNotificationsAsRead(user.id);
-    if (success) {
-      setNotifications(prevNotifs => 
-        prevNotifs.map(notif => ({ ...notif, read: true }))
-      );
-      setUnreadCount(0);
+    try {
+      const success = await markAllNotificationsAsRead(user.id);
+      if (success) {
+        setNotifications(prevNotifs => 
+          prevNotifs.map(notif => ({ ...notif, read: true }))
+        );
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark all notifications as read",
+        variant: "destructive",
+      });
     }
   };
 
@@ -51,7 +84,7 @@ export const useNotifications = () => {
     }
   }, [user?.id]);
 
-  // Set up real-time listener for new notifications
+  // Set up real-time listener for new notifications and updates
   useEffect(() => {
     if (!user?.id) return;
 
@@ -75,6 +108,27 @@ export const useNotifications = () => {
             title: newNotification.title,
             description: newNotification.message,
           });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const updatedNotification = payload.new as Notification;
+          setNotifications(prev => 
+            prev.map(notif => 
+              notif.id === updatedNotification.id ? updatedNotification : notif
+            )
+          );
+          // Recalculate unread count
+          setUnreadCount(prev => 
+            prev + (updatedNotification.read ? -1 : 1)
+          );
         }
       )
       .subscribe();
