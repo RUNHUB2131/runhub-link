@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,7 +111,7 @@ export const useChatList = () => {
   
   const loadChats = useCallback(async () => {
     if (!user?.id || !userType) return;
-    
+    console.log('Calling loadChats (refreshChats)');
     setIsLoading(true);
     try {
       const userChats = await fetchChats(user.id, userType as 'brand' | 'run_club');
@@ -141,7 +140,19 @@ export const useChatList = () => {
           table: 'chat_messages'
         },
         () => {
-          // Refresh chat list when a new message is received
+          console.log('Received INSERT event on chat_messages, refreshing chats');
+          loadChats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages'
+        },
+        () => {
+          console.log('Received UPDATE event on chat_messages, refreshing chats');
           loadChats();
         }
       )
@@ -158,7 +169,6 @@ export const useChatList = () => {
           table: 'chats'
         },
         () => {
-          // Refresh chat list when a new chat is created
           loadChats();
         }
       )

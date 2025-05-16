@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { Chat } from "@/services/chat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,9 +10,10 @@ interface ChatListItemProps {
   chat: Chat;
   isActive?: boolean;
   onClick: () => void;
+  refreshChats?: () => Promise<void>;
 }
 
-const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) => {
+const ChatListItem = ({ chat, isActive = false, onClick, refreshChats }: ChatListItemProps) => {
   const { userType, user } = useAuth();
   
   // Determine which participant to show (the other party)
@@ -53,13 +53,36 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
     }
     
     try {
-      // Mark all messages in this chat as read when clicking on it
-      await supabase
+      // DEBUG: Fetch unread messages for this chat and user before updating
+      const { data: unreadMessages, error: unreadError } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('chat_id', chat.id)
+        .eq('read', false)
+        .not('sender_id', 'eq', user.id);
+      console.log('[DEBUG] Unread messages before update:', unreadMessages, 'Error:', unreadError);
+      if (unreadMessages && unreadMessages.length > 0) {
+        console.log('[DEBUG] Current user.id:', user.id);
+        unreadMessages.forEach((msg, idx) => {
+          console.log(`[DEBUG] Unread message ${idx} sender_id:`, msg.sender_id);
+        });
+      }
+      // Try update without .not() filter
+      const { data: updateDataNoNot, error: updateErrorNoNot, count: updateCountNoNot } = await supabase
+        .from('chat_messages')
+        .update({ read: true })
+        .eq('chat_id', chat.id)
+        .eq('read', false);
+      console.log('[DEBUG] Mark as read result (no .not()):', { updateDataNoNot, updateErrorNoNot, updateCountNoNot });
+      // Original update query
+      const { data: updateData, error: updateError, count: updateCount } = await supabase
         .from('chat_messages')
         .update({ read: true })
         .eq('chat_id', chat.id)
         .not('sender_id', 'eq', user.id);
-      
+      console.log('Mark as read result:', { updateData, updateError, updateCount });
+      // Optionally, optimistically update the unread count here if needed
+      // e.g., setUnreadCount(0) for this chat
       // Clear notification indicators
       if (chat.application_id) {
         try {
@@ -71,7 +94,6 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
             .eq('type', 'new_chat')
             .eq('related_id', chat.application_id)
             .eq('read', false);
-          
           if (notifications && notifications.length > 0) {
             // Mark notifications as read
             const notificationIds = notifications.map(notif => notif.id);
@@ -83,6 +105,10 @@ const ChatListItem = ({ chat, isActive = false, onClick }: ChatListItemProps) =>
         } catch (error) {
           console.error("Error marking chat notifications as read:", error);
         }
+      }
+      // Call refreshChats after marking as read
+      if (refreshChats) {
+        await refreshChats();
       }
     } catch (error) {
       console.error("Error marking chat messages as read:", error);

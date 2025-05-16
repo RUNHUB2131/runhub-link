@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChatList } from "@/hooks/useChat";
@@ -10,7 +9,7 @@ import { MessageCircle } from "lucide-react";
 const ChatListPage = () => {
   const navigate = useNavigate();
   const { userType } = useAuth();
-  const { chats, isLoading } = useChatList();
+  const { chats, isLoading, refreshChats } = useChatList();
   
   const handleChatSelect = (id: string) => {
     navigate(`/chat/${id}`);
@@ -60,7 +59,11 @@ const ChatListPage = () => {
           <div key={chat.id} className="border rounded-md overflow-hidden">
             <ChatListItem
               chat={chat}
-              onClick={() => handleChatSelect(chat.id)}
+              onClick={() => {
+                handleChatSelect(chat.id);
+                refreshChats();
+              }}
+              refreshChats={refreshChats}
             />
           </div>
         ))}
