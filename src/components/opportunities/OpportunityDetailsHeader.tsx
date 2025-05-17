@@ -1,4 +1,3 @@
-
 import { Opportunity, Application, RunClubProfile } from "@/types";
 import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
 import OpportunityActionButton from "@/components/opportunities/OpportunityActionButton";
@@ -38,6 +37,7 @@ const OpportunityDetailsHeader = ({
         userId={userId}
         brandId={opportunity.brand_id}
         opportunityId={opportunity.id}
+        opportunity={opportunity}
         application={application}
         isApplying={isApplying}
         handleApply={handleApply}

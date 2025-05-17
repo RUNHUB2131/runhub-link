@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,9 +101,33 @@ export const useOpportunityDetails = (opportunityId: string) => {
   };
 
   const handleApply = async () => {
-    if (!user || !opportunity) return;
+    if (!user || !opportunity) {
+      toast({
+        title: "Error",
+        description: "Unable to submit application. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
     
     try {
+      // Check if user has already applied
+      const { data: existingApp } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('opportunity_id', opportunity.id)
+        .eq('run_club_id', user.id)
+        .single();
+
+      if (existingApp) {
+        toast({
+          title: "Already Applied",
+          description: "You have already applied to this opportunity.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       const { error } = await supabase
         .from('applications')
         .insert({
@@ -133,7 +156,7 @@ export const useOpportunityDetails = (opportunityId: string) => {
       console.error("Error applying to opportunity:", error);
       toast({
         title: "Error",
-        description: "Failed to submit application. Please try again.",
+        description: error.message || "Failed to submit application. Please try again.",
         variant: "destructive",
       });
       return false;

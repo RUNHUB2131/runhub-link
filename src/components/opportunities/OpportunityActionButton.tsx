@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
-import { Application, RunClubProfile } from "@/types";
+import { Application, RunClubProfile, Opportunity } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { checkChatExistsForApplication } from "@/services/chat";
+import { ApplicationConfirmationDialog } from "./ApplicationConfirmationDialog";
 
 interface OpportunityActionButtonProps {
   userType: 'run_club' | 'brand' | undefined;
   userId: string | undefined;
   brandId: string;
   opportunityId: string;
+  opportunity: Opportunity;
   application: Application | null;
   isApplying: boolean;
   handleApply: () => Promise<boolean>;
@@ -26,6 +28,7 @@ const OpportunityActionButton = ({
   userId,
   brandId,
   opportunityId,
+  opportunity,
   application,
   isApplying,
   handleApply,
@@ -35,19 +38,17 @@ const OpportunityActionButton = ({
 }: OpportunityActionButtonProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleChatClick = async () => {
     if (!application || application.status !== 'accepted') return;
     
-    // Check if chat exists
     try {
       const existingChatId = await checkChatExistsForApplication(application.id);
       
       if (existingChatId) {
-        // Navigate to the chat page with the chat ID
         navigate(`/chat/${existingChatId}`);
       } else {
-        // This shouldn't happen as chat is created automatically on acceptance
         toast({
           title: "Chat Not Found",
           description: "The chat for this application cannot be found.",
@@ -59,6 +60,27 @@ const OpportunityActionButton = ({
       toast({
         title: "Error",
         description: "Failed to open chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleApplyClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmApply = async () => {
+    try {
+      const success = await handleApply();
+      if (success) {
+        setShowConfirmDialog(false);
+        navigate('/applications');
+      }
+    } catch (error) {
+      console.error("Error applying to opportunity:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
         variant: "destructive",
       });
     }
@@ -116,25 +138,35 @@ const OpportunityActionButton = ({
     const isComplete = isProfileComplete(runClubProfile);
     
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Button
-                onClick={handleApply}
-                disabled={isApplying || !isComplete}
-              >
-                {isApplying ? "Applying..." : "Apply Now"}
-              </Button>
-            </div>
-          </TooltipTrigger>
-          {!isComplete && (
-            <TooltipContent>
-              <p>Complete your profile before applying</p>
-            </TooltipContent>
-          )}
-        </Tooltip>
-      </TooltipProvider>
+      <>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Button
+                  onClick={handleApplyClick}
+                  disabled={isApplying || !isComplete}
+                >
+                  {isApplying ? "Applying..." : "Apply Now"}
+                </Button>
+              </div>
+            </TooltipTrigger>
+            {!isComplete && (
+              <TooltipContent>
+                <p>Complete your profile before applying</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+
+        <ApplicationConfirmationDialog
+          opportunity={opportunity}
+          isOpen={showConfirmDialog}
+          onOpenChange={setShowConfirmDialog}
+          onConfirm={handleConfirmApply}
+          isApplying={isApplying}
+        />
+      </>
     );
   }
   

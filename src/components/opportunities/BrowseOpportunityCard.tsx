@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { Opportunity, RunClubProfile } from "@/types";
 import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
 import OpportunityBrandInfo from "./OpportunityBrandInfo";
+import { ApplicationConfirmationDialog } from "./ApplicationConfirmationDialog";
 
 interface BrowseOpportunityCardProps {
   opportunity: Opportunity;
@@ -21,6 +22,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
   const { userType } = useAuth();
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
   
   const profileComplete = isProfileComplete(runClubProfile);
   const missingFields = getMissingProfileFields(runClubProfile);
@@ -40,21 +42,15 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
 
   const handleApply = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Apply clicked for opportunity:", opportunity.id);
-    
     if (!userType) {
-      console.log("No user type, showing profile dialog");
       setShowProfileDialog(true);
       return;
     }
-    
     if (userType === 'run_club') {
       if (!isProfileComplete(runClubProfile)) {
-        console.log("Profile incomplete, showing profile dialog");
         setShowProfileDialog(true);
         return;
       }
-      console.log("Showing apply dialog");
       setShowApplyDialog(true);
     }
   };
@@ -62,6 +58,13 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
   const handleCompleteProfile = () => {
     setShowProfileDialog(false);
     navigate('/profile');
+  };
+
+  const handleConfirmApply = async () => {
+    setIsApplying(true);
+    await onApply(opportunity.id);
+    setIsApplying(false);
+    setShowApplyDialog(false);
   };
 
   console.log("Rendering opportunity in BrowseOpportunityCard:", opportunity);
@@ -143,6 +146,14 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ApplicationConfirmationDialog
+        opportunity={opportunity}
+        isOpen={showApplyDialog}
+        onOpenChange={setShowApplyDialog}
+        onConfirm={handleConfirmApply}
+        isApplying={isApplying}
+      />
     </>
   );
 };
