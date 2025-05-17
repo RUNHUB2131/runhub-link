@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserType } from "@/types";
@@ -23,8 +22,8 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
 
   const handleApplicationsClick = () => {
     if (userType === 'brand') {
-      // Navigate to a page that shows all applications across opportunities
-      navigate("/applications");
+      // Navigate to the brand's opportunities management page
+      navigate("/opportunities");
     } else {
       // For run clubs, navigate to their applications
       navigate("/applications");
@@ -33,7 +32,7 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
 
   if (userType === 'run_club') {
     return (
-      <>
+      <div className="flex flex-col gap-6">
         <Card 
           className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
           onClick={handleOpportunitiesClick}
@@ -68,12 +67,12 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
             </div>
           </CardContent>
         </Card>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
       <Card 
         className="shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
         onClick={handleOpportunitiesClick}
@@ -108,6 +107,6 @@ export const StatsCards = ({ userType, isLoading, stats }: StatsCardsProps) => {
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 };

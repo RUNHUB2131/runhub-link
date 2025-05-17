@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -56,13 +55,19 @@ export const RunClubProfileForm = ({
     setIsLoading(true);
     
     try {
+      // Ensure website starts with https://
+      let website = formData.website.trim();
+      if (website && !/^https?:\/\//i.test(website)) {
+        website = 'https://' + website;
+      }
+      const dataToSave = { ...formData, website };
       if (onSave) {
-        await onSave(formData);
+        await onSave(dataToSave);
       } else {
         // Save to Supabase
         const { error } = await supabase
           .from('run_club_profiles')
-          .update(formData)
+          .update(dataToSave)
           .eq('id', user.id);
         
         if (error) throw error;

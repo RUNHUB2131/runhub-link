@@ -1,4 +1,3 @@
-
 import BrowseOpportunityCard from "./BrowseOpportunityCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -48,7 +47,7 @@ const BrowseOpportunityList = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="flex flex-col gap-6">
       {opportunities.map((opportunity) => (
         <BrowseOpportunityCard 
           key={opportunity.id}
