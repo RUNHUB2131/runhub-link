@@ -90,8 +90,8 @@ const OpportunityActionButton = ({
   if (userType === 'brand' && userId === brandId) {
     return (
       <div className="flex items-center gap-2">
-        <Button onClick={() => setShowApplications(!showApplications)}>
-          {showApplications ? "Hide Applications" : "View Applications"}
+        <Button onClick={() => navigate(`/opportunities/${opportunityId}/applications`)}>
+          View Applications
         </Button>
       </div>
     );
