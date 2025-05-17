@@ -1,4 +1,3 @@
-
 export type UserType = 'run_club' | 'brand';
 
 export type FollowerCountRange = 'under_1000' | '1000_to_4000' | '4000_to_9000' | '9000_to_20000' | 'over_20000';
@@ -79,6 +78,7 @@ export interface Application {
   run_club_id: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
+  seen_by_brand?: boolean;
   run_club_profile?: {
     club_name: string;
     location: string;

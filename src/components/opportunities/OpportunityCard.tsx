@@ -2,9 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Edit, Eye } from "lucide-react";
+import { markApplicationsAsSeen } from "@/services/applicationService";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Opportunity {
   id: string;
+  brand_id: string;
   title: string;
   description: string;
   reward: string;
@@ -12,6 +15,7 @@ interface Opportunity {
   duration: string | null;
   created_at: string;
   applications_count?: number;
+  unseen_applications_count?: number;
 }
 
 interface OpportunityCardProps {
@@ -20,14 +24,22 @@ interface OpportunityCardProps {
 
 const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleViewOpportunity = () => {
     navigate(`/opportunities/${opportunity.id}`);
   };
 
-  const handleViewApplications = (e: React.MouseEvent) => {
+  const handleViewApplications = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/opportunities/applications/${opportunity.id}`);
+    if (user && user.id === opportunity.brand_id) {
+      try {
+        await markApplicationsAsSeen(opportunity.id);
+      } catch (error) {
+        console.error("Failed to mark applications as seen:", error);
+      }
+    }
+    navigate(`/opportunities/${opportunity.id}/applications`);
   };
 
   const handleEditOpportunity = (e: React.MouseEvent) => {
@@ -59,6 +71,22 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
   const getOpportunityType = () => {
     return opportunity.title.toLowerCase().includes('sponsor') ? 'Sponsorship' : 'Event';
   };
+
+  // Debug: Log applications_count value and type for all cards
+  console.log('OpportunityCard:', {
+    id: opportunity.id,
+    applications_count: opportunity.applications_count,
+    coerced: Number(opportunity.applications_count),
+    type: typeof opportunity.applications_count
+  });
+
+  // Debug: Log unseen_applications_count value and type for all cards
+  console.log('OpportunityCard unseen:', {
+    id: opportunity.id,
+    unseen_applications_count: opportunity.unseen_applications_count,
+    coerced: Number(opportunity.unseen_applications_count),
+    type: typeof opportunity.unseen_applications_count
+  });
 
   return (
     <div 
@@ -119,9 +147,21 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
             >
               <Eye className="h-4 w-4 mr-1" />
               Applications
-              <span className="ml-1 bg-gray-100 px-1.5 py-0.5 rounded-full text-xs">
-                {opportunity.applications_count}
-              </span>
+              {Number(opportunity.applications_count) > 0 && (
+                <span className="ml-1 bg-gray-100 px-1.5 py-0.5 rounded-full text-xs">
+                  {opportunity.applications_count}
+                </span>
+              )}
+              {Number(opportunity.applications_count) === 0 && (
+                <span className="ml-1 bg-yellow-200 px-1.5 py-0.5 rounded-full text-xs">
+                  ZERO
+                </span>
+              )}
+              {typeof opportunity.unseen_applications_count === 'number' && opportunity.unseen_applications_count > 0 && (
+                <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">
+                  New
+                </span>
+              )}
             </Button>
             <Button 
               variant="outline"

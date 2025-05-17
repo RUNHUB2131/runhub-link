@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/types";
 
@@ -170,6 +169,21 @@ export const withdrawApplication = async (applicationId: string) => {
     };
   } catch (error) {
     console.error("Error withdrawing application:", error);
+    throw error;
+  }
+};
+
+export const markApplicationsAsSeen = async (opportunityId: string) => {
+  try {
+    const { error } = await supabase
+      .from('applications')
+      .update({ seen_by_brand: true })
+      .eq('opportunity_id', opportunityId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error("Error marking applications as seen:", error);
     throw error;
   }
 };

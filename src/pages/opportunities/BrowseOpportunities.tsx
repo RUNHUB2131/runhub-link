@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -88,8 +87,28 @@ const BrowseOpportunities = () => {
       });
       return;
     }
-    
+
+    // First verify the run club profile exists
     try {
+      const { data: profile, error: profileError } = await supabase
+        .from('run_club_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) {
+        console.error("Profile verification error:", profileError);
+        toast({
+          title: "Error",
+          description: "Unable to verify your profile. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Verified run club profile:", profile);
+      
+      // Now attempt to submit the application
       const { error } = await supabase
         .from('applications')
         .insert({
@@ -98,7 +117,10 @@ const BrowseOpportunities = () => {
           status: 'pending'
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Application submission error:", error);
+        throw error;
+      }
       
       toast({
         title: "Application Submitted",
@@ -115,10 +137,13 @@ const BrowseOpportunities = () => {
       navigate('/applications');
       
     } catch (error: any) {
-      console.error("Error applying to opportunity:", error);
+      console.error("Full error details:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Error details:", error.details);
       toast({
         title: "Error",
-        description: "Failed to submit application. Please try again.",
+        description: error.message || "Failed to submit application. Please try again.",
         variant: "destructive",
       });
     }
