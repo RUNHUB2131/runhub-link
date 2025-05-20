@@ -17,6 +17,14 @@ USING (
     SELECT 1 FROM public.profiles
     WHERE id = auth.uid()
   )
+  OR
+  -- Allow access if the run club has applied to an opportunity owned by the user
+  EXISTS (
+    SELECT 1 FROM public.applications a
+    JOIN public.opportunities o ON a.opportunity_id = o.id
+    WHERE a.run_club_id = run_club_profiles.id
+    AND o.brand_id = auth.uid()
+  )
 );
 
 CREATE POLICY "Enable update for run club owners"

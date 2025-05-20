@@ -8,14 +8,14 @@ import { useAuth } from "@/contexts/AuthContext";
 interface Opportunity {
   id: string;
   brand_id: string;
-  title: string;
-  description: string;
-  reward: string;
-  deadline: string | null;
-  duration: string | null;
+  activation_overview: string;
+  target_launch_date: string;
+  club_incentives: string;
   created_at: string;
   applications_count?: number;
   unseen_applications_count?: number;
+  title: string;
+  submission_deadline: string;
 }
 
 interface OpportunityCardProps {
@@ -69,7 +69,7 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
   };
 
   const getOpportunityType = () => {
-    return opportunity.title.toLowerCase().includes('sponsor') ? 'Sponsorship' : 'Event';
+    return opportunity.activation_overview.toLowerCase().includes('sponsor') ? 'Sponsorship' : 'Event';
   };
 
   // Debug: Log applications_count value and type for all cards
@@ -100,9 +100,8 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
               <Badge 
                 className="bg-primary-100 text-primary-800 hover:bg-primary-100"
               >
-                {getOpportunityType()}
+                Activation
               </Badge>
-              
               {isNew(opportunity.created_at) && (
                 <Badge 
                   className="bg-green-100 text-green-800 hover:bg-green-100"
@@ -111,34 +110,18 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
                 </Badge>
               )}
             </div>
-            
             <h2 className="text-xl font-semibold">{opportunity.title}</h2>
-            <p className="text-gray-600 line-clamp-1">{opportunity.description}</p>
+            <div className="text-gray-600">
+              <span className="font-medium">Incentive:</span> {opportunity.club_incentives}
+            </div>
+            <div className="text-gray-600">
+              <span className="font-medium">Application Due:</span> {opportunity.submission_deadline}
+            </div>
+            <div className="text-gray-600">
+              <span className="font-medium">Activation Launch:</span> {opportunity.target_launch_date}
+            </div>
           </div>
-          
-          <div className="text-primary-500 font-bold text-2xl">
-            {opportunity.reward.startsWith('$') ? opportunity.reward : `$${opportunity.reward}`}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-6 mt-6">
-          <div className="flex items-center text-gray-500">
-            <span className="mr-2">
-              {formatDeadline(opportunity.deadline)}
-            </span>
-          </div>
-          
-          <div className="flex items-center text-gray-500">
-            <span className="mr-2">
-              {formatDuration(opportunity.duration)}
-            </span>
-          </div>
-          
-          {isActive(opportunity.deadline) && (
-            <div className="text-green-600">Active</div>
-          )}
-          
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex gap-2 items-start">
             <Button 
               variant="outline"
               size="sm"

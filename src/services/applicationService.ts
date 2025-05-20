@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Application } from "@/types";
+import { createChatForApplication } from "./chat/chatListService";
+import { toast } from "@/hooks/use-toast";
 
 export interface Opportunity {
   id: string;
@@ -33,6 +35,8 @@ export const fetchOpportunityDetails = async (id: string) => {
 
 export const fetchApplications = async (opportunityId: string) => {
   try {
+    console.log("Fetching applications for opportunity:", opportunityId);
+    
     // First fetch the applications
     const { data: appData, error: appError } = await supabase
       .from('applications')
@@ -40,6 +44,7 @@ export const fetchApplications = async (opportunityId: string) => {
       .eq('opportunity_id', opportunityId);
 
     if (appError) throw appError;
+    console.log("Fetched applications:", appData);
 
     // Initialize applications array with proper typing for status
     const initialApps: RunClubApplication[] = (appData || []).map(app => ({
@@ -47,14 +52,17 @@ export const fetchApplications = async (opportunityId: string) => {
       status: app.status as "pending" | "accepted" | "rejected"
     }));
     
-    // Now fetch the run club profile data separately for each application
+    // Now fetch the run club profile data for each application
     const appsWithProfiles = await Promise.all(
       initialApps.map(async (app) => {
+        console.log("Fetching profile for run club:", app.run_club_id);
         const { data: profileData, error: profileError } = await supabase
           .from('run_club_profiles')
           .select('club_name, location, member_count')
           .eq('id', app.run_club_id)
           .single();
+
+        console.log("Fetched run club profile:", profileData, profileError);
 
         return {
           ...app,
@@ -63,6 +71,7 @@ export const fetchApplications = async (opportunityId: string) => {
       })
     );
 
+    console.log("Final applications with profiles:", appsWithProfiles);
     return appsWithProfiles;
   } catch (error) {
     console.error("Error fetching applications:", error);
@@ -72,34 +81,108 @@ export const fetchApplications = async (opportunityId: string) => {
 
 export const updateApplicationStatus = async (applicationId: string, status: "accepted" | "rejected") => {
   try {
-    const { error } = await supabase
+    console.log("Starting application status update for:", applicationId, "to status:", status);
+    
+    // First get the application details to get the opportunity_id, brand_id, and run_club_id
+    const { data: application, error: fetchError } = await supabase
+      .from('applications')
+      .select('opportunity_id, run_club_id')
+      .eq('id', applicationId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching application details:", fetchError);
+      throw fetchError;
+    }
+    
+    console.log("Fetched application details:", application);
+
+    // Get the opportunity to get the brand_id
+    const { data: opportunity, error: oppError } = await supabase
+      .from('opportunities')
+      .select('brand_id')
+      .eq('id', application.opportunity_id)
+      .single();
+
+    if (oppError) {
+      console.error("Error fetching opportunity details:", oppError);
+      throw oppError;
+    }
+    
+    console.log("Fetched opportunity details:", opportunity);
+
+    // Update the application status
+    const { error: updateError } = await supabase
       .from('applications')
       .update({ status })
       .eq('id', applicationId);
 
-    if (error) throw error;
+    if (updateError) {
+      console.error("Error updating application status:", updateError);
+      throw updateError;
+    }
+    
+    console.log("Successfully updated application status");
+
+    // If the application is accepted, create a chat
+    if (status === 'accepted') {
+      console.log("Creating chat for accepted application");
+      try {
+        const chat = await createChatForApplication(
+          applicationId,
+          application.opportunity_id,
+          opportunity.brand_id,
+          application.run_club_id
+        );
+        console.log("Successfully created chat:", chat);
+      } catch (chatError) {
+        console.error("Error creating chat:", chatError);
+        throw chatError;
+      }
+    }
     
     return { success: true };
   } catch (error) {
-    console.error("Error updating application status:", error);
+    console.error("Error in updateApplicationStatus:", error);
     throw error;
   }
 };
 
 export const fetchRunClubApplications = async (runClubId: string) => {
   try {
-    // Fetch applications for this run club
+    console.log("Fetching applications for run club:", runClubId);
+    
+    // First fetch the applications with opportunity data
     const { data: appData, error: appError } = await supabase
       .from('applications')
-      .select('*, opportunities:opportunity_id(id, title, description, brand_id, reward, deadline, created_at)')
+      .select(`
+        *,
+        opportunities:opportunity_id(
+          id, 
+          title, 
+          brand_id, 
+          club_incentives, 
+          submission_deadline, 
+          target_launch_date
+        )
+      `)
       .eq('run_club_id', runClubId);
 
     if (appError) throw appError;
+    console.log("Fetched applications:", appData);
 
-    // Get brand details for each opportunity
+    // Then fetch the run club profile data
+    const { data: profileData, error: profileError } = await supabase
+      .from('run_club_profiles')
+      .select('club_name, location, member_count')
+      .eq('id', runClubId)
+      .single();
+
+    console.log("Fetched run club profile:", profileData, profileError);
+
+    // Get brand details for each opportunity and combine with run club profile
     const applicationsWithBrands = await Promise.all(
       (appData || []).map(async (app) => {
-        // Fetch brand profile for this opportunity
         if (app.opportunities?.brand_id) {
           const { data: brandData, error: brandError } = await supabase
             .from('brand_profiles')
@@ -110,6 +193,7 @@ export const fetchRunClubApplications = async (runClubId: string) => {
           return {
             ...app,
             status: app.status as "pending" | "accepted" | "rejected",
+            run_club_profile: profileError ? null : profileData,
             opportunities: {
               ...app.opportunities,
               brand: brandError ? null : brandData
@@ -120,10 +204,12 @@ export const fetchRunClubApplications = async (runClubId: string) => {
         return {
           ...app,
           status: app.status as "pending" | "accepted" | "rejected",
+          run_club_profile: profileError ? null : profileData
         };
       })
     );
 
+    console.log("Final applications with all data:", applicationsWithBrands);
     return applicationsWithBrands;
   } catch (error) {
     console.error("Error fetching run club applications:", error);

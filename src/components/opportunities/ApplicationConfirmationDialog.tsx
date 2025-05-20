@@ -17,12 +17,6 @@ export function ApplicationConfirmationDialog({
   onConfirm,
   isApplying
 }: ApplicationConfirmationDialogProps) {
-  const formatDeadline = (deadline: string | null) => {
-    if (!deadline) return null;
-    const date = new Date(deadline);
-    return `Complete by ${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -32,39 +26,35 @@ export function ApplicationConfirmationDialog({
             Please confirm that your run club can fulfill all the requirements of this opportunity.
           </DialogDescription>
         </DialogHeader>
-
         <div className="space-y-4 py-4">
           <div>
             <h4 className="font-medium mb-2">Opportunity Details:</h4>
             <div className="space-y-2 text-sm">
               <p><span className="font-medium">Title:</span> {opportunity.title}</p>
-              <p><span className="font-medium">Reward:</span> {opportunity.reward}</p>
-              {opportunity.duration && (
-                <p><span className="font-medium">Duration:</span> {opportunity.duration}</p>
+              {opportunity.brand && (
+                <p><span className="font-medium">Brand:</span> {opportunity.brand.company_name}</p>
               )}
-              {opportunity.deadline && (
-                <p><span className="font-medium">Deadline:</span> {formatDeadline(opportunity.deadline)}</p>
+              <p><span className="font-medium">Application Due:</span> {opportunity.submission_deadline}</p>
+              <p><span className="font-medium">Incentive:</span> {opportunity.club_incentives}</p>
+              <p><span className="font-medium">Activation Launch:</span> {opportunity.target_launch_date}</p>
+              <p><span className="font-medium">Activation Overview:</span> {opportunity.activation_overview}</p>
+              <p><span className="font-medium">Content Specifications:</span> {opportunity.content_specifications}</p>
+              <p><span className="font-medium">Professional Media Requirements:</span> {opportunity.professional_media}</p>
+              {opportunity.media_requirements && (
+                <p><span className="font-medium">Specific Media Requirements:</span> {opportunity.media_requirements}</p>
+              )}
+              <p><span className="font-medium">Club Responsibilities:</span> {opportunity.club_responsibilities}</p>
+              <p><span className="font-medium">Geographic Locations:</span> {opportunity.geographic_locations?.join(", ")}</p>
+              <p><span className="font-medium">Club Size Preference:</span> {opportunity.club_size_preference}</p>
+              <p><span className="font-medium">Online Reach Preference:</span> {opportunity.online_reach_preference}</p>
+              {opportunity.additional_notes && (
+                <p><span className="font-medium">Additional Notes:</span> {opportunity.additional_notes}</p>
               )}
             </div>
           </div>
-
-          {opportunity.requirements && opportunity.requirements.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2">Requirements:</h4>
-              <ul className="list-disc pl-5 space-y-1 text-sm">
-                {opportunity.requirements.map((requirement, index) => (
-                  <li key={index}>{requirement}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
-
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={onConfirm} disabled={isApplying}>
+          <Button onClick={onConfirm} disabled={isApplying} className="w-full">
             {isApplying ? "Applying..." : "Confirm Application"}
           </Button>
         </DialogFooter>

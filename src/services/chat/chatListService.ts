@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Chat } from "./types";
@@ -86,5 +85,36 @@ export const checkChatExistsForApplication = async (applicationId: string) => {
   } catch (error: any) {
     console.error("Error checking chat existence:", error);
     return null;
+  }
+};
+
+// Create a new chat for an accepted application
+export const createChatForApplication = async (applicationId: string, opportunityId: string, brandId: string, runClubId: string) => {
+  try {
+    console.log("Creating chat with params:", { applicationId, opportunityId, brandId, runClubId });
+    
+    const { data, error } = await supabase
+      .from('chats')
+      .insert({
+        application_id: applicationId,
+        opportunity_id: opportunityId,
+        brand_id: brandId,
+        run_club_id: runClubId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error from Supabase when creating chat:", error);
+      throw error;
+    }
+    
+    console.log("Successfully created chat:", data);
+    return data;
+  } catch (error: any) {
+    console.error("Error creating chat:", error);
+    throw error;
   }
 };

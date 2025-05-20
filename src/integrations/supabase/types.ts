@@ -204,47 +204,74 @@ export type Database = {
       }
       opportunities: {
         Row: {
-          brand_id: string
-          created_at: string
-          deadline: string | null
-          description: string
-          duration: string | null
-          id: string
-          requirements: string[] | null
-          reward: string
-          title: string
+          brand_id: string;
+          created_at: string;
+          title: string;
+          activation_overview: string;
+          target_launch_date: string;
+          primary_objective: string;
+          primary_objective_other: string | null;
+          content_specifications: string;
+          professional_media: string;
+          media_requirements: string | null;
+          club_responsibilities: string;
+          club_incentives: string;
+          geographic_locations: string[];
+          club_size_preference: string;
+          online_reach_preference: string;
+          additional_notes: string | null;
+          submission_deadline: string;
+          id: string;
         }
         Insert: {
-          brand_id: string
-          created_at?: string
-          deadline?: string | null
-          description: string
-          duration?: string | null
-          id?: string
-          requirements?: string[] | null
-          reward: string
-          title: string
+          brand_id: string;
+          created_at?: string;
+          title: string;
+          activation_overview: string;
+          target_launch_date: string;
+          primary_objective: string;
+          primary_objective_other?: string | null;
+          content_specifications: string;
+          professional_media: string;
+          media_requirements?: string | null;
+          club_responsibilities: string;
+          club_incentives: string;
+          geographic_locations: string[];
+          club_size_preference: string;
+          online_reach_preference: string;
+          additional_notes?: string | null;
+          submission_deadline: string;
+          id?: string;
         }
         Update: {
-          brand_id?: string
-          created_at?: string
-          deadline?: string | null
-          description?: string
-          duration?: string | null
-          id?: string
-          requirements?: string[] | null
-          reward?: string
-          title?: string
+          brand_id?: string;
+          created_at?: string;
+          title?: string;
+          activation_overview?: string;
+          target_launch_date?: string;
+          primary_objective?: string;
+          primary_objective_other?: string | null;
+          content_specifications?: string;
+          professional_media?: string;
+          media_requirements?: string | null;
+          club_responsibilities?: string;
+          club_incentives?: string;
+          geographic_locations?: string[];
+          club_size_preference?: string;
+          online_reach_preference?: string;
+          additional_notes?: string | null;
+          submission_deadline?: string;
+          id?: string;
         }
         Relationships: [
           {
-            foreignKeyName: "opportunities_brand_id_fkey"
-            columns: ["brand_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            foreignKeyName: "opportunities_brand_id_fkey",
+            columns: ["brand_id"],
+            isOneToOne: false,
+            referencedRelation: "profiles",
+            referencedColumns: ["id"],
           },
-        ]
+        ];
       }
       profiles: {
         Row: {

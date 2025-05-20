@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Clock, Check, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +10,10 @@ interface ApplicationWithOpportunity extends Application {
   opportunities?: {
     id: string;
     title: string;
-    description: string;
     brand_id: string;
-    reward: string;
-    deadline: string | null;
-    created_at: string;
+    club_incentives: string;
+    submission_deadline: string;
+    target_launch_date: string;
     brand?: {
       company_name: string;
       logo_url?: string;
@@ -138,8 +136,6 @@ const ApplicationCard = ({ application }: { application: ApplicationWithOpportun
           {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
         </Badge>
         <CardTitle className="text-lg">{application.opportunities?.title || "Unknown Opportunity"}</CardTitle>
-        
-        {/* Use OpportunityBrandInfo component instead of basic text */}
         {application.opportunities && application.opportunities.brand_id && (
           <OpportunityBrandInfo opportunity={{
             brand_id: application.opportunities.brand_id,
@@ -147,8 +143,10 @@ const ApplicationCard = ({ application }: { application: ApplicationWithOpportun
           } as any} />
         )}
       </CardHeader>
-      <CardContent className="text-sm">
-        <p className="line-clamp-2">{application.opportunities?.description || "No description available"}</p>
+      <CardContent className="text-sm space-y-1">
+        <div><span className="font-medium">Application Due:</span> {application.opportunities?.submission_deadline}</div>
+        <div><span className="font-medium">Incentive:</span> {application.opportunities?.club_incentives}</div>
+        <div><span className="font-medium">Activation Launch:</span> {application.opportunities?.target_launch_date}</div>
       </CardContent>
       <CardFooter className="flex justify-between pt-2 text-sm text-gray-500">
         <span>Applied: {new Date(application.created_at).toLocaleDateString()}</span>

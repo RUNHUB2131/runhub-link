@@ -1,78 +1,93 @@
-
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Application } from "@/types";
-import { supabase } from "@/integrations/supabase/client";
 import ApplicationsHeader from "@/components/opportunities/applications/ApplicationsHeader";
-import ApplicationsContent, { RunClubApplication } from "@/components/opportunities/applications/ApplicationsContent";
+import ApplicationsContent from "@/components/opportunities/applications/ApplicationsContent";
+import { updateApplicationStatus } from "@/services/applicationService";
 
-interface Opportunity {
-  id: string;
-  title: string;
-  description: string;
+interface RunClubApplication extends Application {
+  run_club_profile?: {
+    club_name: string;
+    location: string;
+    member_count: number;
+  } | null;
 }
 
 const OpportunityApplications = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { id: opportunityId } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [applications, setApplications] = useState<RunClubApplication[]>([]);
-  const [opportunity, setOpportunity] = useState<Opportunity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [opportunity, setOpportunity] = useState<any>(null);
 
-  useEffect(() => {
-    if (id) {
-      // Fetch opportunity details
-      supabase
-        .from('opportunities')
-        .select('id, title, description')
-        .eq('id', id)
-        .single()
-        .then(({ data, error }) => {
-          if (error) {
-            console.error("Error fetching opportunity details:", error);
-            toast({
-              title: "Error",
-              description: "Failed to load opportunity details",
-              variant: "destructive",
-            });
-          } else {
-            setOpportunity(data as Opportunity);
-          }
-        });
-        
-      loadApplications();
+  const fetchOpportunity = async () => {
+    if (!opportunityId) {
+      console.log("No opportunityId provided to fetchOpportunity");
+      return;
     }
-  }, [id]);
-
-  const loadApplications = async () => {
-    if (!id) return;
     
+    console.log("Fetching opportunity details for ID:", opportunityId);
+    try {
+      const { data, error } = await supabase
+        .from('opportunities')
+        .select('*')
+        .eq('id', opportunityId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching opportunity:", error);
+        throw error;
+      }
+      console.log("Successfully fetched opportunity:", data);
+      setOpportunity(data);
+    } catch (error) {
+      console.error("Error in fetchOpportunity:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load opportunity details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchApplications = async () => {
+    console.log("fetchApplications called, opportunityId:", opportunityId);
+    if (!opportunityId) {
+      console.log("No opportunityId, aborting fetch.");
+      return;
+    }
     setIsLoading(true);
     try {
-      // First fetch the applications
+      console.log("Fetching applications for opportunity:", opportunityId);
       const { data: appData, error: appError } = await supabase
         .from('applications')
         .select('*')
-        .eq('opportunity_id', id);
+        .eq('opportunity_id', opportunityId);
+
+      console.log("Applications fetch result:", appData, appError);
 
       if (appError) throw appError;
 
-      // Initialize applications array with proper typing for status
       const initialApps: RunClubApplication[] = (appData || []).map(app => ({
         ...app,
         status: app.status as "pending" | "accepted" | "rejected"
       }));
       
+      console.log("Initial applications:", initialApps);
+      
       // Now fetch the run club profile data separately for each application
       const appsWithProfiles = await Promise.all(
         initialApps.map(async (app) => {
+          console.log("Fetching profile for run club:", app.run_club_id);
           const { data: profileData, error: profileError } = await supabase
             .from('run_club_profiles')
             .select('club_name, location, member_count')
             .eq('id', app.run_club_id)
             .single();
+
+          console.log(`Fetched run club profile for run_club_id ${app.run_club_id}:`, profileData, profileError);
 
           return {
             ...app,
@@ -81,8 +96,10 @@ const OpportunityApplications = () => {
         })
       );
 
+      console.log("Final applications with profiles:", appsWithProfiles);
       setApplications(appsWithProfiles);
-    } catch (error: any) {
+    } catch (error) {
+      console.error("Error fetching applications:", error);
       toast({
         title: "Error",
         description: "Failed to load applications",
@@ -94,15 +111,12 @@ const OpportunityApplications = () => {
   };
 
   const handleRefresh = () => {
-    loadApplications();
+    fetchApplications();
   };
 
   const handleUpdateStatus = async (applicationId: string, status: "accepted" | "rejected") => {
     try {
-      await supabase
-        .from('applications')
-        .update({ status })
-        .eq('id', applicationId);
+      await updateApplicationStatus(applicationId, status);
 
       // Update local state to reflect the change
       setApplications(applications.map(app => 
@@ -121,6 +135,17 @@ const OpportunityApplications = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if (!opportunityId) {
+      console.error("No opportunityId provided. Redirecting...");
+      // Optionally redirect to a fallback page
+      // navigate("/opportunities");
+    } else {
+      fetchOpportunity();
+      fetchApplications();
+    }
+  }, [opportunityId]);
 
   return (
     <div className="space-y-6">

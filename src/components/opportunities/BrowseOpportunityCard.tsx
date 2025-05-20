@@ -83,17 +83,11 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
         
         <CardContent>
           <p className="text-sm text-gray-500 mb-2">
-            Posted {new Date(opportunity.created_at).toLocaleDateString()}
+            Application Due: {opportunity.submission_deadline}
           </p>
-          <p className="line-clamp-3 text-sm">{opportunity.description}</p>
           <div className="mt-3 py-2 px-3 bg-primary-50 rounded-md">
-            <p className="font-medium">Incentive: {opportunity.reward}</p>
+            <p className="font-medium">Incentive: {opportunity.club_incentives}</p>
           </div>
-          {opportunity.deadline && (
-            <p className="text-sm mt-3">
-              <span className="font-medium">Deadline:</span> {new Date(opportunity.deadline).toLocaleDateString()}
-            </p>
-          )}
         </CardContent>
         
         <CardFooter>

@@ -60,11 +60,20 @@ export interface Opportunity {
   id: string;
   brand_id: string;
   title: string;
-  description: string;
-  reward: string;
-  deadline: string | null;
-  duration: string | null;
-  requirements: string[] | null;
+  activation_overview: string;
+  target_launch_date: string;
+  primary_objective: string;
+  primary_objective_other: string | null;
+  content_specifications: string;
+  professional_media: string;
+  media_requirements: string | null;
+  club_responsibilities: string;
+  club_incentives: string;
+  geographic_locations: string[];
+  club_size_preference: string;
+  online_reach_preference: string;
+  additional_notes: string | null;
+  submission_deadline: string;
   created_at: string;
   brand?: {
     company_name: string;
