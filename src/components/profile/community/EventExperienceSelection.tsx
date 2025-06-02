@@ -1,4 +1,3 @@
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -15,7 +14,7 @@ export function EventExperienceSelection({
 }: EventExperienceSelectionProps) {
   return (
     <div className="space-y-3">
-      <Label>Event Experience</Label>
+      <Label>Activation Experience</Label>
       <div className="grid grid-cols-2 gap-2">
         {availableEventTypes.map((type) => (
           <div key={type} className="flex items-center space-x-2">

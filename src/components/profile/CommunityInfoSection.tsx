@@ -69,7 +69,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
       </div>
       
       <div>
-        <h3 className="text-lg font-semibold mb-3">Event Experience</h3>
+        <h3 className="text-lg font-semibold mb-3">Activation Experience</h3>
         <div className="flex flex-wrap gap-2">
           {eventTypes.length > 0 ? (
             eventTypes.map((event, index) => (
@@ -78,7 +78,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
               </Badge>
             ))
           ) : (
-            <p className="text-muted-foreground">No event experience specified</p>
+            <p className="text-muted-foreground">No activation experience specified</p>
           )}
         </div>
       </div>

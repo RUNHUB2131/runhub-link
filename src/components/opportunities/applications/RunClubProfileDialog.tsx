@@ -163,6 +163,20 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
               </div>
             )}
 
+            {/* Activation Experience */}
+            {profile?.community_data?.demographics?.event_experience && profile.community_data.demographics.event_experience.length > 0 && (
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="font-medium mb-2">Activation Experience</div>
+                <div className="flex flex-wrap gap-1">
+                  {(profile.community_data.demographics.event_experience as string[]).map((experience, i) => (
+                    <Badge key={i} variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-200">
+                      {experience}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Website and Social Links */}
             <div className="space-y-2">
               {profile?.website && (

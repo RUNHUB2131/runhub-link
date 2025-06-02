@@ -101,7 +101,7 @@ export function CommunityDataForm({ profile, open, onSaveData }: CommunityDataFo
   }, [formData, runTypes, eventExperience, open, storageKey]);
 
   const availableRunTypes = ["Road", "Trail", "Track", "Urban"];
-  const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
+  const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups", "Giveaways", "Run Club Takeover", "Content Production"];
   const groupSizeRanges = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
   const demographicRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
   const paceRanges = ["3:00-4:00", "4:00-5:00", "5:00-6:00", "6:00-7:00", "7:00-8:00", "8:00+"];

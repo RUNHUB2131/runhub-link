@@ -42,18 +42,27 @@ export function EditCommunityInfoDialog({
         member_count: data.member_count,
         community_data: communityData,
       });
+      
+      // Clear sessionStorage immediately to prevent race condition
+      sessionStorage.removeItem('dialog_runclub-community-info');
+      // Close the dialog immediately after successful save, before any re-renders
+      onOpenChange(false);
     },
   });
 
   const handleCancel = () => {
     // Clear the draft when user explicitly cancels
     clearDraft();
+    // Clear sessionStorage immediately to prevent race condition
+    sessionStorage.removeItem('dialog_runclub-community-info');
     onOpenChange(false);
   };
 
   const handleClickOutside = () => {
     // Clear the draft when user clicks outside (implicit cancel)
     clearDraft();
+    // Clear sessionStorage immediately to prevent race condition
+    sessionStorage.removeItem('dialog_runclub-community-info');
     onOpenChange(false);
   };
 

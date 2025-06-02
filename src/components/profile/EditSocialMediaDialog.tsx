@@ -129,6 +129,8 @@ export function EditSocialMediaDialog({
       });
       // Clear the draft after successful save
       localStorage.removeItem(storageKey);
+      // Clear sessionStorage immediately to prevent race condition
+      sessionStorage.removeItem('dialog_runclub-social-media');
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving social media:", error);
@@ -140,12 +142,16 @@ export function EditSocialMediaDialog({
   const handleCancel = () => {
     // Clear the draft when user explicitly cancels
     localStorage.removeItem(storageKey);
+    // Clear sessionStorage immediately to prevent race condition
+    sessionStorage.removeItem('dialog_runclub-social-media');
     onOpenChange(false);
   };
 
   const handleClickOutside = () => {
     // Clear the draft when user clicks outside (implicit cancel)
     localStorage.removeItem(storageKey);
+    // Clear sessionStorage immediately to prevent race condition
+    sessionStorage.removeItem('dialog_runclub-social-media');
     onOpenChange(false);
   };
 
