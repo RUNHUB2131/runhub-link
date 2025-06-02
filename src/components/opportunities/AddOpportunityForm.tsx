@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -164,7 +165,11 @@ export const AddOpportunityForm = () => {
             <Label htmlFor="activation_overview">Activation Overview *</Label>
             <Textarea id="activation_overview" name="activation_overview" value={formData.activation_overview} onChange={handleChange} required rows={3} />
             <Label htmlFor="target_launch_date">Target Launch Date *</Label>
-            <Input id="target_launch_date" name="target_launch_date" type="date" value={formData.target_launch_date} onChange={handleChange} required />
+            <DatePicker
+              value={formData.target_launch_date}
+              onChange={(value) => setFormData(prev => ({ ...prev, target_launch_date: value }))}
+              placeholder="Select target launch date"
+            />
             <Label htmlFor="primary_objective">Primary Objective *</Label>
             <select id="primary_objective" name="primary_objective" value={formData.primary_objective} onChange={handleChange} required className="w-full border rounded p-2">
               <option value="">Select objective</option>
@@ -233,7 +238,11 @@ export const AddOpportunityForm = () => {
           {/* Submission Section */}
           <div className="space-y-2">
             <Label htmlFor="submission_deadline">Submission Deadline *</Label>
-            <Input id="submission_deadline" name="submission_deadline" type="date" value={formData.submission_deadline} onChange={handleChange} required />
+            <DatePicker
+              value={formData.submission_deadline}
+              onChange={(value) => setFormData(prev => ({ ...prev, submission_deadline: value }))}
+              placeholder="Select submission deadline"
+            />
             <div className="bg-gray-50 p-4 rounded border text-sm">
               <p>Thank you for submitting your opportunity! For questions, contact <a href="mailto:hello@runhub.com" className="text-blue-600 underline">hello@runhub.com</a>.</p>
             </div>
