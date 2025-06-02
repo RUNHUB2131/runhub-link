@@ -37,6 +37,7 @@ export interface RunClubProfile extends Profile {
     demographics?: {
       average_group_size?: string;
       core_demographic?: string;
+      average_pace?: string;
       event_experience?: string[];
     };
   };

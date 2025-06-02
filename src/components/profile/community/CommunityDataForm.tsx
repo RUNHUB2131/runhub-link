@@ -1,4 +1,3 @@
-
 import { RunClubProfile } from "@/types";
 import { useState } from "react";
 import { DemographicSelections } from "./DemographicSelections";
@@ -11,6 +10,7 @@ interface CommunityDataFormProps {
     member_count: number;
     average_group_size: string;
     core_demographic: string;
+    average_pace: string;
     runTypes: string[];
     eventExperience: string[];
   }) => Promise<void>;
@@ -27,6 +27,7 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
     member_count: profile.member_count || 0,
     average_group_size: demographics.average_group_size || "",
     core_demographic: demographics.core_demographic || "",
+    average_pace: demographics.average_pace || "",
   });
   
   const [runTypes, setRunTypes] = useState<string[]>(initialRunTypes);
@@ -37,6 +38,7 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
   const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
   const groupSizeRanges = ["0-10", "10-25", "25-50", "50-100", "100-200", "200+"];
   const demographicRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+  const paceRanges = ["3:00-4:00", "4:00-5:00", "5:00-6:00", "6:00-7:00", "7:00-8:00", "8:00+"];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -76,6 +78,13 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
     }));
   };
 
+  const handleAveragePaceChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      average_pace: value,
+    }));
+  };
+
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
@@ -83,6 +92,7 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
         member_count: formData.member_count,
         average_group_size: formData.average_group_size,
         core_demographic: formData.core_demographic,
+        average_pace: formData.average_pace,
         runTypes,
         eventExperience,
       });
@@ -100,11 +110,14 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
           memberCount={formData.member_count}
           averageGroupSize={formData.average_group_size}
           coreDemographic={formData.core_demographic}
+          averagePace={formData.average_pace}
           groupSizeRanges={groupSizeRanges}
           demographicRanges={demographicRanges}
+          paceRanges={paceRanges}
           onMemberCountChange={handleChange}
           onGroupSizeChange={handleGroupSizeChange}
           onDemographicChange={handleDemographicChange}
+          onAveragePaceChange={handleAveragePaceChange}
         />
         
         <RunTypeSelection

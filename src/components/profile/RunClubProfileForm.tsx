@@ -111,7 +111,7 @@ export const RunClubProfileForm = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Tell us about yourself</Label>
             <Textarea
               id="description"
               name="description"

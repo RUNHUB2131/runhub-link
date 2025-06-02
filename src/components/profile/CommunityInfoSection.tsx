@@ -1,7 +1,6 @@
-
 import { Badge } from "@/components/ui/badge";
 import { RunClubProfile } from "@/types";
-import { Users, Calendar } from "lucide-react";
+import { Users, Calendar, Timer } from "lucide-react";
 
 interface CommunityInfoSectionProps {
   profile: Partial<RunClubProfile>;
@@ -15,7 +14,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
   
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div className="p-6 border rounded-lg flex items-center">
           <Users className="h-10 w-10 text-blue-500 mr-4" />
           <div>
@@ -40,6 +39,15 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
             <p className="text-sm text-muted-foreground">Core Demographic</p>
             <p className="text-3xl font-semibold">
               {demographics.core_demographic || "Not specified"}
+            </p>
+          </div>
+        </div>
+        <div className="p-6 border rounded-lg flex items-center">
+          <Timer className="h-10 w-10 text-purple-500 mr-4" />
+          <div>
+            <p className="text-sm text-muted-foreground">Average Pace</p>
+            <p className="text-3xl font-semibold">
+              {demographics.average_pace || "Not specified"}
             </p>
           </div>
         </div>

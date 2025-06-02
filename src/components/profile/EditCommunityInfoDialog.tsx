@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +31,7 @@ export function EditCommunityInfoDialog({
         demographics: {
           average_group_size: data.average_group_size,
           core_demographic: data.core_demographic,
+          average_pace: data.average_pace,
           event_experience: data.eventExperience,
         },
       };

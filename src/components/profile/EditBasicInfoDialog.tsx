@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,7 +114,7 @@ export function EditBasicInfoDialog({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Tell us about yourself</Label>
             <Textarea
               id="description"
               name="description"

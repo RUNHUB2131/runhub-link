@@ -1,4 +1,3 @@
-
 import { ExternalLink } from "lucide-react";
 import { RunClubProfile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,7 +42,6 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
       </div>
 
       <div>
-        <h3 className="font-semibold mb-2">Description</h3>
         <p className="text-lg">
           {profile.description || "No description provided."}
         </p>

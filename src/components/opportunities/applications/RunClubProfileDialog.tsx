@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Users, Globe, Instagram, Facebook } from "lucide-react";
+import { MapPin, Users, Globe, Instagram, Facebook, Calendar, Timer } from "lucide-react";
 import { RunClubProfile } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -105,19 +104,51 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
                 <p className="text-2xl font-bold mt-1">{profile?.member_count || 0}</p>
               </div>
               
-              {profile?.community_data?.run_types && (
-                <div className="bg-muted/30 p-3 rounded-md">
-                  <div className="font-medium mb-2">Run Types</div>
-                  <div className="flex flex-wrap gap-1">
-                    {(profile.community_data.run_types as string[]).map((type, i) => (
-                      <Badge key={i} variant="secondary">
-                        {type}
-                      </Badge>
-                    ))}
-                  </div>
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-500" />
+                  <span className="font-medium">Avg Group Size</span>
                 </div>
-              )}
+                <p className="text-lg font-bold mt-1">
+                  {profile?.community_data?.demographics?.average_group_size || "Not specified"}
+                </p>
+              </div>
+
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-amber-500" />
+                  <span className="font-medium">Core Demo</span>
+                </div>
+                <p className="text-lg font-bold mt-1">
+                  {profile?.community_data?.demographics?.core_demographic || "Not specified"}
+                </p>
+              </div>
+
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                  <Timer className="h-5 w-5 text-purple-500" />
+                  <span className="font-medium">Avg Pace</span>
+                </div>
+                <p className="text-lg font-bold mt-1">
+                  {profile?.community_data?.demographics?.average_pace ? 
+                    `${profile.community_data.demographics.average_pace} min/km` : "Not specified"}
+                </p>
+              </div>
             </div>
+
+            {/* Run Types */}
+            {profile?.community_data?.run_types && profile.community_data.run_types.length > 0 && (
+              <div className="bg-muted/30 p-3 rounded-md">
+                <div className="font-medium mb-2">Run Types</div>
+                <div className="flex flex-wrap gap-1">
+                  {(profile.community_data.run_types as string[]).map((type, i) => (
+                    <Badge key={i} variant="secondary">
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Website and Social Links */}
             <div className="space-y-2">

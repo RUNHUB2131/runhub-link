@@ -1,4 +1,3 @@
-
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -13,22 +12,28 @@ interface DemographicSelectionsProps {
   memberCount: number;
   averageGroupSize: string;
   coreDemographic: string;
+  averagePace: string;
   groupSizeRanges: string[];
   demographicRanges: string[];
+  paceRanges: string[];
   onMemberCountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onGroupSizeChange: (value: string) => void;
   onDemographicChange: (value: string) => void;
+  onAveragePaceChange: (value: string) => void;
 }
 
 export function DemographicSelections({
   memberCount,
   averageGroupSize,
   coreDemographic,
+  averagePace,
   groupSizeRanges,
   demographicRanges,
+  paceRanges,
   onMemberCountChange,
   onGroupSizeChange,
   onDemographicChange,
+  onAveragePaceChange,
 }: DemographicSelectionsProps) {
   return (
     <div className="space-y-4">
@@ -75,6 +80,25 @@ export function DemographicSelections({
           </SelectTrigger>
           <SelectContent>
             {demographicRanges.map((range) => (
+              <SelectItem key={range} value={range}>
+                {range}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="average_pace">Average Pace (min/km)</Label>
+        <Select
+          value={averagePace}
+          onValueChange={onAveragePaceChange}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select average pace range" />
+          </SelectTrigger>
+          <SelectContent>
+            {paceRanges.map((range) => (
               <SelectItem key={range} value={range}>
                 {range}
               </SelectItem>
