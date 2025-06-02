@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -7,6 +6,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { RecentActivitySection } from "@/components/dashboard/RecentActivitySection";
 import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionCard";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 
@@ -76,29 +76,31 @@ const Dashboard = () => {
   }, [user?.id, userType, toast]);
 
   return (
-    <div className="space-y-6">
-      <DashboardHeader userType={userType} />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <StatsCards userType={userType} stats={stats} isLoading={isLoading} />
+    <PageContainer>
+      <div className="space-y-6">
+        <DashboardHeader userType={userType} />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <StatsCards userType={userType} stats={stats} isLoading={isLoading} />
+          </div>
+          
+          {userType === 'run_club' && (
+            <ProfileCompletionCard 
+              isLoading={profileLoading} 
+              percentage={profilePercentage}
+              profile={runClubProfile} 
+            />
+          )}
         </div>
         
-        {userType === 'run_club' && (
-          <ProfileCompletionCard 
-            isLoading={profileLoading} 
-            percentage={profilePercentage}
-            profile={runClubProfile} 
-          />
-        )}
+        <RecentActivitySection 
+          notifications={recentActivity} 
+          isLoading={isLoading} 
+          notificationsLoading={notificationsLoading} 
+        />
       </div>
-      
-      <RecentActivitySection 
-        notifications={recentActivity} 
-        isLoading={isLoading} 
-        notificationsLoading={notificationsLoading} 
-      />
-    </div>
+    </PageContainer>
   );
 };
 

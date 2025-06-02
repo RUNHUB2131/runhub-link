@@ -1,4 +1,3 @@
-
 import { useCallback, useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
@@ -101,15 +100,19 @@ export function SideBar() {
   }, [userType]);
 
   return (
-    <div className="hidden w-64 border-r bg-background md:block">
-      <div className="flex h-full flex-col gap-2 p-4">
-        <div className="space-y-1">
-          {navLinks.map((link) =>
-            renderNavLink(link.to, link.icon, link.label)
-          )}
+    <div className="hidden w-64 border-r bg-background md:block h-screen fixed left-0 top-0">
+      <div className="flex flex-col h-full">
+        {/* Navigation Links */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-1 mt-16"> {/* Add top margin to account for navbar */}
+            {navLinks.map((link) =>
+              renderNavLink(link.to, link.icon, link.label)
+            )}
+          </div>
         </div>
         
-        <div className="mt-auto pt-4 border-t">
+        {/* Sign out button - always at bottom */}
+        <div className="p-4 border-t bg-background">
           <Button 
             variant="ghost" 
             className="w-full justify-start text-destructive" 

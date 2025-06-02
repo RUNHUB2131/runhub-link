@@ -95,14 +95,7 @@ export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileV
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-        <p className="text-muted-foreground">
-          Tell brands about your run club
-        </p>
-      </div>
-
+    <div className="space-y-8">
       <ProfileSection 
         title="Basic Information" 
         subtitle="Your run club's essential details"

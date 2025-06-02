@@ -1,22 +1,24 @@
-
 import { AddOpportunityForm } from "@/components/opportunities/AddOpportunityForm";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const AddOpportunity = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
+    <PageContainer>
+      <PageHeader 
+        title="Create Opportunity"
+      >
         <Link to="/opportunities">
           <Button variant="ghost" size="sm">
             <ChevronLeft className="h-4 w-4 mr-1" /> Back
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Create Opportunity</h1>
-      </div>
+      </PageHeader>
       <AddOpportunityForm />
-    </div>
+    </PageContainer>
   );
 };
 

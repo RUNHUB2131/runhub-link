@@ -11,7 +11,7 @@ export const AppLayout = () => {
       <NavBar />
       <div className="flex flex-1">
         {user && <SideBar />}
-        <main className="flex-1 p-6 bg-gray-50">
+        <main className={`flex-1 bg-gray-50 overflow-y-auto ${user ? 'ml-64' : ''}`}>
           <Outlet />
         </main>
       </div>

@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOpportunityBrowse } from "@/hooks/useOpportunityBrowse";
 import { supabase } from "@/integrations/supabase/client";
 import BrowseOpportunityList from "@/components/opportunities/BrowseOpportunityList";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { RunClubProfile, Opportunity } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
@@ -150,11 +152,11 @@ const BrowseOpportunities = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Browse Opportunities</h1>
-        <p className="text-gray-500 mt-2">Find sponsorship opportunities for your run club</p>
-      </div>
+    <PageContainer>
+      <PageHeader 
+        title="Browse Opportunities" 
+        description="Find sponsorship opportunities for your run club"
+      />
       
       <BrowseOpportunityList 
         opportunities={opportunities as Opportunity[]}
@@ -162,7 +164,7 @@ const BrowseOpportunities = () => {
         onApply={handleApply}
         runClubProfile={runClubProfile} 
       />
-    </div>
+    </PageContainer>
   );
 };
 

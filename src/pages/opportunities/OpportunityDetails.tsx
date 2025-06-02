@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +8,7 @@ import OpportunityDetailsSkeleton from "@/components/opportunities/OpportunityDe
 import OpportunityNotFound from "@/components/opportunities/OpportunityNotFound";
 import OpportunityDetailsContent from "@/components/opportunities/OpportunityDetailsContent";
 import OpportunityDetailsHeader from "@/components/opportunities/OpportunityDetailsHeader";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const OpportunityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,21 +58,23 @@ const OpportunityDetails = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <OpportunityDetailsHeader
-        opportunity={opportunity}
-        userType={userType}
-        userId={user?.id}
-        application={application}
-        isApplying={isApplying}
-        handleApply={handleApplyClick}
-        showApplications={showApplications}
-        setShowApplications={setShowApplications}
-        runClubProfile={runClubProfile}
-      />
-      
-      <OpportunityDetailsContent opportunity={opportunity} />
-    </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <OpportunityDetailsHeader
+          opportunity={opportunity}
+          userType={userType}
+          userId={user?.id}
+          application={application}
+          isApplying={isApplying}
+          handleApply={handleApplyClick}
+          showApplications={showApplications}
+          setShowApplications={setShowApplications}
+          runClubProfile={runClubProfile}
+        />
+        
+        <OpportunityDetailsContent opportunity={opportunity} />
+      </div>
+    </PageContainer>
   );
 };
 

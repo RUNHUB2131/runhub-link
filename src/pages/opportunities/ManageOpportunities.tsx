@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import { fetchOpportunities, Opportunity } from "@/services/opportunityService";
 import OpportunityCard from "@/components/opportunities/OpportunityCard";
 import EmptyOpportunities from "@/components/opportunities/EmptyOpportunities";
 import OpportunitiesLoading from "@/components/opportunities/OpportunitiesLoading";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const ManageOpportunities = () => {
   const { user } = useAuth();
@@ -47,14 +48,15 @@ const ManageOpportunities = () => {
   };
   
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Manage Opportunities</h1>
+    <PageContainer>
+      <PageHeader 
+        title="Manage Opportunities"
+      >
         <Button onClick={handleAddOpportunity}>
           <Plus className="h-4 w-4 mr-2" />
           New Opportunity
         </Button>
-      </div>
+      </PageHeader>
       
       {isLoading ? (
         <OpportunitiesLoading />
@@ -70,7 +72,7 @@ const ManageOpportunities = () => {
       ) : (
         <EmptyOpportunities onAddOpportunity={handleAddOpportunity} />
       )}
-    </div>
+    </PageContainer>
   );
 };
 

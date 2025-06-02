@@ -8,6 +8,8 @@ import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
 import ApplicationsList from "@/components/applications/ApplicationsList";
 import ApplicationsEmptyState from "@/components/applications/ApplicationsEmptyState";
 import ApplicationsLoadingSkeleton from "@/components/applications/ApplicationsLoadingSkeleton";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -86,11 +88,11 @@ const MyApplications = () => {
   const rejectedApplications = applications.filter(app => app.status === 'rejected');
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2">My Applications</h1>
-        <p className="text-gray-600">Track the status of your applications to brand opportunities</p>
-      </div>
+    <PageContainer>
+      <PageHeader 
+        title="My Applications" 
+        description="Track the status of your applications to brand opportunities"
+      />
 
       {isLoading ? (
         <ApplicationsLoadingSkeleton />
@@ -154,7 +156,7 @@ const MyApplications = () => {
       ) : (
         <ApplicationsEmptyState />
       )}
-    </div>
+    </PageContainer>
   );
 };
 
