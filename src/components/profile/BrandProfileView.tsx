@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { BrandProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { useDialogState } from "@/hooks/usePageVisibility";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { EditBrandBasicInfoDialog } from "@/components/profile/EditBrandBasicInfoDialog";
 import { EditBrandSocialMediaDialog } from "@/components/profile/EditBrandSocialMediaDialog";
@@ -17,9 +17,9 @@ interface BrandProfileViewProps {
 export const BrandProfileView = ({ profile, onProfileUpdate }: BrandProfileViewProps) => {
   const { toast } = useToast();
   
-  // Dialog state
-  const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useState(false);
-  const [socialMediaDialogOpen, setSocialMediaDialogOpen] = useState(false);
+  // Dialog state - persisted across page reloads
+  const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useDialogState('brand-basic-info');
+  const [socialMediaDialogOpen, setSocialMediaDialogOpen] = useDialogState('brand-social-media');
   
   const saveProfileData = async (data: Partial<BrandProfile>) => {
     if (!profile.id) return;

@@ -23,8 +23,9 @@ export function EditCommunityInfoDialog({
   profile,
   onSave,
 }: EditCommunityInfoDialogProps) {
-  const { formComponents, handleSubmit, isLoading } = CommunityDataForm({
+  const { formComponents, handleSubmit, isLoading, clearDraft } = CommunityDataForm({
     profile,
+    open,
     onSaveData: async (data) => {
       const communityData = {
         run_types: data.runTypes,
@@ -44,9 +45,41 @@ export function EditCommunityInfoDialog({
     },
   });
 
+  const handleCancel = () => {
+    // Clear the draft when user explicitly cancels
+    clearDraft();
+    onOpenChange(false);
+  };
+
+  const handleClickOutside = () => {
+    // Clear the draft when user clicks outside (implicit cancel)
+    clearDraft();
+    onOpenChange(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Dialog is being closed - clear the draft (same as cancel)
+      clearDraft();
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="sm:max-w-[550px]"
+        onInteractOutside={(e) => {
+          // Allow pointer events (clicks) to close dialog and discard changes
+          // but prevent focus events (tab switching) from closing
+          if (e.type === 'focusout') {
+            e.preventDefault();
+          } else {
+            // This is a pointer event (click outside) - close and discard
+            handleClickOutside();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Edit Community Information</DialogTitle>
         </DialogHeader>
@@ -54,7 +87,7 @@ export function EditCommunityInfoDialog({
           {formComponents}
         </div>
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)} variant="outline">
+          <Button onClick={handleCancel} variant="outline">
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>

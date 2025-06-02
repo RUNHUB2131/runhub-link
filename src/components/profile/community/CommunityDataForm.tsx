@@ -1,11 +1,13 @@
 import { RunClubProfile } from "@/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { DemographicSelections } from "./DemographicSelections";
 import { RunTypeSelection } from "./RunTypeSelection";
 import { EventExperienceSelection } from "./EventExperienceSelection";
 
 interface CommunityDataFormProps {
   profile: Partial<RunClubProfile>;
+  open: boolean;
   onSaveData: (data: {
     member_count: number;
     average_group_size: string;
@@ -16,7 +18,8 @@ interface CommunityDataFormProps {
   }) => Promise<void>;
 }
 
-export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProps) {
+export function CommunityDataForm({ profile, open, onSaveData }: CommunityDataFormProps) {
+  const { user } = useAuth();
   const communityData = profile.community_data || {};
   const demographics = communityData.demographics || {};
   
@@ -33,6 +36,69 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
   const [runTypes, setRunTypes] = useState<string[]>(initialRunTypes);
   const [eventExperience, setEventExperience] = useState<string[]>(initialEventExperience);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Create a unique key for localStorage based on user ID and dialog type
+  const storageKey = `editCommunityInfo_${user?.id}_draft`;
+
+  // Load draft data from localStorage when dialog opens
+  useEffect(() => {
+    if (open) {
+      const savedDraft = localStorage.getItem(storageKey);
+      if (savedDraft) {
+        try {
+          const draftData = JSON.parse(savedDraft);
+          setFormData(draftData.formData);
+          setRunTypes(draftData.runTypes);
+          setEventExperience(draftData.eventExperience);
+        } catch (error) {
+          console.error("Error parsing saved draft:", error);
+          // Fallback to profile data if draft is corrupted
+          const communityData = profile.community_data || {};
+          const demographics = communityData.demographics || {};
+          const newRunTypes = Array.isArray(communityData.run_types) ? communityData.run_types : [];
+          const newEventExperience = Array.isArray(demographics.event_experience) ? demographics.event_experience : [];
+          
+          setFormData({
+            member_count: profile.member_count || 0,
+            average_group_size: demographics.average_group_size || "",
+            core_demographic: demographics.core_demographic || "",
+            average_pace: demographics.average_pace || "",
+          });
+          
+          setRunTypes(newRunTypes);
+          setEventExperience(newEventExperience);
+        }
+      } else {
+        // No draft exists, use current profile data
+        const communityData = profile.community_data || {};
+        const demographics = communityData.demographics || {};
+        const newRunTypes = Array.isArray(communityData.run_types) ? communityData.run_types : [];
+        const newEventExperience = Array.isArray(demographics.event_experience) ? demographics.event_experience : [];
+        
+        setFormData({
+          member_count: profile.member_count || 0,
+          average_group_size: demographics.average_group_size || "",
+          core_demographic: demographics.core_demographic || "",
+          average_pace: demographics.average_pace || "",
+        });
+        
+        setRunTypes(newRunTypes);
+        setEventExperience(newEventExperience);
+      }
+    }
+  }, [open, profile.member_count, profile.community_data, storageKey]);
+
+  // Save draft to localStorage whenever form data changes
+  useEffect(() => {
+    if (open) {
+      const draftData = {
+        formData,
+        runTypes,
+        eventExperience,
+      };
+      localStorage.setItem(storageKey, JSON.stringify(draftData));
+    }
+  }, [formData, runTypes, eventExperience, open, storageKey]);
 
   const availableRunTypes = ["Road", "Trail", "Track", "Urban"];
   const availableEventTypes = ["Races", "Charity Runs", "Sponsored Events", "Community Meetups"];
@@ -96,6 +162,8 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
         runTypes,
         eventExperience,
       });
+      // Clear the draft after successful save
+      localStorage.removeItem(storageKey);
     } catch (error) {
       console.error("Error saving community info:", error);
     } finally {
@@ -135,5 +203,6 @@ export function CommunityDataForm({ profile, onSaveData }: CommunityDataFormProp
     ),
     handleSubmit,
     isLoading,
+    clearDraft: () => localStorage.removeItem(storageKey),
   };
 }

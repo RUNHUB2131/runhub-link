@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { RunClubProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { useDialogState } from "@/hooks/usePageVisibility";
 import { ProfileSection } from "@/components/profile/ProfileSection";
 import { BasicInfoSection } from "@/components/profile/BasicInfoSection";
 import { SocialMediaSection } from "@/components/profile/SocialMediaSection";
@@ -19,10 +19,10 @@ interface RunClubProfileViewProps {
 export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileViewProps) => {
   const { toast } = useToast();
   
-  // Dialog state
-  const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useState(false);
-  const [socialMediaDialogOpen, setSocialMediaDialogOpen] = useState(false);
-  const [communityInfoDialogOpen, setCommunityInfoDialogOpen] = useState(false);
+  // Dialog state - persisted across page reloads
+  const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useDialogState('runclub-basic-info');
+  const [socialMediaDialogOpen, setSocialMediaDialogOpen] = useDialogState('runclub-social-media');
+  const [communityInfoDialogOpen, setCommunityInfoDialogOpen] = useDialogState('runclub-community-info');
   
   const saveProfileData = async (data: Partial<RunClubProfile>) => {
     if (!profile.id) return;

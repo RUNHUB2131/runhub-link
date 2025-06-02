@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +17,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { RunClubProfile, FollowerCountRange } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EditSocialMediaDialogProps {
   open: boolean;
@@ -32,6 +32,7 @@ export function EditSocialMediaDialog({
   profile,
   onSave,
 }: EditSocialMediaDialogProps) {
+  const { user } = useAuth();
   const socialMedia = profile.social_media || {};
   
   const [formData, setFormData] = useState({
@@ -45,6 +46,56 @@ export function EditSocialMediaDialog({
     strava_follower_range: socialMedia.strava_follower_range || undefined,
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Create a unique key for localStorage based on user ID and dialog type
+  const storageKey = `editSocialMedia_${user?.id}_draft`;
+
+  // Load draft data from localStorage when dialog opens
+  useEffect(() => {
+    if (open) {
+      const savedDraft = localStorage.getItem(storageKey);
+      if (savedDraft) {
+        try {
+          const draftData = JSON.parse(savedDraft);
+          setFormData(draftData);
+        } catch (error) {
+          console.error("Error parsing saved draft:", error);
+          // Fallback to profile data if draft is corrupted
+          const socialMedia = profile.social_media || {};
+          setFormData({
+            instagram: socialMedia.instagram || "",
+            instagram_follower_range: socialMedia.instagram_follower_range || undefined,
+            tiktok: socialMedia.tiktok || "",
+            tiktok_follower_range: socialMedia.tiktok_follower_range || undefined,
+            facebook: socialMedia.facebook || "",
+            facebook_follower_range: socialMedia.facebook_follower_range || undefined,
+            strava: socialMedia.strava || "",
+            strava_follower_range: socialMedia.strava_follower_range || undefined,
+          });
+        }
+      } else {
+        // No draft exists, use current profile data
+        const socialMedia = profile.social_media || {};
+        setFormData({
+          instagram: socialMedia.instagram || "",
+          instagram_follower_range: socialMedia.instagram_follower_range || undefined,
+          tiktok: socialMedia.tiktok || "",
+          tiktok_follower_range: socialMedia.tiktok_follower_range || undefined,
+          facebook: socialMedia.facebook || "",
+          facebook_follower_range: socialMedia.facebook_follower_range || undefined,
+          strava: socialMedia.strava || "",
+          strava_follower_range: socialMedia.strava_follower_range || undefined,
+        });
+      }
+    }
+  }, [open, profile.social_media, storageKey]);
+
+  // Save draft to localStorage whenever form data changes
+  useEffect(() => {
+    if (open) {
+      localStorage.setItem(storageKey, JSON.stringify(formData));
+    }
+  }, [formData, open, storageKey]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -76,12 +127,34 @@ export function EditSocialMediaDialog({
           strava_follower_range: formData.strava_follower_range,
         },
       });
+      // Clear the draft after successful save
+      localStorage.removeItem(storageKey);
       onOpenChange(false);
     } catch (error) {
       console.error("Error saving social media:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    // Clear the draft when user explicitly cancels
+    localStorage.removeItem(storageKey);
+    onOpenChange(false);
+  };
+
+  const handleClickOutside = () => {
+    // Clear the draft when user clicks outside (implicit cancel)
+    localStorage.removeItem(storageKey);
+    onOpenChange(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // Dialog is being closed - clear the draft (same as cancel)
+      localStorage.removeItem(storageKey);
+    }
+    onOpenChange(open);
   };
 
   const followerRangeOptions = [
@@ -93,8 +166,20 @@ export function EditSocialMediaDialog({
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent 
+        className="sm:max-w-[525px]"
+        onInteractOutside={(e) => {
+          // Allow pointer events (clicks) to close dialog and discard changes
+          // but prevent focus events (tab switching) from closing
+          if (e.type === 'focusout') {
+            e.preventDefault();
+          } else {
+            // This is a pointer event (click outside) - close and discard
+            handleClickOutside();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Edit Social Media</DialogTitle>
         </DialogHeader>
@@ -214,7 +299,7 @@ export function EditSocialMediaDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)} variant="outline">
+          <Button onClick={handleCancel} variant="outline">
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>
