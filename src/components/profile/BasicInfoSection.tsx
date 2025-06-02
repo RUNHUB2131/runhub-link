@@ -9,6 +9,19 @@ interface BasicInfoSectionProps {
 export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
   const clubInitial = profile.club_name ? profile.club_name.charAt(0).toUpperCase() : "C";
   
+  // Function to ensure URL has proper protocol
+  const formatWebsiteUrl = (website: string): string => {
+    if (!website) return '';
+    
+    // If the website already has a protocol, return as is
+    if (website.startsWith('http://') || website.startsWith('https://')) {
+      return website;
+    }
+    
+    // Otherwise, add https:// prefix
+    return `https://${website}`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4 mb-6">
@@ -28,7 +41,7 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
         <h3 className="font-semibold mb-2">Website</h3>
         {profile.website ? (
           <a 
-            href={profile.website}
+            href={formatWebsiteUrl(profile.website)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-2xl text-blue-500 hover:underline flex items-center"

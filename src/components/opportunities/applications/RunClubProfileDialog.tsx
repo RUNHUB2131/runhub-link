@@ -17,6 +17,19 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
   const [profile, setProfile] = useState<Partial<RunClubProfile> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Function to ensure URL has proper protocol
+  const formatWebsiteUrl = (website: string): string => {
+    if (!website) return '';
+    
+    // If the website already has a protocol, return as is
+    if (website.startsWith('http://') || website.startsWith('https://')) {
+      return website;
+    }
+    
+    // Otherwise, add https:// prefix
+    return `https://${website}`;
+  };
+
   // Fetch the run club profile details when the dialog opens
   useEffect(() => {
     if (isOpen && runClubId) {
@@ -154,7 +167,7 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
             <div className="space-y-2">
               {profile?.website && (
                 <a 
-                  href={profile.website} 
+                  href={formatWebsiteUrl(profile.website)} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm hover:underline"
