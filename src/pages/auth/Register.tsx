@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,13 +51,13 @@ const Register = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-bold mb-2">Create an account</h1>
-        <p className="text-gray-500">Enter your details to get started</p>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create an account</h1>
+        <p className="text-gray-500 text-sm sm:text-base">Enter your details to get started</p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -68,6 +67,7 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="h-11"
           />
         </div>
         
@@ -80,6 +80,7 @@ const Register = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="h-11"
           />
         </div>
         
@@ -92,12 +93,13 @@ const Register = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            className="h-11"
           />
         </div>
         
         <Button 
           type="submit" 
-          className="w-full" 
+          className="w-full h-11" 
           disabled={isLoading}
         >
           {isLoading ? "Creating account..." : "Create account"}
@@ -105,7 +107,7 @@ const Register = () => {
       </form>
       
       <div className="mt-6 text-center">
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm sm:text-base">
           Already have an account?{" "}
           <Link to="/auth/login" className="text-primary-500 hover:underline">
             Log in
