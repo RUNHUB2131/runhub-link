@@ -22,11 +22,11 @@ export const NavBar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
+    <header className="sticky top-0 z-40 w-full border-b" style={{ backgroundColor: '#021fdf' }}>
       <div className="container flex h-16 items-center">
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -44,7 +44,7 @@ export const NavBar = () => {
               <NotificationsDropdown />
               <ChatIndicator />
               <Link to="/profile">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]">
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
@@ -53,13 +53,14 @@ export const NavBar = () => {
                 size="icon" 
                 onClick={handleLogout}
                 title="Sign out"
+                className="text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
             </>
           ) : (
             <Link to="/auth/login">
-              <Button>Login</Button>
+              <Button className="bg-[#f0f0f0] text-[#021fdf] hover:bg-[#f0f0f0]/90 hover:text-[#021fdf]">Login</Button>
             </Link>
           )}
         </div>
@@ -88,7 +89,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
         <>
           <Link
             to="/dashboard"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Dashboard
@@ -96,7 +97,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/profile"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Profile
@@ -104,7 +105,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/opportunities"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Opportunities
@@ -112,7 +113,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/applications"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             My Applications
@@ -120,7 +121,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/chat"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Chats
@@ -139,7 +140,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
         <>
           <Link
             to="/auth/login"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Login
@@ -147,7 +148,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/auth/register"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
             onClick={closeSheet}
           >
             Register

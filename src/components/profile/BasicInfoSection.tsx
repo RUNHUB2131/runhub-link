@@ -44,7 +44,7 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
             href={formatWebsiteUrl(profile.website)}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-base sm:text-lg lg:text-xl text-blue-500 hover:underline flex items-center break-all sm:break-normal"
+            className="text-base sm:text-lg lg:text-xl text-[#021fdf] hover:underline flex items-center break-all sm:break-normal"
           >
             <span className="truncate sm:inline">{profile.website}</span>
             <ExternalLink size={16} className="ml-2 shrink-0 h-4 w-4 sm:h-5 sm:w-5" />

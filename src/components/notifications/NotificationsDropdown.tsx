@@ -83,7 +83,7 @@ const NotificationsDropdown = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full relative focus:outline-none focus:ring-0 notification-bell-btn">
+        <Button variant="ghost" size="icon" className="relative focus:outline-none focus:ring-0 notification-bell-btn text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-xs text-white flex items-center justify-center">

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,7 @@ export const ProfileCompletionCard = ({ isLoading, percentage, profile = {} }: P
           <>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div 
-                className={`h-2 rounded-full ${percentage < 50 ? 'bg-amber-500' : percentage < 80 ? 'bg-blue-500' : 'bg-green-500'}`}
+                className={`h-2 rounded-full ${percentage < 50 ? 'bg-amber-500' : percentage < 80 ? 'bg-[#021fdf]' : 'bg-green-500'}`}
                 style={{ width: `${percentage}%` }}
               ></div>
             </div>

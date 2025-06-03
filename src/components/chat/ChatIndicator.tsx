@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
@@ -119,7 +118,7 @@ const ChatIndicator = () => {
   };
   
   return (
-    <Button variant="ghost" size="icon" asChild className="relative">
+    <Button variant="ghost" size="icon" asChild className="relative text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]">
       <div onClick={handleChatClick}>
         <MessageCircle className="h-5 w-5" />
         {unreadCount > 0 && (

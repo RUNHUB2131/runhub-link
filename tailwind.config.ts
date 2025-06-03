@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -26,18 +25,18 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#0040FF', // RUNHUB blue
+					DEFAULT: '#021fdf', // RUNHUB signature blue
 					foreground: '#FFFFFF',
 					50: '#e6f0ff',
 					100: '#bdd6ff',
 					200: '#94bcff',
 					300: '#6ba2ff',
 					400: '#4288ff',
-					500: '#0040FF',
-					600: '#0039e6',
-					700: '#0033cc',
-					800: '#002db3',
-					900: '#002699',
+					500: '#021fdf',
+					600: '#021cc7',
+					700: '#0219af',
+					800: '#021697',
+					900: '#02137f',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',

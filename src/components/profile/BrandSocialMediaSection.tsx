@@ -1,4 +1,3 @@
-
 import { BrandProfile } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Instagram, Facebook, Linkedin } from "lucide-react";
@@ -45,7 +44,7 @@ export const BrandSocialMediaSection = ({ profile }: BrandSocialMediaSectionProp
       
       {profile.social_media?.facebook && (
         <Card className="p-4 flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-md text-white">
+          <div style={{ backgroundColor: '#021fdf' }} className="p-2 rounded-md text-white">
             <Facebook className="h-5 w-5" />
           </div>
           <div>
@@ -83,7 +82,7 @@ export const BrandSocialMediaSection = ({ profile }: BrandSocialMediaSectionProp
       
       {profile.social_media?.linkedin && (
         <Card className="p-4 flex items-center gap-3">
-          <div className="bg-blue-700 p-2 rounded-md text-white">
+          <div style={{ backgroundColor: '#021fdf' }} className="p-2 rounded-md text-white">
             <Linkedin className="h-5 w-5" />
           </div>
           <div>

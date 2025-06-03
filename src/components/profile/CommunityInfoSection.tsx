@@ -16,7 +16,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
     <div className="space-y-6 sm:space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         <div className="p-4 sm:p-6 border rounded-lg flex items-center">
-          <Users className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500 mr-3 sm:mr-4 shrink-0" />
+          <Users style={{ color: '#021fdf' }} className="h-8 w-8 sm:h-10 sm:w-10 mr-3 sm:mr-4 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs sm:text-sm text-muted-foreground">Total Member Count</p>
             <p className="text-xl sm:text-2xl lg:text-3xl font-semibold truncate">
@@ -25,7 +25,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
           </div>
         </div>
         <div className="p-4 sm:p-6 border rounded-lg flex items-center">
-          <Users className="h-8 w-8 sm:h-10 sm:w-10 text-green-500 mr-3 sm:mr-4 shrink-0" />
+          <Users style={{ color: '#021fdf' }} className="h-8 w-8 sm:h-10 sm:w-10 mr-3 sm:mr-4 shrink-0" />
           <div className="min-w-0">
             <p className="text-xs sm:text-sm text-muted-foreground">Average Group Size</p>
             <p className="text-xl sm:text-2xl lg:text-3xl font-semibold truncate">
@@ -58,7 +58,7 @@ export const CommunityInfoSection = ({ profile }: CommunityInfoSectionProps) => 
         <div className="flex flex-wrap gap-2">
           {runTypes.length > 0 ? (
             runTypes.map((type, index) => (
-              <Badge key={index} variant="secondary" className="text-sm sm:text-base py-1.5 sm:py-2 px-3 sm:px-6 rounded-full bg-blue-100">
+              <Badge key={index} variant="secondary" className="text-sm sm:text-base py-1.5 sm:py-2 px-3 sm:px-6 rounded-full" style={{ backgroundColor: 'rgba(2, 31, 223, 0.1)', color: '#021fdf' }}>
                 {type}
               </Badge>
             ))

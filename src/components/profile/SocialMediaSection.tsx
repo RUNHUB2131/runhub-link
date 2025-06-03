@@ -61,7 +61,7 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 href={getSocialUrl(socialMedia.instagram, 'instagram')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
+                className="text-[#021fdf] hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
                 <span className="truncate">{formatSocialHandle(socialMedia.instagram, 'instagram')}</span>
                 <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
@@ -85,7 +85,7 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 href={getSocialUrl(socialMedia.tiktok, 'tiktok')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
+                className="text-[#021fdf] hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
                 <span className="truncate">{formatSocialHandle(socialMedia.tiktok, 'tiktok')}</span>
                 <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
@@ -109,7 +109,7 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 href={getSocialUrl(socialMedia.facebook, 'facebook')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
+                className="text-[#021fdf] hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
                 <span className="truncate">{socialMedia.facebook}</span>
                 <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
@@ -133,7 +133,7 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
                 href={getSocialUrl(socialMedia.strava, 'strava')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
+                className="text-[#021fdf] hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
                 <span className="truncate">{socialMedia.strava}</span>
                 <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />

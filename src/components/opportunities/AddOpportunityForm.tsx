@@ -244,7 +244,7 @@ export const AddOpportunityForm = () => {
               placeholder="Select submission deadline"
             />
             <div className="bg-gray-50 p-4 rounded border text-sm">
-              <p>Thank you for submitting your opportunity! For questions, contact <a href="mailto:hello@runhub.com" className="text-blue-600 underline">hello@runhub.com</a>.</p>
+              <p>Thank you for submitting your opportunity! For questions, contact <a href="mailto:hello@runhub.com" className="text-[#021fdf] underline">hello@runhub.com</a>.</p>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating..." : "Create Opportunity"}
