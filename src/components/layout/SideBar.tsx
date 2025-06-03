@@ -8,7 +8,8 @@ import {
   LayoutDashboard, 
   MessageCircle,
   FileText,
-  LogOut
+  LogOut,
+  Users
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -77,6 +78,11 @@ export function SideBar() {
       return [
         ...commonLinks,
         {
+          to: "/clubs",
+          icon: <Users className="h-5 w-5" />,
+          label: "All Clubs",
+        },
+        {
           to: "/opportunities/add",
           icon: <PlusCircle className="h-5 w-5" />,
           label: "Add Opportunity",
@@ -105,9 +111,11 @@ export function SideBar() {
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-1 mt-16"> {/* Add top margin to account for navbar */}
-            {navLinks.map((link) =>
-              renderNavLink(link.to, link.icon, link.label)
-            )}
+            {navLinks.map((link) => (
+              <div key={link.to}>
+                {renderNavLink(link.to, link.icon, link.label)}
+              </div>
+            ))}
           </div>
         </div>
         

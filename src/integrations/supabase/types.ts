@@ -15,6 +15,7 @@ export type Database = {
           id: string
           opportunity_id: string
           run_club_id: string
+          seen_by_brand: boolean
           status: string
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           id?: string
           opportunity_id: string
           run_club_id: string
+          seen_by_brand?: boolean
           status?: string
         }
         Update: {
@@ -29,6 +31,7 @@ export type Database = {
           id?: string
           opportunity_id?: string
           run_club_id?: string
+          seen_by_brand?: boolean
           status?: string
         }
         Relationships: [
@@ -37,13 +40,6 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applications_run_club_id_fkey"
-            columns: ["run_club_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -76,15 +72,7 @@ export type Database = {
           social_media?: Json | null
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "brand_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chat_messages: {
         Row: {
@@ -204,91 +192,89 @@ export type Database = {
       }
       opportunities: {
         Row: {
-          brand_id: string;
-          created_at: string;
-          title: string;
-          activation_overview: string;
-          target_launch_date: string;
-          primary_objective: string;
-          primary_objective_other: string | null;
-          content_specifications: string;
-          professional_media: string;
-          media_requirements: string | null;
-          club_responsibilities: string;
-          club_incentives: string;
-          geographic_locations: string[];
-          club_size_preference: string;
-          online_reach_preference: string;
-          additional_notes: string | null;
-          submission_deadline: string;
-          id: string;
+          activation_overview: string | null
+          additional_notes: string | null
+          brand_id: string
+          club_incentives: string | null
+          club_responsibilities: string | null
+          club_size_preference: string | null
+          content_specifications: string | null
+          created_at: string
+          geographic_locations: string[] | null
+          id: string
+          media_requirements: string | null
+          online_reach_preference: string | null
+          phone_number: string | null
+          primary_contact_email: string | null
+          primary_contact_name: string | null
+          primary_objective: string | null
+          primary_objective_other: string | null
+          professional_media: string | null
+          submission_deadline: string
+          target_launch_date: string | null
+          title: string
         }
         Insert: {
-          brand_id: string;
-          created_at?: string;
-          title: string;
-          activation_overview: string;
-          target_launch_date: string;
-          primary_objective: string;
-          primary_objective_other?: string | null;
-          content_specifications: string;
-          professional_media: string;
-          media_requirements?: string | null;
-          club_responsibilities: string;
-          club_incentives: string;
-          geographic_locations: string[];
-          club_size_preference: string;
-          online_reach_preference: string;
-          additional_notes?: string | null;
-          submission_deadline: string;
-          id?: string;
+          activation_overview?: string | null
+          additional_notes?: string | null
+          brand_id: string
+          club_incentives?: string | null
+          club_responsibilities?: string | null
+          club_size_preference?: string | null
+          content_specifications?: string | null
+          created_at?: string
+          geographic_locations?: string[] | null
+          id?: string
+          media_requirements?: string | null
+          online_reach_preference?: string | null
+          phone_number?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          primary_objective?: string | null
+          primary_objective_other?: string | null
+          professional_media?: string | null
+          submission_deadline?: string
+          target_launch_date?: string | null
+          title: string
         }
         Update: {
-          brand_id?: string;
-          created_at?: string;
-          title?: string;
-          activation_overview?: string;
-          target_launch_date?: string;
-          primary_objective?: string;
-          primary_objective_other?: string | null;
-          content_specifications?: string;
-          professional_media?: string;
-          media_requirements?: string | null;
-          club_responsibilities?: string;
-          club_incentives?: string;
-          geographic_locations?: string[];
-          club_size_preference?: string;
-          online_reach_preference?: string;
-          additional_notes?: string | null;
-          submission_deadline?: string;
-          id?: string;
+          activation_overview?: string | null
+          additional_notes?: string | null
+          brand_id?: string
+          club_incentives?: string | null
+          club_responsibilities?: string | null
+          club_size_preference?: string | null
+          content_specifications?: string | null
+          created_at?: string
+          geographic_locations?: string[] | null
+          id?: string
+          media_requirements?: string | null
+          online_reach_preference?: string | null
+          phone_number?: string | null
+          primary_contact_email?: string | null
+          primary_contact_name?: string | null
+          primary_objective?: string | null
+          primary_objective_other?: string | null
+          professional_media?: string | null
+          submission_deadline?: string
+          target_launch_date?: string | null
+          title?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "opportunities_brand_id_fkey",
-            columns: ["brand_id"],
-            isOneToOne: false,
-            referencedRelation: "profiles",
-            referencedColumns: ["id"],
-          },
-        ];
+        Relationships: []
       }
       profiles: {
         Row: {
-          created_at: string
-          email: string
+          created_at: string | null
           id: string
           user_type: string
         }
         Insert: {
-          created_at?: string
-          email: string
+          created_at?: string | null
           id: string
           user_type: string
         }
         Update: {
-          created_at?: string
-          email?: string
+          created_at?: string | null
           id?: string
           user_type?: string
         }
@@ -296,50 +282,71 @@ export type Database = {
       }
       run_club_profiles: {
         Row: {
+          city: string | null
           club_name: string | null
           community_data: Json | null
           description: string | null
           id: string
           location: string | null
-          city: string | null
-          state: string | null
           logo_url: string | null
           member_count: number | null
           social_media: Json | null
+          state: string | null
           website: string | null
         }
         Insert: {
+          city?: string | null
           club_name?: string | null
           community_data?: Json | null
           description?: string | null
           id: string
           location?: string | null
-          city?: string | null
-          state?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null
+          state?: string | null
           website?: string | null
         }
         Update: {
+          city?: string | null
           club_name?: string | null
           community_data?: Json | null
           description?: string | null
           id?: string
           location?: string | null
-          city?: string | null
-          state?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null
+          state?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          club_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "run_club_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
+            foreignKeyName: "user_favorites_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "run_club_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -349,7 +356,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_opportunity_access: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

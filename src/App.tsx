@@ -16,6 +16,7 @@ import UserTypeSelection from "./pages/auth/UserTypeSelection";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import AllClubs from "./pages/AllClubs";
 
 // Opportunity routes
 import Opportunities from "./pages/opportunities/Opportunities";
@@ -56,6 +57,9 @@ function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/profile" element={<Profile />} />
+                  
+                  {/* Club routes */}
+                  <Route path="/clubs" element={<AllClubs />} />
                   
                   {/* Opportunities routes */}
                   <Route path="/opportunities" element={<Opportunities />} />
