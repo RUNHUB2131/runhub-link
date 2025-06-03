@@ -21,6 +21,7 @@ import AllClubs from "./pages/AllClubs";
 // Opportunity routes
 import Opportunities from "./pages/opportunities/Opportunities";
 import AddOpportunity from "./pages/opportunities/AddOpportunity";
+import EditOpportunity from "./pages/opportunities/EditOpportunity";
 import OpportunityDetails from "./pages/opportunities/OpportunityDetails";
 import OpportunityApplications from "./pages/opportunities/OpportunityApplications";
 
@@ -64,6 +65,7 @@ function App() {
                   {/* Opportunities routes */}
                   <Route path="/opportunities" element={<Opportunities />} />
                   <Route path="/opportunities/add" element={<AddOpportunity />} />
+                  <Route path="/opportunities/:id/edit" element={<EditOpportunity />} />
                   <Route path="/opportunities/:id" element={<OpportunityDetails />} />
                   <Route path="/opportunities/:id/applications" element={<OpportunityApplications />} />
                   

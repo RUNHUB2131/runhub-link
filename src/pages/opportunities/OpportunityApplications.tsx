@@ -6,6 +6,7 @@ import { Application } from "@/types";
 import ApplicationsHeader from "@/components/opportunities/applications/ApplicationsHeader";
 import ApplicationsContent from "@/components/opportunities/applications/ApplicationsContent";
 import { updateApplicationStatus } from "@/services/applicationService";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 interface RunClubApplication extends Application {
   run_club_profile?: {
@@ -148,19 +149,21 @@ const OpportunityApplications = () => {
   }, [opportunityId]);
 
   return (
-    <div className="space-y-6">
-      <ApplicationsHeader
-        title={opportunity?.title || ''}
-        description={opportunity?.description}
-        onRefresh={handleRefresh}
-      />
-      
-      <ApplicationsContent
-        applications={applications}
-        isLoading={isLoading}
-        handleUpdateStatus={handleUpdateStatus}
-      />
-    </div>
+    <PageContainer>
+      <div className="space-y-6">
+        <ApplicationsHeader
+          title={opportunity?.title || ''}
+          description={opportunity?.description}
+          onRefresh={handleRefresh}
+        />
+        
+        <ApplicationsContent
+          applications={applications}
+          isLoading={isLoading}
+          handleUpdateStatus={handleUpdateStatus}
+        />
+      </div>
+    </PageContainer>
   );
 };
 

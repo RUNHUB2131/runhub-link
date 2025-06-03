@@ -45,7 +45,7 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
 
   const handleEditOpportunity = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/opportunities/${opportunity.id}`);
+    navigate(`/opportunities/${opportunity.id}/edit`);
   };
 
   const isNew = (createdAt: string) => {
@@ -88,6 +88,9 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
     coerced: Number(opportunity.unseen_applications_count),
     type: typeof opportunity.unseen_applications_count
   });
+
+  // Check if editing should be allowed (no applications)
+  const hasApplications = Number(opportunity.applications_count) > 0;
 
   return (
     <div 
@@ -153,14 +156,17 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
                 </span>
               )}
             </Button>
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleEditOpportunity}
-            >
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
+            {/* Only show edit button if there are no applications */}
+            {!hasApplications && (
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={handleEditOpportunity}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            )}
           </div>
         </div>
       </div>
