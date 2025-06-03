@@ -95,7 +95,7 @@ export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileV
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <ProfileSection 
         title="Basic Information" 
         subtitle="Your run club's essential details"

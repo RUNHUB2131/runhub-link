@@ -69,10 +69,10 @@ export const BrandProfileView = ({ profile, onProfileUpdate }: BrandProfileViewP
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
+      <div className="px-4 sm:px-0">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">My Profile</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Tell run clubs about your brand
         </p>
       </div>

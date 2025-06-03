@@ -1,4 +1,3 @@
-
 import { ExternalLink } from "lucide-react";
 import { RunClubProfile, FollowerCountRange } from "@/types";
 
@@ -53,100 +52,100 @@ export const SocialMediaSection = ({ profile }: SocialMediaSectionProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-4">Instagram</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Instagram</h3>
           {socialMedia.instagram ? (
             <>
               <a 
                 href={getSocialUrl(socialMedia.instagram, 'instagram')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2"
+                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
-                {formatSocialHandle(socialMedia.instagram, 'instagram')}
-                <ExternalLink size={16} className="ml-1" />
+                <span className="truncate">{formatSocialHandle(socialMedia.instagram, 'instagram')}</span>
+                <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
               </a>
               {socialMedia.instagram_follower_range && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {getFollowerRangeDisplay(socialMedia.instagram_follower_range)}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-muted-foreground">Not linked</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Not linked</p>
           )}
         </div>
         
-        <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-4">TikTok</h3>
+        <div className="p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">TikTok</h3>
           {socialMedia.tiktok ? (
             <>
               <a 
                 href={getSocialUrl(socialMedia.tiktok, 'tiktok')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2"
+                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
-                {formatSocialHandle(socialMedia.tiktok, 'tiktok')}
-                <ExternalLink size={16} className="ml-1" />
+                <span className="truncate">{formatSocialHandle(socialMedia.tiktok, 'tiktok')}</span>
+                <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
               </a>
               {socialMedia.tiktok_follower_range && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {getFollowerRangeDisplay(socialMedia.tiktok_follower_range)}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-muted-foreground">Not linked</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Not linked</p>
           )}
         </div>
         
-        <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-4">Facebook</h3>
+        <div className="p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Facebook</h3>
           {socialMedia.facebook ? (
             <>
               <a 
                 href={getSocialUrl(socialMedia.facebook, 'facebook')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2"
+                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
-                {socialMedia.facebook}
-                <ExternalLink size={16} className="ml-1" />
+                <span className="truncate">{socialMedia.facebook}</span>
+                <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
               </a>
               {socialMedia.facebook_follower_range && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {getFollowerRangeDisplay(socialMedia.facebook_follower_range)}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-muted-foreground">Not linked</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Not linked</p>
           )}
         </div>
         
-        <div className="p-6 border rounded-lg">
-          <h3 className="font-semibold mb-4">Strava</h3>
+        <div className="p-4 sm:p-6 border rounded-lg">
+          <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Strava</h3>
           {socialMedia.strava ? (
             <>
               <a 
                 href={getSocialUrl(socialMedia.strava, 'strava')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline flex items-center mb-2"
+                className="text-blue-500 hover:underline flex items-center mb-2 text-sm sm:text-base break-all sm:break-normal"
               >
-                {socialMedia.strava}
-                <ExternalLink size={16} className="ml-1" />
+                <span className="truncate">{socialMedia.strava}</span>
+                <ExternalLink size={14} className="ml-1 shrink-0 sm:w-4 sm:h-4" />
               </a>
               {socialMedia.strava_follower_range && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {getFollowerRangeDisplay(socialMedia.strava_follower_range)}
                 </p>
               )}
             </>
           ) : (
-            <p className="text-muted-foreground">Not linked</p>
+            <p className="text-muted-foreground text-sm sm:text-base">Not linked</p>
           )}
         </div>
       </div>

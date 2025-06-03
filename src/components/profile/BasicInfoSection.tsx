@@ -23,39 +23,40 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4 mb-6">
-        <Avatar className="h-24 w-24 border-2 border-muted">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-6">
+        <Avatar className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 border-2 border-muted self-center sm:self-start">
           {profile.logo_url ? (
             <AvatarImage src={profile.logo_url} alt={profile.club_name || "Club logo"} />
           ) : null}
-          <AvatarFallback className="text-2xl">{clubInitial}</AvatarFallback>
+          <AvatarFallback className="text-lg sm:text-xl lg:text-2xl">{clubInitial}</AvatarFallback>
         </Avatar>
-        <div>
-          <h2 className="text-2xl font-bold">{profile.club_name || "Not specified"}</h2>
-          <p className="text-muted-foreground">{profile.location || "No location specified"}</p>
+        <div className="text-center sm:text-left">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">{profile.club_name || "Not specified"}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">{profile.location || "No location specified"}</p>
         </div>
       </div>
 
       <div>
-        <h3 className="font-semibold mb-2">Website</h3>
+        <h3 className="font-semibold mb-2 text-sm sm:text-base">Website</h3>
         {profile.website ? (
           <a 
             href={formatWebsiteUrl(profile.website)}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-2xl text-blue-500 hover:underline flex items-center"
+            className="text-base sm:text-lg lg:text-xl text-blue-500 hover:underline flex items-center break-all sm:break-normal"
           >
-            {profile.website}
-            <ExternalLink size={20} className="ml-2" />
+            <span className="truncate sm:inline">{profile.website}</span>
+            <ExternalLink size={16} className="ml-2 shrink-0 h-4 w-4 sm:h-5 sm:w-5" />
           </a>
         ) : (
-          <p className="text-2xl">Not specified</p>
+          <p className="text-base sm:text-lg lg:text-xl">Not specified</p>
         )}
       </div>
 
       <div>
-        <p className="text-lg">
+        <h3 className="font-semibold mb-2 text-sm sm:text-base">Description</h3>
+        <p className="text-sm sm:text-base lg:text-lg leading-relaxed">
           {profile.description || "No description provided."}
         </p>
       </div>

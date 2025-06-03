@@ -83,20 +83,12 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
   };
   
   return (
-    <div className="grid gap-2 py-6">
-      <Link
-        to="/"
-        className="text-sm font-medium transition-colors"
-        onClick={closeSheet}
-      >
-        Home
-      </Link>
-      
+    <div className="grid gap-4 py-8">
       {user ? (
         <>
           <Link
             to="/dashboard"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Dashboard
@@ -104,7 +96,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/profile"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Profile
@@ -112,7 +104,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/opportunities"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Opportunities
@@ -120,7 +112,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/applications"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             My Applications
@@ -128,7 +120,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/chat"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Chats
@@ -136,10 +128,10 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Button 
             variant="ghost" 
-            className="justify-start px-2 text-sm font-medium text-destructive"
+            className="justify-start px-2 py-3 h-auto text-base font-medium text-destructive hover:bg-destructive/10"
             onClick={handleSignOut}
           >
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-5 w-5 mr-3" />
             Sign out
           </Button>
         </>
@@ -147,7 +139,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
         <>
           <Link
             to="/auth/login"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Login
@@ -155,7 +147,7 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
           
           <Link
             to="/auth/register"
-            className="text-sm font-medium transition-colors"
+            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent"
             onClick={closeSheet}
           >
             Register
