@@ -10,9 +10,10 @@ const AddOpportunity = () => {
     <PageContainer>
       <PageHeader 
         title="Create Opportunity"
+        description="Create a new sponsorship opportunity to connect with run clubs"
       >
         <Link to="/opportunities">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="w-full sm:w-auto">
             <ChevronLeft className="h-4 w-4 mr-1" /> Back
           </Button>
         </Link>

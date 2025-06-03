@@ -73,6 +73,8 @@ export interface Opportunity {
   club_responsibilities: string;
   club_incentives: string;
   geographic_locations: string[];
+  city?: string;
+  state?: string;
   club_size_preference: string;
   online_reach_preference: string;
   additional_notes: string | null;

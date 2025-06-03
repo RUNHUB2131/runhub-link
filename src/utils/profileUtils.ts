@@ -41,6 +41,76 @@ export const fetchBrandProfile = async (userId: string): Promise<Partial<BrandPr
   }
 };
 
+export const ensureUserProfile = async (userId: string, userType: 'brand' | 'run_club'): Promise<boolean> => {
+  try {
+    console.log(`Ensuring profile exists for user ${userId} with type ${userType}`);
+    
+    // First check if profile exists
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking existing profile:', checkError);
+      throw checkError;
+    }
+
+    if (existingProfile) {
+      console.log('Profile exists:', existingProfile);
+      return existingProfile.user_type === userType;
+    }
+
+    // Profile doesn't exist, create it
+    console.log('Creating missing profile...');
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        user_type: userType
+      });
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      throw profileError;
+    }
+
+    // Also create the specific profile type
+    if (userType === 'brand') {
+      const { error: brandError } = await supabase
+        .from('brand_profiles')
+        .insert({
+          id: userId,
+          company_name: 'Your Company Name'
+        });
+
+      if (brandError && !brandError.message?.includes('duplicate key value')) {
+        console.error('Error creating brand profile:', brandError);
+        throw brandError;
+      }
+    } else if (userType === 'run_club') {
+      const { error: clubError } = await supabase
+        .from('run_club_profiles')
+        .insert({
+          id: userId,
+          club_name: 'Your Club Name'
+        });
+
+      if (clubError && !clubError.message?.includes('duplicate key value')) {
+        console.error('Error creating run club profile:', clubError);
+        throw clubError;
+      }
+    }
+
+    console.log('Profile created successfully');
+    return true;
+  } catch (error: any) {
+    console.error('Error ensuring user profile:', error);
+    return false;
+  }
+};
+
 export const saveRunClubBasicInfo = async (profileId: string, data: Partial<RunClubProfile>) => {
   const { error } = await supabase
     .from('run_club_profiles')
@@ -84,28 +154,20 @@ export const saveRunClubCommunityInfo = async (profileId: string, data: Partial<
 };
 
 // Helper functions for Brand Profile
-export const saveBrandBasicInfo = async (profileId: string, data: Partial<BrandProfile>) => {
+export const saveBrandBasicInfo = async (userId: string, data: Partial<BrandProfile>) => {
   const { error } = await supabase
     .from('brand_profiles')
-    .update({
-      company_name: data.company_name,
-      industry: data.industry,
-      description: data.description,
-      website: data.website,
-      logo_url: data.logo_url,
-    })
-    .eq('id', profileId);
+    .update(data)
+    .eq('id', userId);
 
   if (error) throw error;
 };
 
-export const saveBrandSocialMedia = async (profileId: string, data: Partial<BrandProfile>) => {
+export const saveBrandSocialMedia = async (userId: string, data: Partial<BrandProfile>) => {
   const { error } = await supabase
     .from('brand_profiles')
-    .update({
-      social_media: data.social_media,
-    })
-    .eq('id', profileId);
+    .update({ social_media: data.social_media })
+    .eq('id', userId);
 
   if (error) throw error;
 };

@@ -10,9 +10,10 @@ const EditOpportunity = () => {
     <PageContainer>
       <PageHeader 
         title="Edit Opportunity"
+        description="Update your sponsorship opportunity details"
       >
         <Link to="/opportunities">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="w-full sm:w-auto">
             <ChevronLeft className="h-4 w-4 mr-1" /> Back
           </Button>
         </Link>

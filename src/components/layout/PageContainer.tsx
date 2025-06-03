@@ -24,7 +24,7 @@ export const PageContainer = ({
 
   return (
     <div className={cn(
-      "p-6",
+      "p-4 sm:p-6",
       maxWidth !== "full" && "mx-auto",
       maxWidthClasses[maxWidth],
       className

@@ -97,10 +97,13 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
       className="border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleViewOpportunity}
     >
-      <div className="p-6">
-        <div className="flex flex-row justify-between items-start">
-          <div className="space-y-2">
-            <div className="flex gap-2">
+      <div className="p-4 sm:p-6">
+        {/* Mobile-first responsive layout */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:justify-between lg:items-start lg:space-y-0">
+          {/* Main content */}
+          <div className="flex-1 space-y-3">
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2">
               <Badge 
                 className="bg-primary-100 text-primary-800 hover:bg-primary-100"
               >
@@ -114,59 +117,78 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
                 </Badge>
               )}
             </div>
-            <h2 className="text-xl font-semibold">{opportunity.title}</h2>
-            <div className="text-gray-600">
-              <span className="font-medium">Incentive:</span> {opportunity.club_incentives}
-            </div>
-            <div className="text-gray-600">
-              <span className="font-medium">Application Due:</span> {opportunity.submission_deadline}
-            </div>
-            <div className="text-gray-600">
-              <span className="font-medium">Activation Launch:</span> {opportunity.target_launch_date}
+            
+            {/* Title */}
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 leading-tight">
+              {opportunity.title}
+            </h2>
+            
+            {/* Details */}
+            <div className="space-y-2 text-sm sm:text-base">
+              <div className="text-gray-600">
+                <span className="font-medium">Incentive:</span> {opportunity.club_incentives}
+              </div>
+              <div className="text-gray-600">
+                <span className="font-medium">Application Due:</span> {opportunity.submission_deadline}
+              </div>
+              <div className="text-gray-600">
+                <span className="font-medium">Activation Launch:</span> {opportunity.target_launch_date}
+              </div>
             </div>
           </div>
-          <div className="ml-auto flex gap-2 items-start">
-            {/* View count display - positioned to the left of buttons */}
-            {typeof opportunity.unique_views_count === 'number' && opportunity.unique_views_count > 0 && (
-              <div className="flex items-center text-gray-500 text-sm h-9">
-                <span>{opportunity.unique_views_count} {opportunity.unique_views_count === 1 ? 'view' : 'views'}</span>
+          
+          {/* Actions and Stats - Stack on mobile, side-by-side on larger screens */}
+          <div className="flex flex-col space-y-3 lg:flex-row lg:items-start lg:space-y-0 lg:space-x-4 lg:ml-6">
+            {/* Action buttons with view count inline */}
+            <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 lg:flex-col lg:space-y-2 lg:space-x-0">
+              {/* View count and Applications button in same row on mobile */}
+              <div className="flex items-center space-x-2 sm:space-x-0 sm:block lg:flex lg:space-x-2">
+                {/* View count display - inline with buttons */}
+                {typeof opportunity.unique_views_count === 'number' && opportunity.unique_views_count > 0 && (
+                  <div className="flex items-center text-gray-500 text-sm whitespace-nowrap">
+                    <span>{opportunity.unique_views_count} {opportunity.unique_views_count === 1 ? 'view' : 'views'}</span>
+                  </div>
+                )}
+                
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={handleViewApplications}
+                  className="flex items-center justify-center w-full sm:w-auto"
+                >
+                  <Eye className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span className="flex-1 sm:flex-none">Applications</span>
+                  {Number(opportunity.applications_count) > 0 && (
+                    <span className="ml-1 bg-gray-100 px-1.5 py-0.5 rounded-full text-xs flex-shrink-0">
+                      {opportunity.applications_count}
+                    </span>
+                  )}
+                  {Number(opportunity.applications_count) === 0 && (
+                    <span className="ml-1 bg-yellow-200 px-1.5 py-0.5 rounded-full text-xs flex-shrink-0">
+                      ZERO
+                    </span>
+                  )}
+                  {typeof opportunity.unseen_applications_count === 'number' && opportunity.unseen_applications_count > 0 && (
+                    <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs flex-shrink-0">
+                      New
+                    </span>
+                  )}
+                </Button>
               </div>
-            )}
-            <Button 
-              variant="outline"
-              size="sm"
-              onClick={handleViewApplications}
-              className="flex items-center"
-            >
-              <Eye className="h-4 w-4 mr-1" />
-              Applications
-              {Number(opportunity.applications_count) > 0 && (
-                <span className="ml-1 bg-gray-100 px-1.5 py-0.5 rounded-full text-xs">
-                  {opportunity.applications_count}
-                </span>
+              
+              {/* Only show edit button if there are no applications */}
+              {!hasApplications && (
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditOpportunity}
+                  className="flex items-center justify-center w-full sm:w-auto"
+                >
+                  <Edit className="h-4 w-4 mr-1 flex-shrink-0" />
+                  <span>Edit</span>
+                </Button>
               )}
-              {Number(opportunity.applications_count) === 0 && (
-                <span className="ml-1 bg-yellow-200 px-1.5 py-0.5 rounded-full text-xs">
-                  ZERO
-                </span>
-              )}
-              {typeof opportunity.unseen_applications_count === 'number' && opportunity.unseen_applications_count > 0 && (
-                <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">
-                  New
-                </span>
-              )}
-            </Button>
-            {/* Only show edit button if there are no applications */}
-            {!hasApplications && (
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={handleEditOpportunity}
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-            )}
+            </div>
           </div>
         </div>
       </div>
