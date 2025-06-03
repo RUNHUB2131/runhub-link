@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, LayoutDashboard, Briefcase, MessageCircle, FileText, Users, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
@@ -82,50 +82,79 @@ const MobileNav = ({ closeSheet }: { closeSheet: () => void }) => {
       console.error("Logout error:", error);
     }
   };
+
+  // Generate navigation links based on user type (same logic as desktop sidebar)
+  const navLinks = useMemo(() => {
+    const commonLinks = [
+      {
+        to: "/dashboard",
+        icon: <LayoutDashboard className="h-5 w-5" />,
+        label: "Dashboard",
+      },
+      {
+        to: "/opportunities",
+        icon: <Briefcase className="h-5 w-5" />,
+        label: "Opportunities",
+      },
+      {
+        to: "/profile",
+        icon: <User className="h-5 w-5" />,
+        label: "Profile",
+      },
+      {
+        to: "/chat",
+        icon: <MessageCircle className="h-5 w-5" />,
+        label: "Chats",
+      },
+    ];
+
+    // Brand-specific links
+    if (userType === "brand") {
+      return [
+        ...commonLinks,
+        {
+          to: "/clubs",
+          icon: <Users className="h-5 w-5" />,
+          label: "All Clubs",
+        },
+        {
+          to: "/opportunities/add",
+          icon: <PlusCircle className="h-5 w-5" />,
+          label: "Add Opportunity",
+        },
+      ];
+    }
+
+    // Run club-specific links
+    if (userType === "run_club") {
+      return [
+        ...commonLinks,
+        {
+          to: "/applications",
+          icon: <FileText className="h-5 w-5" />,
+          label: "My Applications",
+        },
+      ];
+    }
+
+    return commonLinks;
+  }, [userType]);
   
   return (
     <div className="grid gap-4 py-8">
       {user ? (
         <>
-          <Link
-            to="/dashboard"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
-            onClick={closeSheet}
-          >
-            Dashboard
-          </Link>
-          
-          <Link
-            to="/profile"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
-            onClick={closeSheet}
-          >
-            Profile
-          </Link>
-          
-          <Link
-            to="/opportunities"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
-            onClick={closeSheet}
-          >
-            Opportunities
-          </Link>
-          
-          <Link
-            to="/applications"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
-            onClick={closeSheet}
-          >
-            My Applications
-          </Link>
-          
-          <Link
-            to="/chat"
-            className="text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
-            onClick={closeSheet}
-          >
-            Chats
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="flex items-center gap-3 text-base font-medium transition-colors py-3 px-2 rounded-md hover:bg-accent text-foreground"
+              onClick={closeSheet}
+            >
+              {link.icon}
+              {link.label}
+            </Link>
+          ))}
           
           <Button 
             variant="ghost" 
