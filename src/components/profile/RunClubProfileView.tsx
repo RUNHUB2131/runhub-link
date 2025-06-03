@@ -10,6 +10,7 @@ import { EditBasicInfoDialog } from "@/components/profile/EditBasicInfoDialog";
 import { EditSocialMediaDialog } from "@/components/profile/EditSocialMediaDialog";
 import { EditCommunityInfoDialog } from "@/components/profile/EditCommunityInfoDialog";
 import { saveRunClubBasicInfo, saveRunClubSocialMedia, saveRunClubCommunityInfo } from "@/utils/profileUtils";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RunClubProfileViewProps {
   profile: Partial<RunClubProfile>;
@@ -18,6 +19,7 @@ interface RunClubProfileViewProps {
 
 export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileViewProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Dialog state - persisted across page reloads
   const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useDialogState('runclub-basic-info');
@@ -25,10 +27,17 @@ export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileV
   const [communityInfoDialogOpen, setCommunityInfoDialogOpen] = useDialogState('runclub-community-info');
   
   const saveProfileData = async (data: Partial<RunClubProfile>) => {
-    if (!profile.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      await saveRunClubBasicInfo(profile.id, data);
+      await saveRunClubBasicInfo(user.id, data);
       
       toast({
         title: "Success",
@@ -49,10 +58,17 @@ export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileV
   };
 
   const saveSocialMedia = async (data: Partial<RunClubProfile>) => {
-    if (!profile.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      await saveRunClubSocialMedia(profile.id, data);
+      await saveRunClubSocialMedia(user.id, data);
       
       toast({
         title: "Success",
@@ -72,10 +88,17 @@ export const RunClubProfileView = ({ profile, onProfileUpdate }: RunClubProfileV
   };
 
   const saveCommunityInfo = async (data: Partial<RunClubProfile>) => {
-    if (!profile.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      await saveRunClubCommunityInfo(profile.id, data);
+      await saveRunClubCommunityInfo(user.id, data);
       
       toast({
         title: "Success",

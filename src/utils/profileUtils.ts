@@ -7,17 +7,25 @@ export const fetchRunClubProfile = async (userId: string): Promise<Partial<RunCl
       .from('run_club_profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching run club profile:", error);
-      return null;
+      // Return a basic profile object so the user can still edit
+      return { id: userId };
+    }
+
+    // If no profile exists yet, return a basic profile object
+    if (!data) {
+      console.log("No run club profile found, returning empty profile for user:", userId);
+      return { id: userId };
     }
 
     return data as RunClubProfile;
   } catch (error: any) {
     console.error("Error fetching run club profile:", error);
-    return null;
+    // Return a basic profile object so the user can still edit
+    return { id: userId };
   }
 };
 
@@ -120,9 +128,39 @@ export const ensureUserProfile = async (userId: string, userType: 'brand' | 'run
 };
 
 export const saveRunClubBasicInfo = async (profileId: string, data: Partial<RunClubProfile>) => {
+  // First ensure the base profile exists
+  const { data: existingProfile, error: profileCheckError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (profileCheckError) {
+    console.error('Error checking profile:', profileCheckError);
+    throw new Error('Failed to check user profile');
+  }
+
+  // If no base profile exists, create it
+  if (!existingProfile) {
+    console.log('Creating base profile for user:', profileId);
+    const { error: profileCreateError } = await supabase
+      .from('profiles')
+      .insert({
+        id: profileId,
+        user_type: 'run_club'
+      });
+
+    if (profileCreateError) {
+      console.error('Error creating base profile:', profileCreateError);
+      throw new Error('Failed to create base profile');
+    }
+  }
+
+  // Now upsert the run club profile
   const { error } = await supabase
     .from('run_club_profiles')
-    .update({
+    .upsert({
+      id: profileId,
       club_name: data.club_name,
       description: data.description,
       city: data.city,
@@ -130,19 +168,51 @@ export const saveRunClubBasicInfo = async (profileId: string, data: Partial<RunC
       website: data.website,
       logo_url: data.logo_url,
       member_count: data.member_count,
-    })
-    .eq('id', profileId);
+    }, {
+      onConflict: 'id'
+    });
 
   if (error) throw error;
 };
 
 export const saveRunClubSocialMedia = async (profileId: string, data: Partial<RunClubProfile>) => {
+  // First ensure the base profile exists
+  const { data: existingProfile, error: profileCheckError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (profileCheckError) {
+    console.error('Error checking profile:', profileCheckError);
+    throw new Error('Failed to check user profile');
+  }
+
+  // If no base profile exists, create it
+  if (!existingProfile) {
+    console.log('Creating base profile for user:', profileId);
+    const { error: profileCreateError } = await supabase
+      .from('profiles')
+      .insert({
+        id: profileId,
+        user_type: 'run_club'
+      });
+
+    if (profileCreateError) {
+      console.error('Error creating base profile:', profileCreateError);
+      throw new Error('Failed to create base profile');
+    }
+  }
+
+  // Now upsert the run club profile
   const { error } = await supabase
     .from('run_club_profiles')
-    .update({
+    .upsert({
+      id: profileId,
       social_media: data.social_media,
-    })
-    .eq('id', profileId);
+    }, {
+      onConflict: 'id'
+    });
 
   if (error) throw error;
 };
@@ -150,13 +220,44 @@ export const saveRunClubSocialMedia = async (profileId: string, data: Partial<Ru
 export const saveRunClubCommunityInfo = async (profileId: string, data: Partial<RunClubProfile>) => {
   console.log("Saving community info with member count:", data.member_count);
   
+  // First ensure the base profile exists
+  const { data: existingProfile, error: profileCheckError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', profileId)
+    .maybeSingle();
+
+  if (profileCheckError) {
+    console.error('Error checking profile:', profileCheckError);
+    throw new Error('Failed to check user profile');
+  }
+
+  // If no base profile exists, create it
+  if (!existingProfile) {
+    console.log('Creating base profile for user:', profileId);
+    const { error: profileCreateError } = await supabase
+      .from('profiles')
+      .insert({
+        id: profileId,
+        user_type: 'run_club'
+      });
+
+    if (profileCreateError) {
+      console.error('Error creating base profile:', profileCreateError);
+      throw new Error('Failed to create base profile');
+    }
+  }
+
+  // Now upsert the run club profile
   const { error } = await supabase
     .from('run_club_profiles')
-    .update({
+    .upsert({
+      id: profileId,
       member_count: data.member_count,
       community_data: data.community_data,
-    })
-    .eq('id', profileId);
+    }, {
+      onConflict: 'id'
+    });
 
   if (error) throw error;
 };
