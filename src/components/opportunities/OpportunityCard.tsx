@@ -14,6 +14,7 @@ interface Opportunity {
   created_at: string;
   applications_count?: number;
   unseen_applications_count?: number;
+  unique_views_count?: number;
   title: string;
   submission_deadline: string;
 }
@@ -122,6 +123,12 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
             </div>
           </div>
           <div className="ml-auto flex gap-2 items-start">
+            {/* View count display - positioned to the left of buttons */}
+            {typeof opportunity.unique_views_count === 'number' && opportunity.unique_views_count > 0 && (
+              <div className="flex items-center text-gray-500 text-sm h-9">
+                <span>{opportunity.unique_views_count} {opportunity.unique_views_count === 1 ? 'view' : 'views'}</span>
+              </div>
+            )}
             <Button 
               variant="outline"
               size="sm"

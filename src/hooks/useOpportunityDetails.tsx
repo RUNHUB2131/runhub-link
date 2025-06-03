@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Opportunity, Application, RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { trackOpportunityView } from "@/services/opportunityService";
 
 export const useOpportunityDetails = (opportunityId: string) => {
   const { user, userType } = useAuth();
@@ -68,6 +69,16 @@ export const useOpportunityDetails = (opportunityId: string) => {
       };
       
       setOpportunity(completeOpportunity);
+      
+      // Track view for run clubs viewing opportunities (not their own brand's opportunities)
+      if (userType === 'run_club' && user.id !== opportunityData.brand_id) {
+        try {
+          await trackOpportunityView(opportunityId, user.id);
+        } catch (error) {
+          console.error("Error tracking opportunity view:", error);
+          // Don't fail the whole operation if view tracking fails
+        }
+      }
       
       // For run clubs, check if they've already applied
       if (userType === 'run_club') {
