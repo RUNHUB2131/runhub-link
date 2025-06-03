@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -66,13 +65,55 @@ export const BrandProfileForm = ({
       if (onSave) {
         await onSave(formData);
       } else {
-        // Save to Supabase
-        const { error } = await supabase
-          .from('brand_profiles')
-          .update(formData)
-          .eq('id', user.id);
+        // First ensure the base profile exists
+        console.log('Ensuring base profile exists for user:', user.id);
         
-        if (error) throw error;
+        const { data: existingProfile, error: profileCheckError } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profileCheckError) {
+          console.error('Error checking profile:', profileCheckError);
+          throw new Error('Failed to check user profile');
+        }
+
+        // If no base profile exists, create it
+        if (!existingProfile) {
+          console.log('Creating base profile...');
+          const { error: profileCreateError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              user_type: 'brand'
+            });
+
+          if (profileCreateError) {
+            console.error('Error creating base profile:', profileCreateError);
+            throw new Error('Failed to create base profile');
+          }
+        }
+
+        // Now try to upsert the brand profile
+        console.log('Upserting brand profile with data:', { id: user.id, ...formData });
+        
+        const { error, data } = await supabase
+          .from('brand_profiles')
+          .upsert({
+            id: user.id,
+            ...formData
+          }, {
+            onConflict: 'id'
+          })
+          .select();
+        
+        if (error) {
+          console.error('Brand profile upsert error:', error);
+          throw error;
+        }
+        
+        console.log('Brand profile saved successfully:', data);
       }
       
       toast({
@@ -82,7 +123,7 @@ export const BrandProfileForm = ({
       
       navigate("/dashboard");
     } catch (error: any) {
-      console.error(error);
+      console.error('Full error details:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save profile. Please try again.",

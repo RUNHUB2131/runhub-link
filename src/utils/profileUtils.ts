@@ -27,17 +27,25 @@ export const fetchBrandProfile = async (userId: string): Promise<Partial<BrandPr
       .from('brand_profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching brand profile:", error);
-      return null;
+      // Return a basic profile object so the user can still edit
+      return { id: userId };
+    }
+
+    // If no profile exists yet, return a basic profile object
+    if (!data) {
+      console.log("No brand profile found, returning empty profile for user:", userId);
+      return { id: userId };
     }
 
     return data as BrandProfile;
   } catch (error: any) {
     console.error("Error fetching brand profile:", error);
-    return null;
+    // Return a basic profile object so the user can still edit
+    return { id: userId };
   }
 };
 
@@ -155,19 +163,85 @@ export const saveRunClubCommunityInfo = async (profileId: string, data: Partial<
 
 // Helper functions for Brand Profile
 export const saveBrandBasicInfo = async (userId: string, data: Partial<BrandProfile>) => {
+  // First ensure the base profile exists
+  const { data: existingProfile, error: profileCheckError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (profileCheckError) {
+    console.error('Error checking profile:', profileCheckError);
+    throw new Error('Failed to check user profile');
+  }
+
+  // If no base profile exists, create it
+  if (!existingProfile) {
+    console.log('Creating base profile for user:', userId);
+    const { error: profileCreateError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        user_type: 'brand'
+      });
+
+    if (profileCreateError) {
+      console.error('Error creating base profile:', profileCreateError);
+      throw new Error('Failed to create base profile');
+    }
+  }
+
+  // Now upsert the brand profile
   const { error } = await supabase
     .from('brand_profiles')
-    .update(data)
-    .eq('id', userId);
+    .upsert({
+      id: userId,
+      ...data
+    }, {
+      onConflict: 'id'
+    });
 
   if (error) throw error;
 };
 
 export const saveBrandSocialMedia = async (userId: string, data: Partial<BrandProfile>) => {
+  // First ensure the base profile exists
+  const { data: existingProfile, error: profileCheckError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (profileCheckError) {
+    console.error('Error checking profile:', profileCheckError);
+    throw new Error('Failed to check user profile');
+  }
+
+  // If no base profile exists, create it
+  if (!existingProfile) {
+    console.log('Creating base profile for user:', userId);
+    const { error: profileCreateError } = await supabase
+      .from('profiles')
+      .insert({
+        id: userId,
+        user_type: 'brand'
+      });
+
+    if (profileCreateError) {
+      console.error('Error creating base profile:', profileCreateError);
+      throw new Error('Failed to create base profile');
+    }
+  }
+
+  // Now upsert the brand profile
   const { error } = await supabase
     .from('brand_profiles')
-    .update({ social_media: data.social_media })
-    .eq('id', userId);
+    .upsert({
+      id: userId,
+      social_media: data.social_media
+    }, {
+      onConflict: 'id'
+    });
 
   if (error) throw error;
 };

@@ -8,6 +8,7 @@ import { EditBrandSocialMediaDialog } from "@/components/profile/EditBrandSocial
 import { saveBrandBasicInfo, saveBrandSocialMedia } from "@/utils/profileUtils";
 import { BrandBasicInfoSection } from "@/components/profile/BrandBasicInfoSection";
 import { BrandSocialMediaSection } from "@/components/profile/BrandSocialMediaSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BrandProfileViewProps {
   profile: Partial<BrandProfile>;
@@ -16,16 +17,24 @@ interface BrandProfileViewProps {
 
 export const BrandProfileView = ({ profile, onProfileUpdate }: BrandProfileViewProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Dialog state - persisted across page reloads
   const [basicInfoDialogOpen, setBasicInfoDialogOpen] = useDialogState('brand-basic-info');
   const [socialMediaDialogOpen, setSocialMediaDialogOpen] = useDialogState('brand-social-media');
   
   const saveProfileData = async (data: Partial<BrandProfile>) => {
-    if (!profile.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      await saveBrandBasicInfo(profile.id, data);
+      await saveBrandBasicInfo(user.id, data);
       
       toast({
         title: "Success",
@@ -46,10 +55,17 @@ export const BrandProfileView = ({ profile, onProfileUpdate }: BrandProfileViewP
   };
 
   const saveSocialMedia = async (data: Partial<BrandProfile>) => {
-    if (!profile.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      await saveBrandSocialMedia(profile.id, data);
+      await saveBrandSocialMedia(user.id, data);
       
       toast({
         title: "Success",
