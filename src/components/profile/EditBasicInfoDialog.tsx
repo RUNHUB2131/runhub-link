@@ -10,9 +10,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RunClubProfile } from "@/types";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { useAuth } from "@/contexts/AuthContext";
+import { AUSTRALIAN_STATES } from "@/utils/states";
 
 interface EditBasicInfoDialogProps {
   open: boolean;
@@ -31,7 +39,8 @@ export function EditBasicInfoDialog({
   const [formData, setFormData] = useState({
     club_name: profile.club_name || "",
     description: profile.description || "",
-    location: profile.location || "",
+    city: profile.city || "",
+    state: profile.state || "",
     website: profile.website || "",
     logo_url: profile.logo_url || "",
   });
@@ -54,7 +63,8 @@ export function EditBasicInfoDialog({
           setFormData({
             club_name: profile.club_name || "",
             description: profile.description || "",
-            location: profile.location || "",
+            city: profile.city || "",
+            state: profile.state || "",
             website: profile.website || "",
             logo_url: profile.logo_url || "",
           });
@@ -64,7 +74,8 @@ export function EditBasicInfoDialog({
         setFormData({
           club_name: profile.club_name || "",
           description: profile.description || "",
-          location: profile.location || "",
+          city: profile.city || "",
+          state: profile.state || "",
           website: profile.website || "",
           logo_url: profile.logo_url || "",
         });
@@ -84,6 +95,13 @@ export function EditBasicInfoDialog({
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleStateChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      state: value,
     }));
   };
 
@@ -174,14 +192,30 @@ export function EditBasicInfoDialog({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="city">City</Label>
             <Input
-              id="location"
-              name="location"
-              value={formData.location}
+              id="city"
+              name="city"
+              value={formData.city}
               onChange={handleChange}
-              placeholder="City, State"
+              placeholder="City"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="state">State</Label>
+            <Select value={formData.state} onValueChange={handleStateChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select state" />
+              </SelectTrigger>
+              <SelectContent>
+                {AUSTRALIAN_STATES.map((state) => (
+                  <SelectItem key={state.value} value={state.value}>
+                    {state.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">

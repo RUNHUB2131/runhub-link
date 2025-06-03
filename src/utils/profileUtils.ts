@@ -1,4 +1,3 @@
-
 import { RunClubProfile, BrandProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,7 +47,8 @@ export const saveRunClubBasicInfo = async (profileId: string, data: Partial<RunC
     .update({
       club_name: data.club_name,
       description: data.description,
-      location: data.location,
+      city: data.city,
+      state: data.state,
       website: data.website,
       logo_url: data.logo_url,
       member_count: data.member_count,

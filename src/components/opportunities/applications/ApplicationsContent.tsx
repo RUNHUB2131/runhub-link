@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ export interface RunClubApplication extends Application {
   run_club_profile?: {
     club_name: string;
     location: string;
+    city?: string;
+    state?: string;
     member_count: number;
   } | null;
 }
@@ -95,10 +96,13 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                     </div>
                     
                     <div className="flex flex-col md:flex-row gap-4 text-sm text-muted-foreground">
-                      {app.run_club_profile?.location && (
+                      {(app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location) && (
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-1" />
-                          {app.run_club_profile.location}
+                          {app.run_club_profile?.city && app.run_club_profile?.state 
+                            ? `${app.run_club_profile.city}, ${app.run_club_profile.state}`
+                            : app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location
+                          }
                         </div>
                       )}
                       

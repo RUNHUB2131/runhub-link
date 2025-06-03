@@ -19,6 +19,8 @@ export interface RunClubProfile extends Profile {
   club_name: string;
   description?: string;
   location?: string;
+  city?: string;
+  state?: string;
   member_count?: number;
   website?: string;
   logo_url?: string;
@@ -92,6 +94,8 @@ export interface Application {
   run_club_profile?: {
     club_name: string;
     location: string;
+    city?: string;
+    state?: string;
     member_count: number;
   } | null;
 }

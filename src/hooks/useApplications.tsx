@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +7,8 @@ interface RunClubApplication extends Application {
   run_club_profile?: {
     club_name: string;
     location: string;
+    city?: string;
+    state?: string;
     member_count: number;
   } | null;
 }
@@ -39,7 +40,7 @@ export const useApplications = (opportunityId: string) => {
         initialApps.map(async (app) => {
           const { data: profileData, error: profileError } = await supabase
             .from('run_club_profiles')
-            .select('club_name, location, member_count')
+            .select('club_name, location, city, state, member_count')
             .eq('id', app.run_club_id)
             .single();
 

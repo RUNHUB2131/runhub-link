@@ -13,6 +13,8 @@ export interface RunClubApplication extends Application {
   run_club_profile?: {
     club_name: string;
     location: string;
+    city?: string;
+    state?: string;
     member_count: number;
   } | null;
 }

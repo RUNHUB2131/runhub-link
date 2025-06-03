@@ -4,11 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { RunClubProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { AUSTRALIAN_STATES } from "@/utils/states";
 
 interface RunClubProfileFormProps {
   initialData?: Partial<RunClubProfile>;
@@ -22,7 +30,8 @@ export const RunClubProfileForm = ({
   const [formData, setFormData] = useState({
     club_name: initialData.club_name || "",
     description: initialData.description || "",
-    location: initialData.location || "",
+    city: initialData.city || "",
+    state: initialData.state || "",
     member_count: initialData.member_count || 0,
     website: initialData.website || "",
     logo_url: initialData.logo_url || "",
@@ -37,6 +46,13 @@ export const RunClubProfileForm = ({
     setFormData((prev) => ({
       ...prev,
       [name]: name === "member_count" ? parseInt(value) || 0 : value,
+    }));
+  };
+
+  const handleStateChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      state: value,
     }));
   };
 
@@ -123,14 +139,30 @@ export const RunClubProfileForm = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="city">City</Label>
             <Input
-              id="location"
-              name="location"
-              value={formData.location}
+              id="city"
+              name="city"
+              value={formData.city}
               onChange={handleChange}
-              placeholder="City, State"
+              placeholder="City"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="state">State</Label>
+            <Select value={formData.state} onValueChange={handleStateChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select state" />
+              </SelectTrigger>
+              <SelectContent>
+                {AUSTRALIAN_STATES.map((state) => (
+                  <SelectItem key={state.value} value={state.value}>
+                    {state.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">

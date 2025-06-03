@@ -301,6 +301,8 @@ export type Database = {
           description: string | null
           id: string
           location: string | null
+          city: string | null
+          state: string | null
           logo_url: string | null
           member_count: number | null
           social_media: Json | null
@@ -312,6 +314,8 @@ export type Database = {
           description?: string | null
           id: string
           location?: string | null
+          city?: string | null
+          state?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null
@@ -323,6 +327,8 @@ export type Database = {
           description?: string | null
           id?: string
           location?: string | null
+          city?: string | null
+          state?: string | null
           logo_url?: string | null
           member_count?: number | null
           social_media?: Json | null

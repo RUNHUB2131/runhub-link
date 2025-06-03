@@ -33,7 +33,12 @@ export const BasicInfoSection = ({ profile }: BasicInfoSectionProps) => {
         </Avatar>
         <div className="text-center sm:text-left">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">{profile.club_name || "Not specified"}</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">{profile.location || "No location specified"}</p>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {profile.city && profile.state 
+              ? `${profile.city}, ${profile.state}`
+              : profile.city || profile.state || profile.location || "No location specified"
+            }
+          </p>
         </div>
       </div>
 

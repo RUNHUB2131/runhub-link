@@ -1,4 +1,3 @@
-
 import { RunClubProfile } from "@/types";
 
 /**
@@ -6,10 +5,13 @@ import { RunClubProfile } from "@/types";
  * to apply for opportunities
  */
 export const isProfileComplete = (profile: Partial<RunClubProfile>): boolean => {
+  // Check location - prefer city/state combination, fallback to location field
+  const hasLocation = (profile.city && profile.state) || profile.location;
+  
   // Required fields - medium enforcement level
   const requiredFields = [
     !!profile.club_name,
-    !!profile.location,
+    !!hasLocation,
     profile.member_count !== undefined && profile.member_count > 0,
     !!profile.description,
   ];
@@ -37,7 +39,11 @@ export const getMissingProfileFields = (profile: Partial<RunClubProfile>): strin
   const missingFields: string[] = [];
   
   if (!profile.club_name) missingFields.push("Club Name");
-  if (!profile.location) missingFields.push("Location");
+  
+  // Check location - prefer city/state combination, fallback to location field
+  const hasLocation = (profile.city && profile.state) || profile.location;
+  if (!hasLocation) missingFields.push("City and State");
+  
   if (!profile.member_count || profile.member_count <= 0) missingFields.push("Member Count");
   if (!profile.description) missingFields.push("Description");
   

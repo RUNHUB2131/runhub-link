@@ -91,10 +91,15 @@ const RunClubProfileDialog = ({ runClubId, isOpen, onOpenChange }: RunClubProfil
               </Avatar>
               <div>
                 <h3 className="text-xl font-bold">{profile?.club_name || "Unknown Club"}</h3>
-                {profile?.location && (
+                {(profile?.city || profile?.state || profile?.location) && (
                   <div className="flex items-center text-muted-foreground">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{profile.location}</span>
+                    <span>
+                      {profile?.city && profile?.state 
+                        ? `${profile.city}, ${profile.state}`
+                        : profile?.city || profile?.state || profile?.location
+                      }
+                    </span>
                   </div>
                 )}
               </div>
