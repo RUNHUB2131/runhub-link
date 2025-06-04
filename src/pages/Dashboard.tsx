@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useTotalViews } from "@/hooks/useTotalViews";
+import { useTotalApplications, ApplicationsPeriod } from "@/hooks/useTotalApplications";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCards, ViewsPeriod } from "@/components/dashboard/StatsCards";
@@ -15,8 +16,10 @@ const Dashboard = () => {
   const { user, userType } = useAuth();
   const { toast } = useToast();
   const [viewsPeriod, setViewsPeriod] = useState<ViewsPeriod>('all');
+  const [applicationsPeriod, setApplicationsPeriod] = useState<ApplicationsPeriod>('all');
   const { isLoading, stats, recentActivity } = useDashboardData();
   const { totalViews, isLoading: totalViewsLoading } = useTotalViews(viewsPeriod);
+  const { totalApplications, isLoading: totalApplicationsLoading } = useTotalApplications(applicationsPeriod);
   const [profilePercentage, setProfilePercentage] = useState<number>(0);
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
@@ -24,6 +27,10 @@ const Dashboard = () => {
 
   const handleViewsPeriodChange = (period: ViewsPeriod) => {
     setViewsPeriod(period);
+  };
+
+  const handleApplicationsPeriodChange = (period: ApplicationsPeriod) => {
+    setApplicationsPeriod(period);
   };
 
   useEffect(() => {
@@ -87,26 +94,41 @@ const Dashboard = () => {
       <div className="space-y-6">
         <DashboardHeader userType={userType} />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
-            <StatsCards 
-              userType={userType} 
-              stats={stats} 
-              isLoading={isLoading} 
-              totalViews={totalViews}
-              totalViewsLoading={totalViewsLoading}
-              onViewsPeriodChange={handleViewsPeriodChange} 
-            />
-          </div>
-          
-          {userType === 'run_club' && (
+        {userType === 'run_club' ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <StatsCards 
+                userType={userType} 
+                stats={stats} 
+                isLoading={isLoading} 
+                totalViews={totalViews}
+                totalViewsLoading={totalViewsLoading}
+                onViewsPeriodChange={handleViewsPeriodChange}
+                totalApplications={totalApplications}
+                totalApplicationsLoading={totalApplicationsLoading}
+                onApplicationsPeriodChange={handleApplicationsPeriodChange}
+              />
+            </div>
+            
             <ProfileCompletionCard 
               isLoading={profileLoading} 
               percentage={profilePercentage}
               profile={runClubProfile} 
             />
-          )}
-        </div>
+          </div>
+        ) : (
+          <StatsCards 
+            userType={userType} 
+            stats={stats} 
+            isLoading={isLoading} 
+            totalViews={totalViews}
+            totalViewsLoading={totalViewsLoading}
+            onViewsPeriodChange={handleViewsPeriodChange}
+            totalApplications={totalApplications}
+            totalApplicationsLoading={totalApplicationsLoading}
+            onApplicationsPeriodChange={handleApplicationsPeriodChange}
+          />
+        )}
         
         <RecentActivitySection 
           notifications={recentActivity} 
