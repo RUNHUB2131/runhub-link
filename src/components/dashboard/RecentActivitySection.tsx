@@ -1,4 +1,3 @@
-
 import { Skeleton } from "@/components/ui/skeleton";
 import { Notification } from "@/services/notificationService";
 import { format } from "date-fns";
@@ -6,18 +5,55 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface RecentActivitySectionProps {
   notifications: Notification[];
   isLoading: boolean;
   notificationsLoading: boolean;
+  markAsRead: (notificationId: string) => Promise<void>;
 }
 
-export const RecentActivitySection = ({ notifications, isLoading, notificationsLoading }: RecentActivitySectionProps) => {
+export const RecentActivitySection = ({ 
+  notifications, 
+  isLoading, 
+  notificationsLoading,
+  markAsRead
+}: RecentActivitySectionProps) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return format(date, "MMM d, h:mm a");
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark notification as read using the passed function
+    if (!notification.read) {
+      await markAsRead(notification.id);
+    }
+
+    // Navigate based on notification type
+    if (notification.related_id) {
+      switch (notification.type) {
+        case 'application':
+        case 'new_application':
+          navigate(`/applications`);
+          break;
+        case 'application_status':
+          navigate(`/applications`);
+          break;
+        case 'opportunity':
+          navigate(`/opportunities`);
+          break;
+        case 'chat':
+        case 'new_chat':
+          navigate(`/chat`);
+          break;
+        default:
+          break;
+      }
+    }
   };
 
   return (
@@ -26,7 +62,7 @@ export const RecentActivitySection = ({ notifications, isLoading, notificationsL
         <CardTitle className="text-2xl font-bold">Recent Activity</CardTitle>
         {notifications.length > 0 && (
           <Button variant="ghost" size="sm" asChild>
-            <Link to="#" className="flex items-center gap-1">
+            <Link to="/notifications" className="flex items-center gap-1">
               <Bell size={16} /> View all
             </Link>
           </Button>
@@ -42,7 +78,11 @@ export const RecentActivitySection = ({ notifications, isLoading, notificationsL
         ) : notifications.length > 0 ? (
           <div className="divide-y divide-gray-100">
             {notifications.slice(0, 5).map((notification) => (
-              <div key={notification.id} className="py-3 hover:bg-gray-50 transition-colors rounded-md px-2">
+              <div 
+                key={notification.id} 
+                className="py-3 hover:bg-gray-50 transition-colors rounded-md px-2 cursor-pointer"
+                onClick={() => handleNotificationClick(notification)}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">

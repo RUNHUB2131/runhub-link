@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useTotalViews } from "@/hooks/useTotalViews";
 import { useTotalApplications, ApplicationsPeriod } from "@/hooks/useTotalApplications";
 import { useToast } from "@/hooks/use-toast";
@@ -17,13 +18,13 @@ const Dashboard = () => {
   const { toast } = useToast();
   const [viewsPeriod, setViewsPeriod] = useState<ViewsPeriod>('all');
   const [applicationsPeriod, setApplicationsPeriod] = useState<ApplicationsPeriod>('all');
-  const { isLoading, stats, recentActivity } = useDashboardData();
+  const { isLoading, stats } = useDashboardData();
+  const { notifications, isLoading: notificationsLoading, markAsRead } = useNotifications();
   const { totalViews, isLoading: totalViewsLoading } = useTotalViews(viewsPeriod);
   const { totalApplications, isLoading: totalApplicationsLoading } = useTotalApplications(applicationsPeriod);
   const [profilePercentage, setProfilePercentage] = useState<number>(0);
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
-  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   const handleViewsPeriodChange = (period: ViewsPeriod) => {
     setViewsPeriod(period);
@@ -131,9 +132,10 @@ const Dashboard = () => {
         )}
         
         <RecentActivitySection 
-          notifications={recentActivity} 
+          notifications={notifications} 
           isLoading={isLoading} 
-          notificationsLoading={notificationsLoading} 
+          notificationsLoading={notificationsLoading}
+          markAsRead={markAsRead}
         />
       </div>
     </PageContainer>

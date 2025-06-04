@@ -99,3 +99,39 @@ export const markAllNotificationsAsRead = async (userId: string) => {
     return false;
   }
 };
+
+// Helper function to create a notification (useful for testing)
+export const createNotification = async (
+  userId: string,
+  title: string,
+  message: string,
+  type: string,
+  relatedId?: string
+) => {
+  try {
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: userId,
+        title,
+        message,
+        type,
+        related_id: relatedId || null,
+        read: false
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
+    return data as Notification;
+  } catch (error: any) {
+    console.error("Error creating notification:", error);
+    toast({
+      title: "Error",
+      description: "Failed to create notification",
+      variant: "destructive",
+    });
+    return null;
+  }
+};

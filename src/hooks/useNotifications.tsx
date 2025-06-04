@@ -1,54 +1,54 @@
-import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Notification, fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/services/notificationService";
 import { toast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export const useNotifications = () => {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const loadNotifications = async () => {
-    if (!user?.id) return;
-    
-    setIsLoading(true);
-    try {
-      const data = await fetchNotifications(user.id);
-      setNotifications(data);
-      setUnreadCount(data.filter(notif => !notif.read).length);
-    } catch (error) {
-      console.error("Error loading notifications:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load notifications",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use React Query to manage notifications globally
+  const {
+    data: notifications = [],
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['notifications', user?.id],
+    queryFn: () => fetchNotifications(user?.id || ''),
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const unreadCount = notifications.filter(notif => !notif.read).length;
 
   const markAsRead = async (notificationId: string) => {
-    // First check if the notification is already read
+    // Find the notification first
     const notification = notifications.find(notif => notif.id === notificationId);
     if (!notification || notification.read) {
       return; // Don't proceed if notification doesn't exist or is already read
     }
 
     try {
-      const success = await markNotificationAsRead(notificationId);
-      if (success) {
-        setNotifications(prevNotifs => 
-          prevNotifs.map(notif => 
-            notif.id === notificationId ? { ...notif, read: true } : notif
-          )
+      // Optimistically update the cache
+      queryClient.setQueryData(['notifications', user?.id], (oldData: Notification[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(notif =>
+          notif.id === notificationId ? { ...notif, read: true } : notif
         );
-        setUnreadCount(prev => Math.max(0, prev - 1));
+      });
+
+      // Update the database
+      const success = await markNotificationAsRead(notificationId);
+      if (!success) {
+        // Revert the optimistic update if the database update failed
+        queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
       }
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      // Revert the optimistic update
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
       toast({
         title: "Error",
         description: "Failed to mark notification as read",
@@ -59,17 +59,23 @@ export const useNotifications = () => {
 
   const markAllAsRead = async () => {
     if (!user?.id) return;
-    
+
     try {
+      // Optimistically update the cache
+      queryClient.setQueryData(['notifications', user?.id], (oldData: Notification[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(notif => ({ ...notif, read: true }));
+      });
+
       const success = await markAllNotificationsAsRead(user.id);
-      if (success) {
-        setNotifications(prevNotifs => 
-          prevNotifs.map(notif => ({ ...notif, read: true }))
-        );
-        setUnreadCount(0);
+      if (!success) {
+        // Revert the optimistic update if the database update failed
+        queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
       }
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
+      // Revert the optimistic update
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
       toast({
         title: "Error",
         description: "Failed to mark all notifications as read",
@@ -78,11 +84,9 @@ export const useNotifications = () => {
     }
   };
 
-  useEffect(() => {
-    if (user?.id) {
-      loadNotifications();
-    }
-  }, [user?.id]);
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+  };
 
   // Set up real-time listener for new notifications and updates
   useEffect(() => {
@@ -100,8 +104,12 @@ export const useNotifications = () => {
         },
         (payload) => {
           const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
-          setUnreadCount(prev => prev + 1);
+          
+          // Add the new notification to the cache
+          queryClient.setQueryData(['notifications', user?.id], (oldData: Notification[] | undefined) => {
+            if (!oldData) return [newNotification];
+            return [newNotification, ...oldData];
+          });
           
           // Display a toast notification
           toast({
@@ -120,15 +128,14 @@ export const useNotifications = () => {
         },
         (payload) => {
           const updatedNotification = payload.new as Notification;
-          setNotifications(prev => 
-            prev.map(notif => 
+          
+          // Update the notification in the cache
+          queryClient.setQueryData(['notifications', user?.id], (oldData: Notification[] | undefined) => {
+            if (!oldData) return oldData;
+            return oldData.map(notif =>
               notif.id === updatedNotification.id ? updatedNotification : notif
-            )
-          );
-          // Recalculate unread count
-          setUnreadCount(prev => 
-            prev + (updatedNotification.read ? -1 : 1)
-          );
+            );
+          });
         }
       )
       .subscribe();
@@ -136,7 +143,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, queryClient]);
 
   return {
     notifications,
@@ -144,6 +151,6 @@ export const useNotifications = () => {
     isLoading,
     markAsRead,
     markAllAsRead,
-    refresh: loadNotifications
+    refresh
   };
 };

@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AllClubs from "./pages/AllClubs";
+import Notifications from "./pages/Notifications";
 
 // Opportunity routes
 import Opportunities from "./pages/opportunities/Opportunities";
@@ -58,6 +59,7 @@ function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/notifications" element={<Notifications />} />
                   
                   {/* Club routes */}
                   <Route path="/clubs" element={<AllClubs />} />

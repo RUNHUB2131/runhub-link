@@ -3,7 +3,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { UserType } from "@/types";
-import { Notification } from "@/services/notificationService";
 
 interface DashboardStats {
   opportunities: number;
@@ -19,7 +18,6 @@ export const useDashboardData = () => {
     opportunities: 0,
     applications: 0
   });
-  const [recentActivity, setRecentActivity] = useState<Notification[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -152,7 +150,6 @@ export const useDashboardData = () => {
   return {
     isLoading,
     profileCompletionPercentage,
-    stats,
-    recentActivity
+    stats
   };
 };

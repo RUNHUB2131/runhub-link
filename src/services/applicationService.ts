@@ -99,10 +99,10 @@ export const updateApplicationStatus = async (applicationId: string, status: "ac
     
     console.log("Fetched application details:", application);
 
-    // Get the opportunity to get the brand_id
+    // Get the opportunity details to get the brand_id and title
     const { data: opportunity, error: oppError } = await supabase
       .from('opportunities')
-      .select('brand_id')
+      .select('brand_id, title')
       .eq('id', application.opportunity_id)
       .single();
 
@@ -114,6 +114,7 @@ export const updateApplicationStatus = async (applicationId: string, status: "ac
     console.log("Fetched opportunity details:", opportunity);
 
     // Update the application status
+    // Note: Database trigger will automatically create notifications
     const { error: updateError } = await supabase
       .from('applications')
       .update({ status })
