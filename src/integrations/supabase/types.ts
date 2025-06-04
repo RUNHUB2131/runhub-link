@@ -287,6 +287,45 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunity_views: {
+        Row: {
+          id: string
+          opportunity_id: string
+          run_club_id: string
+          viewed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          opportunity_id: string
+          run_club_id: string
+          viewed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          opportunity_id?: string
+          run_club_id?: string
+          viewed_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_views_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_views_run_club_id_fkey"
+            columns: ["run_club_id"]
+            isOneToOne: false
+            referencedRelation: "run_club_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useTotalViews } from "@/hooks/useTotalViews";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { StatsCards } from "@/components/dashboard/StatsCards";
+import { StatsCards, ViewsPeriod } from "@/components/dashboard/StatsCards";
 import { RecentActivitySection } from "@/components/dashboard/RecentActivitySection";
 import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionCard";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -13,11 +14,17 @@ import { fetchRunClubProfile } from "@/utils/profileUtils";
 const Dashboard = () => {
   const { user, userType } = useAuth();
   const { toast } = useToast();
+  const [viewsPeriod, setViewsPeriod] = useState<ViewsPeriod>('all');
   const { isLoading, stats, recentActivity } = useDashboardData();
+  const { totalViews, isLoading: totalViewsLoading } = useTotalViews(viewsPeriod);
   const [profilePercentage, setProfilePercentage] = useState<number>(0);
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+  const handleViewsPeriodChange = (period: ViewsPeriod) => {
+    setViewsPeriod(period);
+  };
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -82,7 +89,14 @@ const Dashboard = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
-            <StatsCards userType={userType} stats={stats} isLoading={isLoading} />
+            <StatsCards 
+              userType={userType} 
+              stats={stats} 
+              isLoading={isLoading} 
+              totalViews={totalViews}
+              totalViewsLoading={totalViewsLoading}
+              onViewsPeriodChange={handleViewsPeriodChange} 
+            />
           </div>
           
           {userType === 'run_club' && (
