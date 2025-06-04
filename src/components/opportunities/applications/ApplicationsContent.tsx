@@ -143,10 +143,10 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-black text-white hover:bg-gray-800"
+                        className="bg-white text-primary-500 border-primary-500 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-600"
                         onClick={() => openPitchDialog(app.pitch || "", app.run_club_profile?.club_name || "Unknown Club")}
                       >
-                        PITCH
+                        View pitch
                       </Button>
                     )}
                     
