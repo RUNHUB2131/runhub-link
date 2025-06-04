@@ -136,6 +136,23 @@ export const markChatNotificationsAsRead = async (userId: string, applicationId:
   }
 };
 
+// Get opportunity ID from application ID for navigation purposes
+export const getOpportunityIdFromApplication = async (applicationId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("applications")
+      .select("opportunity_id")
+      .eq("id", applicationId)
+      .single();
+
+    if (error) throw error;
+    return data?.opportunity_id || null;
+  } catch (error: any) {
+    console.error("Error fetching opportunity ID from application:", error);
+    return null;
+  }
+};
+
 // Helper function to create a notification (useful for testing)
 export const createNotification = async (
   userId: string,

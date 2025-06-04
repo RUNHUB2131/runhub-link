@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { getOpportunityIdFromApplication } from "@/services/notificationService";
 
 interface RecentActivitySectionProps {
   notifications: Notification[];
@@ -38,7 +39,15 @@ export const RecentActivitySection = ({
       switch (notification.type) {
         case 'application':
         case 'new_application':
-          navigate(`/applications`);
+          // For new_application notifications, related_id is the application ID
+          // We need to get the opportunity ID to navigate to the correct applications page
+          const opportunityId = await getOpportunityIdFromApplication(notification.related_id);
+          if (opportunityId) {
+            navigate(`/opportunities/${opportunityId}/applications`);
+          } else {
+            // Fallback to general applications page if we can't get the opportunity ID
+            navigate(`/applications`);
+          }
           break;
         case 'application_status':
           navigate(`/applications`);

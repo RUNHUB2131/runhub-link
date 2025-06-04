@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
-import { Notification, fetchNotifications, markNotificationAsRead } from "@/services/notificationService";
+import { Notification, fetchNotifications, markNotificationAsRead, getOpportunityIdFromApplication } from "@/services/notificationService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
@@ -45,6 +45,16 @@ const Notifications = () => {
       switch (notification.type) {
         case 'application':
         case 'new_application':
+          // For new_application notifications, related_id is the application ID
+          // We need to get the opportunity ID to navigate to the correct applications page
+          const opportunityId = await getOpportunityIdFromApplication(notification.related_id);
+          if (opportunityId) {
+            navigate(`/opportunities/${opportunityId}/applications`);
+          } else {
+            // Fallback to general applications page if we can't get the opportunity ID
+            navigate(`/applications`);
+          }
+          break;
         case 'application_status':
           navigate(`/applications`);
           break;

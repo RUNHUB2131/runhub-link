@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "@/components/ui/button";
 import { findChatByApplicationId } from "@/services/chat/chatLookupService";
+import { getOpportunityIdFromApplication } from "@/services/notificationService";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,19 +37,48 @@ const NotificationsDropdown = () => {
       await markAsRead(notificationId);
     }
     
-    // If this is a chat notification, navigate to the appropriate chat
-    if (type === 'new_chat' && relatedId) {
+    // Handle different notification types
+    if (relatedId) {
       try {
-        const chatData = await findChatByApplicationId(relatedId);
-        if (chatData && chatData.id) {
-          setIsOpen(false); // Close the dropdown
-          navigate(`/chat/${chatData.id}`);
+        switch (type) {
+          case 'new_application':
+          case 'application':
+            // For new_application notifications, related_id is the application ID
+            // We need to get the opportunity ID to navigate to the correct applications page
+            const opportunityId = await getOpportunityIdFromApplication(relatedId);
+            if (opportunityId) {
+              setIsOpen(false);
+              navigate(`/opportunities/${opportunityId}/applications`);
+            } else {
+              // Fallback to general applications page if we can't get the opportunity ID
+              setIsOpen(false);
+              navigate(`/applications`);
+            }
+            break;
+          case 'new_chat':
+            // Navigate to the appropriate chat
+            const chatData = await findChatByApplicationId(relatedId);
+            if (chatData && chatData.id) {
+              setIsOpen(false);
+              navigate(`/chat/${chatData.id}`);
+            }
+            break;
+          case 'application_status':
+            setIsOpen(false);
+            navigate(`/applications`);
+            break;
+          case 'opportunity':
+            setIsOpen(false);
+            navigate(`/opportunities`);
+            break;
+          default:
+            break;
         }
       } catch (error) {
-        console.error("Error finding chat:", error);
+        console.error("Error handling notification click:", error);
         toast({
           title: "Error",
-          description: "Failed to navigate to chat",
+          description: "Failed to navigate",
           variant: "destructive",
         });
       }
