@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Application } from "@/types";
 import ApplicationsHeader from "@/components/opportunities/applications/ApplicationsHeader";
 import ApplicationsContent from "@/components/opportunities/applications/ApplicationsContent";
-import { updateApplicationStatus } from "@/services/applicationService";
+import { updateApplicationStatus, markApplicationsAsSeen } from "@/services/applicationService";
 import { PageContainer } from "@/components/layout/PageContainer";
 
 interface RunClubApplication extends Application {
@@ -19,6 +20,7 @@ interface RunClubApplication extends Application {
 const OpportunityApplications = () => {
   const { id: opportunityId } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [applications, setApplications] = useState<RunClubApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [opportunity, setOpportunity] = useState<any>(null);
@@ -111,6 +113,22 @@ const OpportunityApplications = () => {
     }
   };
 
+  const markAsSeen = async () => {
+    if (!opportunityId || !user || !opportunity) {
+      return;
+    }
+    
+    // Only mark as seen if the current user is the brand owner of this opportunity
+    if (user.id === opportunity.brand_id) {
+      try {
+        await markApplicationsAsSeen(opportunityId);
+        console.log("Applications marked as seen for opportunity:", opportunityId);
+      } catch (error) {
+        console.error("Failed to mark applications as seen:", error);
+      }
+    }
+  };
+
   const handleRefresh = () => {
     fetchApplications();
   };
@@ -147,6 +165,13 @@ const OpportunityApplications = () => {
       fetchApplications();
     }
   }, [opportunityId]);
+
+  // Mark applications as seen when opportunity data is available
+  useEffect(() => {
+    if (opportunity && user) {
+      markAsSeen();
+    }
+  }, [opportunity, user]);
 
   return (
     <PageContainer>
