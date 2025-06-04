@@ -15,7 +15,7 @@ const ChatIndicator = () => {
   useEffect(() => {
     if (!user?.id) return;
     
-    // Initial count of unread messages
+    // Initial count of chats with unread messages
     const fetchUnreadCount = async () => {
       try {
         // Get all chats for the current user
@@ -31,20 +31,28 @@ const ChatIndicator = () => {
           return;
         }
         
-        // Get count of unread messages in those chats
+        // Count how many chats have unread messages
         const chatIds = chats.map(chat => chat.id);
-        const { count, error: countError } = await supabase
-          .from('chat_messages')
-          .select('*', { count: 'exact', head: true })
-          .in('chat_id', chatIds)
-          .eq('read', false)
-          .not('sender_id', 'eq', user.id);
+        let chatsWithUnreadMessages = 0;
         
-        if (countError) throw countError;
+        for (const chatId of chatIds) {
+          const { count, error: countError } = await supabase
+            .from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('chat_id', chatId)
+            .eq('read', false)
+            .not('sender_id', 'eq', user.id);
+          
+          if (countError) throw countError;
+          
+          if ((count || 0) > 0) {
+            chatsWithUnreadMessages++;
+          }
+        }
         
-        setUnreadCount(count || 0);
+        setUnreadCount(chatsWithUnreadMessages);
       } catch (error) {
-        console.error("Error fetching unread messages count:", error);
+        console.error("Error fetching unread chats count:", error);
       }
     };
     
@@ -63,9 +71,10 @@ const ChatIndicator = () => {
         (payload) => {
           const message = payload.new as any;
           
-          // Only increment if the message is not from the current user
+          // Only update if the message is not from the current user
           if (message && message.sender_id !== user.id) {
-            setUnreadCount(prev => prev + 1);
+            // Refresh the count to ensure accuracy
+            fetchUnreadCount();
           }
         }
       )

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ interface ChatMessageInputProps {
 
 const ChatMessageInput = ({ onSendMessage, isSending }: ChatMessageInputProps) => {
   const [message, setMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +20,13 @@ const ChatMessageInput = ({ onSendMessage, isSending }: ChatMessageInputProps) =
     onSendMessage(message);
     setMessage("");
   };
+  
+  // Restore focus when textarea becomes enabled again
+  useEffect(() => {
+    if (!isSending) {
+      textareaRef.current?.focus();
+    }
+  }, [isSending]);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Enter without Shift key
@@ -33,6 +40,7 @@ const ChatMessageInput = ({ onSendMessage, isSending }: ChatMessageInputProps) =
     <form onSubmit={handleSubmit} className="border-t p-4">
       <div className="flex items-end gap-2">
         <Textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}

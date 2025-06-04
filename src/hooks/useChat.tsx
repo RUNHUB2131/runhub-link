@@ -55,11 +55,44 @@ export const useChat = (chatId: string) => {
     if (!user || !chatId || !content.trim() || !userType) return;
     
     setIsSending(true);
+    
+    // Create optimistic message for immediate UI update
+    const optimisticMessage: ChatMessage = {
+      id: `temp-${Date.now()}`, // Temporary ID
+      chat_id: chatId,
+      sender_id: user.id,
+      sender_type: userType as 'brand' | 'run_club',
+      content: content.trim(),
+      read: true,
+      created_at: new Date().toISOString()
+    };
+    
+    // Add optimistic message to UI immediately
+    setMessages(prev => [...prev, optimisticMessage]);
+    
     try {
       const senderType = userType as 'brand' | 'run_club';
-      await sendMessage(chatId, user.id, senderType, content);
+      const sentMessage = await sendMessage(chatId, user.id, senderType, content.trim());
+      
+      if (sentMessage) {
+        // Replace optimistic message with real message from server
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === optimisticMessage.id ? sentMessage : msg
+          )
+        );
+      } else {
+        // Remove optimistic message if sending failed
+        setMessages(prev => 
+          prev.filter(msg => msg.id !== optimisticMessage.id)
+        );
+      }
     } catch (error) {
       console.error("Error sending message:", error);
+      // Remove optimistic message if sending failed
+      setMessages(prev => 
+        prev.filter(msg => msg.id !== optimisticMessage.id)
+      );
     } finally {
       setIsSending(false);
     }
@@ -99,9 +132,9 @@ export const useChat = (chatId: string) => {
     
     loadInitialData();
     
-    // Subscribe to new messages
+    // Subscribe to new messages with a unique channel name per chat
     const channel = supabase
-      .channel('chat-messages')
+      .channel(`chat-messages-${chatId}`)
       .on(
         'postgres_changes',
         {
@@ -112,6 +145,7 @@ export const useChat = (chatId: string) => {
         },
         (payload) => {
           const newMessage = payload.new as ChatMessage;
+          console.log('New message received:', newMessage);
           setMessages(prev => [...prev, newMessage]);
           
           // Mark the message as read if it's not from the current user
