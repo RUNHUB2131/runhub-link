@@ -63,10 +63,7 @@ const ChatListPage = () => {
           <div key={chat.id} className="border rounded-md overflow-hidden">
             <ChatListItem
               chat={chat}
-              onClick={() => {
-                handleChatSelect(chat.id);
-                refreshChats();
-              }}
+              onClick={() => handleChatSelect(chat.id)}
               refreshChats={refreshChats}
             />
           </div>

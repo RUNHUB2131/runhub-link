@@ -1,115 +1,77 @@
 import { format } from "date-fns";
-import { Chat } from "@/services/chat";
+import { Chat } from "@/services/chat/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface ChatListItemProps {
   chat: Chat;
   isActive?: boolean;
   onClick: () => void;
-  refreshChats?: () => Promise<void>;
+  refreshChats?: () => void;
 }
 
 const ChatListItem = ({ chat, isActive = false, onClick, refreshChats }: ChatListItemProps) => {
-  const { userType, user } = useAuth();
+  const { user, userType } = useAuth();
+  const { markChatAsRead } = useNotifications();
   
-  // Determine which participant to show (the other party)
-  const isBrand = userType === "brand";
-  const otherParty = isBrand ? chat.run_club_profile : chat.brand_profile;
-  const otherPartyName = isBrand
-    ? chat.run_club_profile?.club_name || "Run Club"
-    : chat.brand_profile?.company_name || "Brand";
-  const otherPartyLogo = isBrand
-    ? chat.run_club_profile?.logo_url
-    : chat.brand_profile?.logo_url;
-  
-  // Format the date for display
-  const formatDate = (dateString: string) => {
+  const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
-    // If the date is today, show the time
-    if (date.toDateString() === now.toDateString()) {
-      return format(date, "h:mm a");
-    }
-    
-    // If the date is within the last week, show the day name
-    if (now.getTime() - date.getTime() < 7 * 24 * 60 * 60 * 1000) {
+    if (days === 0) {
+      return format(date, "HH:mm");
+    } else if (days === 1) {
+      return "Yesterday";
+    } else if (days < 7) {
       return format(date, "EEE");
+    } else {
+      return format(date, "dd/MM");
+    }
+  };
+  
+  const getChatDisplayInfo = () => {
+    if (!user) return { name: '', image: null };
+    
+    // Show the other participant's info
+    if (chat.brand_profile && user.id !== chat.brand_id) {
+      return {
+        name: chat.brand_profile.company_name || 'Brand',
+        image: chat.brand_profile.logo_url
+      };
+    } else if (chat.run_club_profile && user.id !== chat.run_club_id) {
+      return {
+        name: chat.run_club_profile.club_name || 'Run Club',
+        image: chat.run_club_profile.logo_url
+      };
     }
     
-    // Otherwise show the date
-    return format(date, "MMM d");
+    return { name: 'Chat', image: null };
   };
-
-  // Handler for clicking on a chat
+  
   const handleChatClick = async () => {
-    if (!user?.id || !chat.id) {
-      onClick();
-      return;
-    }
+    if (!user) return;
     
     try {
-      // DEBUG: Fetch unread messages for this chat and user before updating
-      const { data: unreadMessages, error: unreadError } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('chat_id', chat.id)
-        .eq('read', false)
-        .not('sender_id', 'eq', user.id);
-      console.log('[DEBUG] Unread messages before update:', unreadMessages, 'Error:', unreadError);
-      if (unreadMessages && unreadMessages.length > 0) {
-        console.log('[DEBUG] Current user.id:', user.id);
-        unreadMessages.forEach((msg, idx) => {
-          console.log(`[DEBUG] Unread message ${idx} sender_id:`, msg.sender_id);
-        });
-      }
-      // Try update without .not() filter
-      const { data: updateDataNoNot, error: updateErrorNoNot, count: updateCountNoNot } = await supabase
-        .from('chat_messages')
-        .update({ read: true })
-        .eq('chat_id', chat.id)
-        .eq('read', false);
-      console.log('[DEBUG] Mark as read result (no .not()):', { updateDataNoNot, updateErrorNoNot, updateCountNoNot });
-      // Original update query
-      const { data: updateData, error: updateError, count: updateCount } = await supabase
+      // Mark messages in this chat as read
+      await supabase
         .from('chat_messages')
         .update({ read: true })
         .eq('chat_id', chat.id)
         .not('sender_id', 'eq', user.id);
-      console.log('Mark as read result:', { updateData, updateError, updateCount });
-      // Optionally, optimistically update the unread count here if needed
-      // e.g., setUnreadCount(0) for this chat
-      // Clear notification indicators
+      
+      // Mark chat notifications as read using the synchronized system
       if (chat.application_id) {
-        try {
-          // Get notifications related to this chat
-          const { data: notifications } = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('type', 'new_chat')
-            .eq('related_id', chat.application_id)
-            .eq('read', false);
-          if (notifications && notifications.length > 0) {
-            // Mark notifications as read
-            const notificationIds = notifications.map(notif => notif.id);
-            await supabase
-              .from('notifications')
-              .update({ read: true })
-              .in('id', notificationIds);
-          }
-        } catch (error) {
-          console.error("Error marking chat notifications as read:", error);
-        }
+        await markChatAsRead(chat.application_id);
       }
-      // Call refreshChats after marking as read
-      if (refreshChats) {
-        await refreshChats();
-      }
+      
+      // Don't automatically refresh chats here to prevent infinite loops
+      // The chat list will refresh when the user navigates back or page reloads
     } catch (error) {
       console.error("Error marking chat messages as read:", error);
     }
@@ -118,40 +80,47 @@ const ChatListItem = ({ chat, isActive = false, onClick, refreshChats }: ChatLis
     onClick();
   };
   
+  const { name, image } = getChatDisplayInfo();
+  
   return (
-    <div 
+    <div
       className={cn(
-        "p-3 flex items-center gap-3 cursor-pointer hover:bg-muted transition-colors",
+        "p-3 cursor-pointer hover:bg-muted/50 transition-colors flex items-center gap-3",
         isActive && "bg-muted"
       )}
       onClick={handleChatClick}
     >
-      <Avatar className="h-12 w-12">
-        {otherPartyLogo ? (
-          <AvatarImage src={otherPartyLogo} alt={otherPartyName} />
+      <Avatar>
+        {image ? (
+          <AvatarImage src={image} alt={name} />
         ) : (
-          <AvatarFallback>{otherPartyName.charAt(0).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>
+            {name.charAt(0).toUpperCase()}
+          </AvatarFallback>
         )}
       </Avatar>
       
       <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start">
-          <h3 className="font-semibold truncate">{otherPartyName}</h3>
-          <span className="text-xs text-muted-foreground">
-            {formatDate(chat.updated_at)}
-          </span>
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium truncate">{name}</h3>
+          <div className="flex items-center gap-2">
+            {(chat.unread_count || 0) > 0 && (
+              <Badge variant="destructive">
+                {chat.unread_count}
+              </Badge>
+            )}
+            <span className="text-xs text-muted-foreground">
+              {formatTime(chat.updated_at)}
+            </span>
+          </div>
         </div>
         
-        <p className="text-sm text-muted-foreground truncate">
-          {chat.opportunity?.title || "Opportunity"}
-        </p>
+        {chat.opportunity?.title && (
+          <p className="text-sm text-muted-foreground truncate">
+            {chat.opportunity.title}
+          </p>
+        )}
       </div>
-      
-      {(chat.unread_count || 0) > 0 && (
-        <Badge variant="default" className="ml-auto">
-          {chat.unread_count}
-        </Badge>
-      )}
     </div>
   );
 };

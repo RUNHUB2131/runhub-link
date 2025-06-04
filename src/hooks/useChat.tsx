@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useNotifications } from "@/hooks/useNotifications";
 import { 
   fetchMessages, 
   markMessagesAsRead, 
@@ -13,6 +14,7 @@ import {
 
 export const useChat = (chatId: string) => {
   const { user, userType } = useAuth();
+  const { markChatAsRead } = useNotifications();
   const [chat, setChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +30,11 @@ export const useChat = (chatId: string) => {
       const chatData = await fetchChatById(chatId);
       if (chatData) {
         setChat(chatData);
+        
+        // Mark chat notifications as read using the synchronized system
+        if (chatData.application_id) {
+          await markChatAsRead(chatData.application_id);
+        }
       }
       
       // Fetch messages
@@ -41,7 +48,7 @@ export const useChat = (chatId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [chatId, user]);
+  }, [chatId, user, markChatAsRead]);
 
   // Send a new message
   const handleSendMessage = async (content: string) => {
@@ -60,10 +67,37 @@ export const useChat = (chatId: string) => {
 
   // Setup real-time subscription to messages
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !user) return;
     
     // Load initial data
-    loadChat();
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch chat details
+        const chatData = await fetchChatById(chatId);
+        if (chatData) {
+          setChat(chatData);
+          
+          // Mark chat notifications as read using the synchronized system
+          if (chatData.application_id) {
+            await markChatAsRead(chatData.application_id);
+          }
+        }
+        
+        // Fetch messages
+        const messagesData = await fetchMessages(chatId);
+        setMessages(messagesData);
+        
+        // Mark messages as read
+        await markMessagesAsRead(chatId, user.id);
+      } catch (error) {
+        console.error("Error loading chat:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadInitialData();
     
     // Subscribe to new messages
     const channel = supabase
@@ -81,7 +115,7 @@ export const useChat = (chatId: string) => {
           setMessages(prev => [...prev, newMessage]);
           
           // Mark the message as read if it's not from the current user
-          if (user && newMessage.sender_id !== user.id) {
+          if (newMessage.sender_id !== user.id) {
             markMessagesAsRead(chatId, user.id);
           }
         }
@@ -91,7 +125,7 @@ export const useChat = (chatId: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [chatId, user, loadChat]);
+  }, [chatId, user?.id, markChatAsRead]);
 
   return {
     chat,
@@ -111,7 +145,7 @@ export const useChatList = () => {
   
   const loadChats = useCallback(async () => {
     if (!user?.id || !userType) return;
-    console.log('Calling loadChats (refreshChats)');
+    console.log('Loading chats...');
     setIsLoading(true);
     try {
       const userChats = await fetchChats(user.id, userType as 'brand' | 'run_club');
@@ -125,60 +159,7 @@ export const useChatList = () => {
   
   useEffect(() => {
     loadChats();
-    
-    // Setup real-time subscriptions for new messages and chats
-    if (!user?.id) return;
-    
-    // Subscribe to messages to update unread count
-    const messagesChannel = supabase
-      .channel('chat-messages-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages'
-        },
-        () => {
-          console.log('Received INSERT event on chat_messages, refreshing chats');
-          loadChats();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'chat_messages'
-        },
-        () => {
-          console.log('Received UPDATE event on chat_messages, refreshing chats');
-          loadChats();
-        }
-      )
-      .subscribe();
-    
-    // Subscribe to new chats
-    const chatsChannel = supabase
-      .channel('chats-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chats'
-        },
-        () => {
-          loadChats();
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(messagesChannel);
-      supabase.removeChannel(chatsChannel);
-    };
-  }, [user?.id, loadChats]);
+  }, [loadChats]);
   
   return {
     chats,

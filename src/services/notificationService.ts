@@ -100,6 +100,42 @@ export const markAllNotificationsAsRead = async (userId: string) => {
   }
 };
 
+// Mark chat notifications as read for a specific application
+export const markChatNotificationsAsRead = async (userId: string, applicationId: string) => {
+  try {
+    // Get chat notifications related to this application
+    const { data: notifications, error: fetchError } = await supabase
+      .from("notifications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("type", "new_chat")
+      .eq("related_id", applicationId)
+      .eq("read", false);
+
+    if (fetchError) throw fetchError;
+    if (!notifications || notifications.length === 0) return true; // No unread notifications
+
+    // Mark all these notifications as read
+    const notificationIds = notifications.map(notif => notif.id);
+    const { error: updateError } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .in("id", notificationIds);
+
+    if (updateError) throw updateError;
+    
+    return true;
+  } catch (error: any) {
+    console.error("Error marking chat notifications as read:", error);
+    toast({
+      title: "Error",
+      description: "Failed to mark chat notifications as read",
+      variant: "destructive",
+    });
+    return false;
+  }
+};
+
 // Helper function to create a notification (useful for testing)
 export const createNotification = async (
   userId: string,

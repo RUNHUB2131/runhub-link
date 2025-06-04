@@ -14,47 +14,82 @@ export const fetchChats = async (userId: string, userType: 'brand' | 'run_club')
       .eq(idField, userId)
       .order('updated_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error fetching chats:", error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return [];
+    }
     
     // Then fetch related data for each chat
     const enrichedChats = await Promise.all(
-      (data || []).map(async (chat) => {
-        // Get opportunity info
-        const { data: oppData } = await supabase
-          .from('opportunities')
-          .select('title')
-          .eq('id', chat.opportunity_id)
-          .single();
-        
-        // Get brand profile info
-        const { data: brandData } = await supabase
-          .from('brand_profiles')
-          .select('company_name, logo_url')
-          .eq('id', chat.brand_id)
-          .single();
-        
-        // Get run club profile info
-        const { data: runClubData } = await supabase
-          .from('run_club_profiles')
-          .select('club_name, logo_url')
-          .eq('id', chat.run_club_id)
-          .single();
-        
-        // Get unread count
-        const { count } = await supabase
-          .from('chat_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('chat_id', chat.id)
-          .eq('read', false)
-          .not('sender_id', 'eq', userId);
-        
-        return {
-          ...chat,
-          opportunity: oppData,
-          brand_profile: brandData,
-          run_club_profile: runClubData,
-          unread_count: count || 0
-        };
+      data.map(async (chat) => {
+        try {
+          // Get opportunity info (use .maybeSingle() to handle missing data)
+          const { data: oppData, error: oppError } = await supabase
+            .from('opportunities')
+            .select('title')
+            .eq('id', chat.opportunity_id)
+            .maybeSingle();
+          
+          if (oppError) {
+            console.error("Error fetching opportunity for chat", chat.id, oppError);
+          }
+          
+          // Get brand profile info
+          const { data: brandData, error: brandError } = await supabase
+            .from('brand_profiles')
+            .select('company_name, logo_url')
+            .eq('id', chat.brand_id)
+            .maybeSingle();
+          
+          if (brandError) {
+            console.error("Error fetching brand profile for chat", chat.id, brandError);
+          }
+          
+          // Get run club profile info
+          const { data: runClubData, error: runClubError } = await supabase
+            .from('run_club_profiles')
+            .select('club_name, logo_url')
+            .eq('id', chat.run_club_id)
+            .maybeSingle();
+          
+          if (runClubError) {
+            console.error("Error fetching run club profile for chat", chat.id, runClubError);
+          }
+          
+          // Get unread count
+          const { count, error: countError } = await supabase
+            .from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('chat_id', chat.id)
+            .eq('read', false)
+            .not('sender_id', 'eq', userId);
+          
+          if (countError) {
+            console.error("Error getting unread count for chat", chat.id, countError);
+          }
+          
+          return {
+            ...chat,
+            opportunity: oppData || null,
+            brand_profile: brandData || null,
+            run_club_profile: runClubData || null,
+            unread_count: count || 0
+          };
+        } catch (error) {
+          console.error("Error processing chat", chat.id, error);
+          // Return chat with default values if there's an error
+          return {
+            ...chat,
+            opportunity: null,
+            brand_profile: null,
+            run_club_profile: null,
+            unread_count: 0
+          };
+        }
       })
     );
     
