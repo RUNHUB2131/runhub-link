@@ -111,7 +111,7 @@ export const useOpportunityDetails = (opportunityId: string) => {
     }
   };
 
-  const handleApply = async () => {
+  const handleApply = async (pitch: string) => {
     if (!user || !opportunity) {
       toast({
         title: "Error",
@@ -144,7 +144,8 @@ export const useOpportunityDetails = (opportunityId: string) => {
         .insert({
           opportunity_id: opportunity.id,
           run_club_id: user.id,
-          status: 'pending'
+          status: 'pending',
+          pitch: pitch
         });
       
       if (error) throw error;
@@ -159,7 +160,8 @@ export const useOpportunityDetails = (opportunityId: string) => {
         opportunity_id: opportunity.id,
         run_club_id: user.id,
         status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        pitch: pitch
       });
       
       return true;

@@ -26,7 +26,7 @@ const OpportunityDetails = () => {
     handleApply
   } = useOpportunityDetails(id || '');
 
-  const handleApplyClick = async () => {
+  const handleApplyClick = async (pitch: string) => {
     // Check if profile is complete before applying
     if (!isProfileComplete(runClubProfile)) {
       toast({
@@ -38,7 +38,7 @@ const OpportunityDetails = () => {
     }
     
     setIsApplying(true);
-    const success = await handleApply();
+    const success = await handleApply(pitch);
     setIsApplying(false);
     
     if (success) {

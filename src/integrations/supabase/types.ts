@@ -39,6 +39,7 @@ export type Database = {
           created_at: string
           id: string
           opportunity_id: string
+          pitch: string | null
           run_club_id: string
           seen_by_brand: boolean
           status: string
@@ -47,6 +48,7 @@ export type Database = {
           created_at?: string
           id?: string
           opportunity_id: string
+          pitch?: string | null
           run_club_id: string
           seen_by_brand?: boolean
           status?: string
@@ -55,6 +57,7 @@ export type Database = {
           created_at?: string
           id?: string
           opportunity_id?: string
+          pitch?: string | null
           run_club_id?: string
           seen_by_brand?: boolean
           status?: string

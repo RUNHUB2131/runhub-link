@@ -9,10 +9,11 @@ import { Opportunity, RunClubProfile } from "@/types";
 import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
 import OpportunityBrandInfo from "./OpportunityBrandInfo";
 import { ApplicationConfirmationDialog } from "./ApplicationConfirmationDialog";
+import { PitchDialog } from "./PitchDialog";
 
 interface BrowseOpportunityCardProps {
   opportunity: Opportunity;
-  onApply: (opportunityId: string) => void;
+  onApply: (opportunityId: string, pitch: string) => void;
   runClubProfile?: Partial<RunClubProfile>;
 }
 
@@ -21,6 +22,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
   const { toast } = useToast();
   const { userType } = useAuth();
   const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [showPitchDialog, setShowPitchDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   
@@ -61,10 +63,15 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
   };
 
   const handleConfirmApply = async () => {
-    setIsApplying(true);
-    await onApply(opportunity.id);
-    setIsApplying(false);
     setShowApplyDialog(false);
+    setShowPitchDialog(true);
+  };
+
+  const handlePitchSubmit = async (pitch: string) => {
+    setIsApplying(true);
+    await onApply(opportunity.id, pitch);
+    setIsApplying(false);
+    setShowPitchDialog(false);
   };
 
   console.log("Rendering opportunity in BrowseOpportunityCard:", opportunity);
@@ -147,6 +154,14 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
         onOpenChange={setShowApplyDialog}
         onConfirm={handleConfirmApply}
         isApplying={isApplying}
+      />
+
+      <PitchDialog
+        opportunity={opportunity}
+        isOpen={showPitchDialog}
+        onOpenChange={setShowPitchDialog}
+        onSubmit={handlePitchSubmit}
+        isSubmitting={isApplying}
       />
     </>
   );

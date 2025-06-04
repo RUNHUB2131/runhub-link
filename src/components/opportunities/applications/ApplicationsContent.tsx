@@ -6,6 +6,7 @@ import ApplicationStatusBadge from "./ApplicationStatusBadge";
 import ApplicationActionButtons from "./ApplicationActionButtons";
 import EmptyApplicationsState from "./EmptyApplicationsState";
 import RunClubProfileDialog from "./RunClubProfileDialog";
+import { PitchViewDialog } from "../PitchViewDialog";
 import { MapPin, Users, Calendar } from "lucide-react";
 import { Application } from "@/types";
 
@@ -29,6 +30,9 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
   const [activeTab, setActiveTab] = useState("all");
   const [selectedRunClubId, setSelectedRunClubId] = useState<string | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
+  const [selectedPitch, setSelectedPitch] = useState<string>("");
+  const [selectedClubName, setSelectedClubName] = useState<string>("");
+  const [pitchDialogOpen, setPitchDialogOpen] = useState(false);
 
   // Filter applications based on active tab
   const filteredApplications = applications.filter(app => {
@@ -42,6 +46,12 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
   const openRunClubProfile = (runClubId: string) => {
     setSelectedRunClubId(runClubId);
     setProfileDialogOpen(true);
+  };
+
+  const openPitchDialog = (pitch: string, clubName: string) => {
+    setSelectedPitch(pitch);
+    setSelectedClubName(clubName);
+    setPitchDialogOpen(true);
   };
 
   if (isLoading) {
@@ -129,6 +139,17 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                       View Profile
                     </Button>
                     
+                    {app.pitch && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="bg-black text-white hover:bg-gray-800"
+                        onClick={() => openPitchDialog(app.pitch || "", app.run_club_profile?.club_name || "Unknown Club")}
+                      >
+                        PITCH
+                      </Button>
+                    )}
+                    
                     <ApplicationActionButtons 
                       applicationId={app.id}
                       status={app.status}
@@ -149,6 +170,13 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
           onOpenChange={setProfileDialogOpen} 
         />
       )}
+      
+      <PitchViewDialog
+        isOpen={pitchDialogOpen}
+        onOpenChange={setPitchDialogOpen}
+        pitch={selectedPitch}
+        clubName={selectedClubName}
+      />
     </div>
   );
 };

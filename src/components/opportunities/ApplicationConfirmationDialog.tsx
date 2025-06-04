@@ -55,7 +55,7 @@ export function ApplicationConfirmationDialog({
         </div>
         <DialogFooter>
           <Button onClick={onConfirm} disabled={isApplying} className="w-full">
-            {isApplying ? "Applying..." : "Confirm Application"}
+            {isApplying ? "Processing..." : "Next: Write Pitch"}
           </Button>
         </DialogFooter>
       </DialogContent>

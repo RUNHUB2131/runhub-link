@@ -11,7 +11,7 @@ interface OpportunityDetailsHeaderProps {
   userId: string | undefined;
   application: Application | null;
   isApplying: boolean;
-  handleApply: () => Promise<boolean>;
+  handleApply: (pitch: string) => Promise<boolean>;
   showApplications: boolean;
   setShowApplications: (show: boolean) => void;
   runClubProfile: Partial<RunClubProfile>;

@@ -77,7 +77,7 @@ const BrowseOpportunities = () => {
     loadProfile();
   }, [user?.id]);
 
-  const handleApply = async (opportunityId: string) => {
+  const handleApply = async (opportunityId: string, pitch: string) => {
     if (!user?.id) return;
     
     // Double-check profile completion before submitting application
@@ -110,13 +110,14 @@ const BrowseOpportunities = () => {
 
       console.log("Verified run club profile:", profile);
       
-      // Now attempt to submit the application
+      // Now attempt to submit the application with pitch
       const { error } = await supabase
         .from('applications')
         .insert({
           opportunity_id: opportunityId,
           run_club_id: user.id,
-          status: 'pending'
+          status: 'pending',
+          pitch: pitch
         });
       
       if (error) {

@@ -93,6 +93,7 @@ export interface Application {
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
   seen_by_brand?: boolean;
+  pitch?: string;
   run_club_profile?: {
     club_name: string;
     location: string;

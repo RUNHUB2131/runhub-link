@@ -8,6 +8,7 @@ import { Application, RunClubProfile, Opportunity } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { checkChatExistsForApplication } from "@/services/chat";
 import { ApplicationConfirmationDialog } from "./ApplicationConfirmationDialog";
+import { PitchDialog } from "./PitchDialog";
 
 interface OpportunityActionButtonProps {
   userType: 'run_club' | 'brand' | undefined;
@@ -17,7 +18,7 @@ interface OpportunityActionButtonProps {
   opportunity: Opportunity;
   application: Application | null;
   isApplying: boolean;
-  handleApply: () => Promise<boolean>;
+  handleApply: (pitch: string) => Promise<boolean>;
   showApplications: boolean;
   setShowApplications: (show: boolean) => void;
   runClubProfile: Partial<RunClubProfile>;
@@ -39,6 +40,7 @@ const OpportunityActionButton = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showPitchDialog, setShowPitchDialog] = useState(false);
 
   const handleChatClick = async () => {
     if (!application || application.status !== 'accepted') return;
@@ -70,10 +72,15 @@ const OpportunityActionButton = ({
   };
 
   const handleConfirmApply = async () => {
+    setShowConfirmDialog(false);
+    setShowPitchDialog(true);
+  };
+
+  const handlePitchSubmit = async (pitch: string) => {
     try {
-      const success = await handleApply();
+      const success = await handleApply(pitch);
       if (success) {
-        setShowConfirmDialog(false);
+        setShowPitchDialog(false);
         navigate('/applications');
       }
     } catch (error) {
@@ -165,6 +172,14 @@ const OpportunityActionButton = ({
           onOpenChange={setShowConfirmDialog}
           onConfirm={handleConfirmApply}
           isApplying={isApplying}
+        />
+
+        <PitchDialog
+          opportunity={opportunity}
+          isOpen={showPitchDialog}
+          onOpenChange={setShowPitchDialog}
+          onSubmit={handlePitchSubmit}
+          isSubmitting={isApplying}
         />
       </>
     );

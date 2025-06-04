@@ -6,7 +6,7 @@ import { Opportunity, RunClubProfile } from "@/types";
 interface BrowseOpportunityListProps {
   opportunities: Opportunity[];
   isLoading: boolean;
-  onApply: (opportunityId: string) => void;
+  onApply: (opportunityId: string, pitch: string) => void;
   runClubProfile?: Partial<RunClubProfile>;
 }
 
