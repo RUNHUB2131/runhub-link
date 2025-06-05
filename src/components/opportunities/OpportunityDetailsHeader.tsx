@@ -35,12 +35,13 @@ const OpportunityDetailsHeader = ({
       <div className="flex items-center">
         <Button 
           variant="ghost" 
-          className="mr-2 p-0 hover:bg-transparent" 
+          size="sm"
+          className="mr-3 p-0 hover:bg-transparent text-gray-600 hover:text-gray-900" 
           onClick={() => navigate('/opportunities')}
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">Back to opportunities</span>
         </Button>
-        <span className="text-xl font-medium">Back to opportunities</span>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface ApplicationsHeaderProps {
   title: string;
@@ -11,30 +10,41 @@ interface ApplicationsHeaderProps {
 
 const ApplicationsHeader = ({ title, description, onRefresh }: ApplicationsHeaderProps) => {
   const navigate = useNavigate();
+  const { id: opportunityId } = useParams<{ id: string }>();
+  
+  const handleBackNavigation = () => {
+    if (opportunityId) {
+      navigate(`/opportunities/${opportunityId}`);
+    } else {
+      navigate('/opportunities');
+    }
+  };
   
   return (
     <div className="space-y-6">
       <div className="flex items-center">
         <Button 
           variant="ghost" 
-          className="mr-2 p-0 hover:bg-transparent" 
-          onClick={() => navigate('/opportunities')}
+          size="sm"
+          className="mr-3 p-0 hover:bg-transparent text-gray-600 hover:text-gray-900" 
+          onClick={handleBackNavigation}
         >
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">Back to opportunity</span>
         </Button>
-        <span className="text-xl font-medium">Back to opportunities</span>
       </div>
 
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold">{title || 'Loading...'} - Applications</h1>
-        {description && <p className="text-gray-500">{description}</p>}
-      </div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold">{title || 'Loading...'} - Applications</h1>
+          {description && <p className="text-gray-600">{description}</p>}
+        </div>
 
-      <div className="flex justify-end">
         <Button 
           variant="outline"
+          size="sm"
           onClick={onRefresh}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 self-start"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh Data
