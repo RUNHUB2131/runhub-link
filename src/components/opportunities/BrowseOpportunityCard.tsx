@@ -10,6 +10,7 @@ import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompl
 import OpportunityBrandInfo from "./OpportunityBrandInfo";
 import { ApplicationConfirmationDialog } from "./ApplicationConfirmationDialog";
 import { PitchDialog } from "./PitchDialog";
+import { Calendar, Gift } from "lucide-react";
 
 interface BrowseOpportunityCardProps {
   opportunity: Opportunity;
@@ -74,49 +75,76 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
     setShowPitchDialog(false);
   };
 
+  // Format the deadline date nicely
+  const formatDeadline = (deadline: string) => {
+    try {
+      const date = new Date(deadline);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric'
+      });
+    } catch {
+      return deadline;
+    }
+  };
+
   console.log("Rendering opportunity in BrowseOpportunityCard:", opportunity);
 
   return (
     <>
       <Card 
         key={opportunity.id} 
-        className="cursor-pointer hover:shadow-md transition-shadow"
+        className="cursor-pointer hover:shadow-md transition-all duration-200 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-l-4 border-l-primary"
         onClick={handleViewOpportunity}
       >
-        <CardHeader className="pb-2">
-          <OpportunityBrandInfo opportunity={opportunity} />
-          <CardTitle className="line-clamp-2 mt-2">{opportunity.title}</CardTitle>
-        </CardHeader>
-        
-        <CardContent>
-          <p className="text-sm text-gray-500 mb-2">
-            Application Due: {opportunity.submission_deadline}
-          </p>
-          <div className="mt-3 py-2 px-3 bg-primary-50 rounded-md">
-            <p className="font-medium">Incentive: {opportunity.club_incentives}</p>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            {/* Left side - Main content */}
+            <div className="flex-1 min-w-0">
+              <OpportunityBrandInfo opportunity={opportunity} />
+              
+              <CardTitle className="text-lg font-bold mt-2 mb-3 line-clamp-2 text-gray-900">
+                {opportunity.title}
+              </CardTitle>
+              
+              <div className="flex flex-col sm:flex-row gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <span>Due {formatDeadline(opportunity.submission_deadline)}</span>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <Gift className="h-4 w-4 text-emerald-500" />
+                  <span className="font-medium text-emerald-700">
+                    {opportunity.club_incentives}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - Actions */}
+            <div className="flex flex-col gap-2 ml-4">
+              <Button 
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-white font-medium px-6 py-2"
+                onClick={handleApply}
+              >
+                Apply Now
+              </Button>
+              <Button 
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-900 text-xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewOpportunity();
+                }}
+              >
+                View Details
+              </Button>
+            </div>
           </div>
         </CardContent>
-        
-        <CardFooter>
-          <div className="w-full flex gap-2">
-            <Button 
-              variant="outline"
-              className="w-1/2"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewOpportunity();
-              }}
-            >
-              View Details
-            </Button>
-            <Button 
-              className="w-1/2"
-              onClick={handleApply}
-            >
-              Apply Now
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>

@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { RunClubProfile, BrandProfile } from "@/types";
-import { BrandProfileView } from "@/components/profile/BrandProfileView";
-import { RunClubProfileView } from "@/components/profile/RunClubProfileView";
+import { BrandSettingsView } from "@/components/profile/BrandSettingsView";
+import { RunClubSettingsView } from "@/components/profile/RunClubSettingsView";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { fetchRunClubProfile, fetchBrandProfile } from "@/utils/profileUtils";
-import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { userType, user } = useAuth();
@@ -61,24 +59,12 @@ const Profile = () => {
     );
   }
 
-  const headerDescription = userType === 'brand' 
-    ? "Tell run clubs about your company"
-    : "Tell brands about your run club";
-
   return (
     <PageContainer>
-      <PageHeader 
-        title="My Profile" 
-        description={headerDescription}
-      />
-      
       {userType === 'brand' ? (
-        <BrandProfileView profile={brandProfile} onProfileUpdate={fetchProfileData} />
+        <BrandSettingsView profile={brandProfile} />
       ) : (
-        <RunClubProfileView 
-          profile={runClubProfile}
-          onProfileUpdate={fetchProfileData}
-        />
+        <RunClubSettingsView profile={runClubProfile} />
       )}
     </PageContainer>
   );

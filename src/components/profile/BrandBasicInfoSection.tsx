@@ -1,7 +1,6 @@
-
 import { BrandProfile } from "@/types";
 import { Card } from "@/components/ui/card";
-import { Globe, Building2 } from "lucide-react";
+import { Globe, Building2, CheckCircle } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface BrandBasicInfoSectionProps {
@@ -68,6 +67,13 @@ export const BrandBasicInfoSection = ({ profile }: BrandBasicInfoSectionProps) =
           >
             {displayWebsite(profile.website)}
           </a>
+        </div>
+      )}
+
+      {profile.open_to_pitches && (
+        <div className="flex items-center text-green-600 text-sm">
+          <CheckCircle className="h-4 w-4 mr-2" />
+          Open to receiving sponsorship pitches
         </div>
       )}
     </div>

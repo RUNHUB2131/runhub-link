@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { BrandProfile } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ export const BrandProfileForm = ({
     description: initialData.description || "",
     website: initialData.website || "",
     logo_url: initialData.logo_url || "",
+    open_to_pitches: initialData.open_to_pitches || false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -197,6 +199,19 @@ export const BrandProfileForm = ({
             <p className="text-xs text-muted-foreground">
               You can enter just the domain (e.g., website.com)
             </p>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="open_to_pitches"
+              checked={formData.open_to_pitches}
+              onCheckedChange={(checked) => 
+                setFormData(prev => ({ ...prev, open_to_pitches: !!checked }))
+              }
+            />
+            <Label htmlFor="open_to_pitches" className="text-sm">
+              I'm open to receiving sponsorship pitches from run clubs
+            </Label>
           </div>
           
           <Button 

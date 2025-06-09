@@ -18,19 +18,26 @@ const BrowseOpportunityList = ({
 }: BrowseOpportunityListProps) => {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-2/3" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-3/4" />
-            </CardContent>
-            <CardFooter>
-              <Skeleton className="h-10 w-full" />
-            </CardFooter>
+          <Card key={i} className="p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Skeleton className="h-6 w-6 rounded" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-6 w-3/4 mb-3" />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+            </div>
           </Card>
         ))}
       </div>
@@ -47,7 +54,7 @@ const BrowseOpportunityList = ({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="space-y-3">
       {opportunities.map((opportunity) => (
         <BrowseOpportunityCard 
           key={opportunity.id}

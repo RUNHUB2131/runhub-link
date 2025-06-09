@@ -51,6 +51,7 @@ export interface BrandProfile extends Profile {
   description?: string;
   website?: string;
   logo_url?: string;
+  open_to_pitches?: boolean;
   social_media?: {
     instagram?: string;
     facebook?: string;

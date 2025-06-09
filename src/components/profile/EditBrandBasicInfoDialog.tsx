@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { BrandProfile } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImageUpload } from "@/components/ui/image-upload";
@@ -27,6 +28,7 @@ export const EditBrandBasicInfoDialog = ({
     description: profile.description || "",
     website: profile.website || "",
     logo_url: profile.logo_url || "",
+    open_to_pitches: profile.open_to_pitches || false,
   });
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -51,6 +53,7 @@ export const EditBrandBasicInfoDialog = ({
             description: profile.description || "",
             website: profile.website || "",
             logo_url: profile.logo_url || "",
+            open_to_pitches: profile.open_to_pitches || false,
           });
         }
       } else {
@@ -61,6 +64,7 @@ export const EditBrandBasicInfoDialog = ({
           description: profile.description || "",
           website: profile.website || "",
           logo_url: profile.logo_url || "",
+          open_to_pitches: profile.open_to_pitches || false,
         });
       }
     }
@@ -208,6 +212,19 @@ export const EditBrandBasicInfoDialog = ({
               You can enter just the domain (e.g., website.com)
             </p>
           </div>
+
+                     <div className="flex items-center space-x-2">
+             <Checkbox
+               id="open_to_pitches"
+               checked={formData.open_to_pitches}
+               onCheckedChange={(checked) => 
+                 setFormData(prev => ({ ...prev, open_to_pitches: !!checked }))
+               }
+             />
+             <Label htmlFor="open_to_pitches" className="text-sm">
+               I'm open to receiving sponsorship pitches from run clubs
+             </Label>
+           </div>
 
           <div className="flex justify-end gap-2">
             <Button

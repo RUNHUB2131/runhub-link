@@ -15,6 +15,7 @@ import Register from "./pages/auth/Register";
 import UserTypeSelection from "./pages/auth/UserTypeSelection";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import PersonalInformation from "./pages/PersonalInformation";
 import NotFound from "./pages/NotFound";
 import AllClubs from "./pages/AllClubs";
 import Notifications from "./pages/Notifications";
@@ -59,6 +60,7 @@ function App() {
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/personal-information" element={<PersonalInformation />} />
                   <Route path="/notifications" element={<Notifications />} />
                   
                   {/* Club routes */}
