@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Edit, Eye, Calendar, Target, MapPin } from "lucide-react";
+import { Edit, Eye, Calendar, Target, MapPin, Star } from "lucide-react";
 import { markApplicationsAsSeen } from "@/services/applicationService";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -20,6 +20,8 @@ interface Opportunity {
   geographic_locations?: string[];
   club_size_preference?: string;
   online_reach_preference?: string;
+  is_targeted?: boolean;
+  target_club_name?: string | null;
 }
 
 interface OpportunityCardProps {
@@ -121,6 +123,12 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
             <div className="flex flex-wrap gap-2">
               {getStatusBadge()}
               {getApplicationsStatus()}
+              {opportunity.is_targeted && (
+                <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 flex items-center gap-1">
+                  <Star className="h-3 w-3" />
+                  Targeted
+                </Badge>
+              )}
             </div>
             {typeof opportunity.unique_views_count === 'number' && opportunity.unique_views_count > 0 && (
               <div className="flex items-center text-gray-500 text-sm">
@@ -154,6 +162,14 @@ const OpportunityCard = ({ opportunity }: OpportunityCardProps) => {
                 <span className="font-medium">Location:</span>
                 <span className="ml-1 truncate">{getLocationDisplay()}</span>
               </div>
+              
+              {opportunity.is_targeted && opportunity.target_club_name && (
+                <div className="flex items-center text-gray-600 md:col-span-2">
+                  <Star className="h-4 w-4 mr-2 text-yellow-500" />
+                  <span className="font-medium">Sent to:</span>
+                  <span className="ml-1 truncate font-medium text-yellow-700">{opportunity.target_club_name}</span>
+                </div>
+              )}
             </div>
             
             {/* Incentive highlight */}

@@ -34,6 +34,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           created_at: string
@@ -79,6 +103,7 @@ export type Database = {
           id: string
           industry: string | null
           logo_url: string | null
+          open_to_pitches: boolean | null
           social_media: Json | null
           website: string | null
         }
@@ -88,6 +113,7 @@ export type Database = {
           id: string
           industry?: string | null
           logo_url?: string | null
+          open_to_pitches?: boolean | null
           social_media?: Json | null
           website?: string | null
         }
@@ -97,6 +123,7 @@ export type Database = {
           id?: string
           industry?: string | null
           logo_url?: string | null
+          open_to_pitches?: boolean | null
           social_media?: Json | null
           website?: string | null
         }
@@ -223,6 +250,7 @@ export type Database = {
           activation_overview: string | null
           additional_notes: string | null
           brand_id: string
+          city: string | null
           club_incentives: string | null
           club_responsibilities: string | null
           club_size_preference: string | null
@@ -238,14 +266,19 @@ export type Database = {
           primary_objective: string | null
           primary_objective_other: string | null
           professional_media: string | null
+          quotes_requested: boolean | null
+          quotes_requested_at: string | null
+          state: string | null
           submission_deadline: string
           target_launch_date: string | null
+          target_run_club_id: string | null
           title: string
         }
         Insert: {
           activation_overview?: string | null
           additional_notes?: string | null
           brand_id: string
+          city?: string | null
           club_incentives?: string | null
           club_responsibilities?: string | null
           club_size_preference?: string | null
@@ -261,14 +294,19 @@ export type Database = {
           primary_objective?: string | null
           primary_objective_other?: string | null
           professional_media?: string | null
+          quotes_requested?: boolean | null
+          quotes_requested_at?: string | null
+          state?: string | null
           submission_deadline?: string
           target_launch_date?: string | null
+          target_run_club_id?: string | null
           title: string
         }
         Update: {
           activation_overview?: string | null
           additional_notes?: string | null
           brand_id?: string
+          city?: string | null
           club_incentives?: string | null
           club_responsibilities?: string | null
           club_size_preference?: string | null
@@ -284,33 +322,45 @@ export type Database = {
           primary_objective?: string | null
           primary_objective_other?: string | null
           professional_media?: string | null
+          quotes_requested?: boolean | null
+          quotes_requested_at?: string | null
+          state?: string | null
           submission_deadline?: string
           target_launch_date?: string | null
+          target_run_club_id?: string | null
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_target_run_club_id_fkey"
+            columns: ["target_run_club_id"]
+            isOneToOne: false
+            referencedRelation: "run_club_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       opportunity_views: {
         Row: {
+          created_at: string
           id: string
           opportunity_id: string
           run_club_id: string
           viewed_at: string
-          created_at: string
         }
         Insert: {
+          created_at?: string
           id?: string
           opportunity_id: string
           run_club_id: string
           viewed_at?: string
-          created_at?: string
         }
         Update: {
+          created_at?: string
           id?: string
           opportunity_id?: string
           run_club_id?: string
           viewed_at?: string
-          created_at?: string
         }
         Relationships: [
           {

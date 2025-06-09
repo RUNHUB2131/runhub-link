@@ -82,6 +82,7 @@ export interface Opportunity {
   submission_deadline: string;
   quotes_requested?: boolean;
   quotes_requested_at?: string;
+  target_run_club_id?: string | null;
   created_at: string;
   brand?: {
     company_name: string;

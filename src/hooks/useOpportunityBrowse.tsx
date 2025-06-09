@@ -38,13 +38,17 @@ export const useOpportunityBrowse = () => {
   }, [user?.id]);
 
   const fetchOpportunities = useCallback(async () => {
+    if (!user?.id) return;
+    
     setIsLoading(true);
     try {
-      console.log("Fetching opportunities, applied opportunities:", userApplications);
-      // First, fetch all opportunities
+      console.log("Fetching opportunities for user ID:", user.id);
+      
+      // Fetch opportunities that the run club can see
       const { data: opportunitiesData, error: opportunitiesError } = await supabase
         .from('opportunities')
         .select('*')
+        .or(`target_run_club_id.is.null,target_run_club_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
       
       if (opportunitiesError) {
@@ -118,7 +122,7 @@ export const useOpportunityBrowse = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userApplications, toast]);
+  }, [user?.id, userApplications, toast]);
 
   useEffect(() => {
     if (user?.id) {

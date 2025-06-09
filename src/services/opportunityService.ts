@@ -24,7 +24,7 @@ export const trackOpportunityView = async (opportunityId: string, runClubId: str
           run_club_id: runClubId
         },
         {
-          onConflict: ['opportunity_id', 'run_club_id'],
+          onConflict: 'opportunity_id,run_club_id',
           ignoreDuplicates: true
         }
       );
@@ -71,11 +71,25 @@ export const fetchOpportunities = async (userId: string) => {
         console.error('Error fetching counts:', { countError, unseenError, viewError });
       }
 
+      // Get target club name if this is a targeted opportunity
+      let target_club_name = null;
+      if (opp.target_run_club_id) {
+        const { data: clubData } = await supabase
+          .from('run_club_profiles')
+          .select('club_name')
+          .eq('id', opp.target_run_club_id)
+          .single();
+        target_club_name = clubData?.club_name || null;
+      }
+
       return {
         ...opp,
         applications_count: count || 0,
         unseen_applications_count: unseenCount || 0,
-        unique_views_count: viewCount || 0
+        unique_views_count: viewCount || 0,
+        // Add targeting info
+        is_targeted: !!opp.target_run_club_id,
+        target_club_name: target_club_name
       };
     })
   );

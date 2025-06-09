@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { RunClubProfile, Opportunity } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete } from "@/utils/profileCompletionUtils";
+import { Star } from "lucide-react";
 
 const BrowseOpportunities = () => {
   const { toast } = useToast();
@@ -28,6 +29,13 @@ const BrowseOpportunities = () => {
   
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
+
+  // Separate targeted and general opportunities
+  const { targetedOpportunities, generalOpportunities } = useMemo(() => {
+    const targeted = opportunities.filter(opp => opp.target_run_club_id === user?.id);
+    const general = opportunities.filter(opp => !opp.target_run_club_id);
+    return { targetedOpportunities: targeted, generalOpportunities: general };
+  }, [opportunities, user?.id]);
 
   // Check if we've been redirected from the applications page with withdrawal info
   useEffect(() => {
@@ -159,12 +167,42 @@ const BrowseOpportunities = () => {
         description="Find sponsorship opportunities for your run club"
       />
       
-      <BrowseOpportunityList 
-        opportunities={opportunities as Opportunity[]}
-        isLoading={isLoading || profileLoading}
-        onApply={handleApply}
-        runClubProfile={runClubProfile} 
-      />
+      {/* Targeted Opportunities Section */}
+      {targetedOpportunities.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="h-5 w-5 text-yellow-500 fill-current" />
+            <h2 className="text-xl font-semibold text-gray-900">Just for you</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            These opportunities have been specifically sent to your run club.
+          </p>
+          <BrowseOpportunityList 
+            opportunities={targetedOpportunities as Opportunity[]}
+            isLoading={isLoading || profileLoading}
+            onApply={handleApply}
+            runClubProfile={runClubProfile} 
+          />
+        </div>
+      )}
+      
+      {/* General Opportunities Section */}
+      <div>
+        {targetedOpportunities.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">All Opportunities</h2>
+            <p className="text-sm text-gray-600">
+              Browse all available sponsorship opportunities.
+            </p>
+          </div>
+        )}
+        <BrowseOpportunityList 
+          opportunities={generalOpportunities as Opportunity[]}
+          isLoading={isLoading || profileLoading}
+          onApply={handleApply}
+          runClubProfile={runClubProfile} 
+        />
+      </div>
     </PageContainer>
   );
 };

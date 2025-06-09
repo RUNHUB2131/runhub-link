@@ -15,6 +15,7 @@ import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AUSTRALIAN_STATES } from "@/utils/states";
 import { ensureUserProfile } from "@/utils/profileUtils";
+import { RunClubSelector } from "./RunClubSelector";
 
 const PRIMARY_OBJECTIVES = [
   "Brand awareness",
@@ -118,6 +119,8 @@ export const AddOpportunityForm = () => {
     additional_notes: "",
     submission_deadline: "",
     quotes_requested: false,
+    is_targeted: false,
+    target_run_club_id: null,
   });
 
   const [showObjectiveOther, setShowObjectiveOther] = useState(false);
@@ -159,6 +162,11 @@ export const AddOpportunityForm = () => {
       }
     }
 
+    // Add targeted opportunity validation
+    if (formData.is_targeted && !formData.target_run_club_id) {
+      newErrors.target_run_club_id = "Please select a run club for targeted opportunities";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -191,6 +199,21 @@ export const AddOpportunityForm = () => {
         setFormData(prev => ({ ...prev, media_requirements: "", quotes_requested: false }));
       }
     }
+  };
+
+  const handleTargetingChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      is_targeted: checked,
+      target_run_club_id: checked ? prev.target_run_club_id : null
+    }));
+  };
+
+  const handleRunClubChange = (clubId: string | null) => {
+    setFormData(prev => ({
+      ...prev,
+      target_run_club_id: clubId
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -268,6 +291,7 @@ export const AddOpportunityForm = () => {
         submission_deadline: formData.submission_deadline,
         quotes_requested: formData.quotes_requested,
         quotes_requested_at: formData.quotes_requested ? new Date().toISOString() : null,
+        target_run_club_id: formData.is_targeted ? formData.target_run_club_id : null,
       };
 
       console.log('Attempting to create opportunity with data:', opportunityData);
@@ -673,6 +697,50 @@ export const AddOpportunityForm = () => {
                   </SelectContent>
                 </Select>
               </FormField>
+            </div>
+          </FormSection>
+
+          {/* Target Specific Club Section */}
+          <FormSection 
+            title="Opportunity Targeting" 
+            description="Choose whether to send this opportunity to all clubs or a specific club"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_targeted"
+                  checked={formData.is_targeted}
+                  onCheckedChange={handleTargetingChange}
+                />
+                <label htmlFor="is_targeted" className="text-sm font-medium text-gray-700">
+                  Send to specific run club only
+                </label>
+              </div>
+              
+              {formData.is_targeted && (
+                <div className="space-y-3">
+                  <FormField 
+                    label="Select Run Club" 
+                    name="target_run_club_id" 
+                    required
+                    error={errors.target_run_club_id}
+                  >
+                    <RunClubSelector
+                      value={formData.target_run_club_id}
+                      onChange={handleRunClubChange}
+                      placeholder="Search and select a run club..."
+                    />
+                  </FormField>
+                  
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      This opportunity will only be visible to the selected run club. 
+                      They will see it in a special "Just for you" section.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
             </div>
           </FormSection>
 

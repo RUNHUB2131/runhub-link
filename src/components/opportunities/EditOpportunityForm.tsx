@@ -16,6 +16,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AUSTRALIAN_STATES } from "@/utils/states";
 import { parseLocationString } from "@/utils/states";
 import { ensureUserProfile } from "@/utils/profileUtils";
+import { RunClubSelector } from "./RunClubSelector";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const PRIMARY_OBJECTIVES = [
   "Brand awareness",
@@ -119,6 +121,8 @@ export const EditOpportunityForm = () => {
     online_reach_preference: "",
     additional_notes: "",
     submission_deadline: "",
+    is_targeted: false,
+    target_run_club_id: null,
   });
 
   const [showObjectiveOther, setShowObjectiveOther] = useState(false);
@@ -194,6 +198,8 @@ export const EditOpportunityForm = () => {
             online_reach_preference: data.online_reach_preference || "",
             additional_notes: data.additional_notes || "",
             submission_deadline: data.submission_deadline || "",
+            is_targeted: !!data.target_run_club_id,
+            target_run_club_id: data.target_run_club_id,
           });
 
           setShowObjectiveOther(data.primary_objective === "Other");
@@ -249,6 +255,11 @@ export const EditOpportunityForm = () => {
       if (deadlineDate >= launchDate) {
         newErrors.submission_deadline = "Submission deadline must be before the launch date";
       }
+    }
+
+    // Add targeted opportunity validation
+    if (formData.is_targeted && !formData.target_run_club_id) {
+      newErrors.target_run_club_id = "Please select a run club for targeted opportunities";
     }
 
     setErrors(newErrors);
@@ -309,6 +320,21 @@ export const EditOpportunityForm = () => {
   const handleDateChange = useCallback((name: string) => (value: string) => {
     handleChange(name, value);
   }, [handleChange]);
+
+  const handleTargetingChange = useCallback((checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      is_targeted: checked,
+      target_run_club_id: checked ? prev.target_run_club_id : null
+    }));
+  }, []);
+
+  const handleRunClubChange = useCallback((clubId: string | null) => {
+    setFormData(prev => ({
+      ...prev,
+      target_run_club_id: clubId
+    }));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -403,6 +429,7 @@ export const EditOpportunityForm = () => {
         online_reach_preference: formData.online_reach_preference,
         additional_notes: formData.additional_notes.trim() || null,
         submission_deadline: formData.submission_deadline,
+        target_run_club_id: formData.is_targeted ? formData.target_run_club_id : null,
       };
 
       console.log('Attempting to update opportunity with data:', updateData);
@@ -749,6 +776,50 @@ export const EditOpportunityForm = () => {
                   </SelectContent>
                 </Select>
               </FormField>
+            </div>
+          </FormSection>
+
+          {/* Target Specific Club Section */}
+          <FormSection 
+            title="Opportunity Targeting" 
+            description="Choose whether to send this opportunity to all clubs or a specific club"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_targeted"
+                  checked={formData.is_targeted}
+                  onCheckedChange={handleTargetingChange}
+                />
+                <label htmlFor="is_targeted" className="text-sm font-medium text-gray-700">
+                  Send to specific run club only
+                </label>
+              </div>
+              
+              {formData.is_targeted && (
+                <div className="space-y-3">
+                  <FormField 
+                    label="Select Run Club" 
+                    name="target_run_club_id" 
+                    required
+                    error={errors.target_run_club_id}
+                  >
+                    <RunClubSelector
+                      value={formData.target_run_club_id}
+                      onChange={handleRunClubChange}
+                      placeholder="Search and select a run club..."
+                    />
+                  </FormField>
+                  
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      This opportunity will only be visible to the selected run club. 
+                      They will see it in a special "Just for you" section.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
             </div>
           </FormSection>
 
