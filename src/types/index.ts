@@ -1,4 +1,4 @@
-export type UserType = 'run_club' | 'brand';
+export type UserType = 'run_club' | 'brand' | 'content_producer';
 
 export type FollowerCountRange = 'under_1000' | '1000_to_4000' | '4000_to_9000' | '9000_to_20000' | 'over_20000';
 

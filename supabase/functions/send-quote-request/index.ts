@@ -40,7 +40,7 @@ const generateEmailHTML = (data: QuoteRequestData): string => {
 <!DOCTYPE html>
 <html>
 <head>
-  <title>New Quote Request - RUNHUB Connect</title>
+          <title>New Quote Request - RUNHUB LINK</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
@@ -160,7 +160,7 @@ const handler = async (request: Request): Promise<Response> => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'RUNHUB Connect <noreply@mail.runhub.co>',
+        from: 'RUNHUB LINK <noreply@mail.runhub.co>',
         to: [RUNHUB_EMAIL],
         subject: `Quote Request: ${requestData.opportunity.title}`,
         html: generateEmailHTML(requestData),

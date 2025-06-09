@@ -2,13 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Footprints, Building } from "lucide-react";
 import { UserType } from "@/types";
 
 const UserTypeSelection = () => {
   const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<UserType | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   const handleContinue = () => {
+    if (selectedType === 'content_producer') {
+      setShowComingSoon(true);
+      return;
+    }
+    
     if (selectedType) {
       // Store the selected user type in localStorage to use during registration
       localStorage.setItem("runhub_user_type", selectedType);
@@ -16,13 +23,41 @@ const UserTypeSelection = () => {
     }
   };
 
+  if (showComingSoon) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+        <div className="text-center">
+          <div className="mx-auto mb-6 w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
+            <span className="text-4xl">🚀</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Coming Soon!</h1>
+          <p className="text-gray-600 mb-6">
+            Content Producer access is launching soon! Create content and collaborate with run clubs and brands on the platform.
+          </p>
+          <Button
+            onClick={() => setShowComingSoon(false)}
+            variant="outline"
+            className="mb-4"
+          >
+            Back to Selection
+          </Button>
+          <div>
+            <Button variant="link" onClick={() => navigate("/")} className="text-sm sm:text-base">
+              Back to home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-0">
       <div className="text-center mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sign in as</h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
         <Card 
           className={`p-4 sm:p-6 cursor-pointer text-center hover:shadow-md transition-shadow ${
             selectedType === 'run_club' ? 'ring-2 ring-primary-500 bg-primary-50' : ''
@@ -30,10 +65,7 @@ const UserTypeSelection = () => {
           onClick={() => setSelectedType('run_club')}
         >
           <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full flex items-center justify-center">
-            <svg className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Footprints className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500" />
           </div>
           <h3 className="text-lg sm:text-xl font-semibold">Run Club</h3>
           <p className="text-xs sm:text-sm text-gray-500 mt-2">
@@ -48,16 +80,29 @@ const UserTypeSelection = () => {
           onClick={() => setSelectedType('brand')}
         >
           <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full flex items-center justify-center">
-            <svg className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 3L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M8 3L8 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 11L22 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Building className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500" />
           </div>
           <h3 className="text-lg sm:text-xl font-semibold">Brand</h3>
           <p className="text-xs sm:text-sm text-gray-500 mt-2">
             Access your brand dashboard and manage campaigns
+          </p>
+        </Card>
+
+        <Card 
+          className={`p-4 sm:p-6 cursor-pointer text-center hover:shadow-md transition-shadow ${
+            selectedType === 'content_producer' ? 'ring-2 ring-primary-500 bg-primary-50' : ''
+          }`}
+          onClick={() => setSelectedType('content_producer')}
+        >
+          <div className="mx-auto mb-3 sm:mb-4 w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full flex items-center justify-center">
+            <svg className="h-6 w-6 sm:h-8 sm:w-8 text-primary-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 7L16 12L23 17V7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h3 className="text-lg sm:text-xl font-semibold">Content Producer</h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-2">
+            Create amazing content with top brands
           </p>
         </Card>
       </div>

@@ -22,7 +22,7 @@ const Login = () => {
       await login(email, password);
       toast({
         title: "Login successful",
-        description: "Welcome back to RunHub Connect!",
+        description: "Welcome back to RUNHUB LINK!",
       });
       navigate("/dashboard");
     } catch (error) {

@@ -1,18 +1,24 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, Footprints, Building, Handshake } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <header style={{ backgroundColor: '#021fdf' }} className="border-b border-gray-200">
+      <header className="bg-primary border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="runhub-logo text-[#f0f0f0] font-bold">RUNHUB</div>
+          <div className="text-primary-foreground font-bold text-2xl">RUNHUB</div>
           <div className="flex items-center gap-4">
             <Link to="/auth/login">
-              <Button variant="ghost" className="text-[#f0f0f0] hover:bg-[#f0f0f0]/20 hover:text-[#f0f0f0]">Log in</Button>
+              <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
+                Log in
+              </Button>
             </Link>
             <Link to="/auth/user-type">
-              <Button className="bg-[#f0f0f0] text-[#021fdf] hover:bg-[#f0f0f0]/90 hover:text-[#021fdf]">Sign up</Button>
+              <Button className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
+                Sign up
+              </Button>
             </Link>
           </div>
         </div>
@@ -20,163 +26,249 @@ const Index = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section style={{ backgroundColor: '#f0f0f0' }} className="py-20">
+        <section className="bg-gray-50 py-20 lg:py-32">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold mb-6">Connecting Run Clubs with Brands</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              RUNHUB Connect is the platform that brings running clubs and brands together for 
-              meaningful sponsorships and partnerships.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Link to="/auth/user-type">
-                <Button size="lg">Get Started</Button>
-              </Link>
-              <Button size="lg" variant="outline">Learn More</Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section className="py-16" style={{ backgroundColor: '#f0f0f0' }}>
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(2, 31, 223, 0.1)' }}>
-                  <svg className="h-6 w-6" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Create Your Profile</h3>
-                <p className="text-gray-600">Sign up as a running club or brand and build your profile to showcase your community or products.</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(2, 31, 223, 0.1)' }}>
-                  <svg className="h-6 w-6" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 10H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 6H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 14H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M21 18H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Browse Opportunities</h3>
-                <p className="text-gray-600">Discover sponsorship opportunities that align with your club's values or create opportunities as a brand.</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(2, 31, 223, 0.1)' }}>
-                  <svg className="h-6 w-6" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 12H16L14 15H10L8 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M5.45 5.11L2 12V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H20C20.5304 20 21.0391 19.7893 21.4142 19.4142C21.7893 19.0391 22 18.5304 22 18V12L18.55 5.11C18.3844 4.77679 18.1292 4.49637 17.813 4.30028C17.4967 4.10419 17.1321 4.0002 16.76 4H7.24C6.86792 4.0002 6.50326 4.10419 6.18704 4.30028C5.87083 4.49637 5.61558 4.77679 5.45 5.11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Connect & Collaborate</h3>
-                <p className="text-gray-600">Apply to opportunities, manage applications, and build lasting partnerships between clubs and brands.</p>
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">
+                Connecting run clubs with{" "}
+                <span className="text-primary">brands</span>
+              </h1>
+                              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+                  RUNHUB LINK is the platform that brings running clubs and brands together for 
+                  meaningful sponsorships and partnerships.
+                </p>
+              <div className="flex justify-center">
+                <Link to="/auth/user-type">
+                  <Button size="lg" className="group">
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* User Types */}
-        <section className="py-16" style={{ backgroundColor: '#f0f0f0' }}>
+        {/* How It Works */}
+        <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Who It's For</h2>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Simple steps to connect and collaborate on the platform
+              </p>
+            </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-2xl font-semibold mb-4">Running Clubs</h3>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Create a profile to showcase your club and community</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Discover sponsorship opportunities from brands</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Apply for partnerships that match your club's values</span>
-                  </li>
-                </ul>
-                <Link to="/auth/user-type">
-                  <Button>Join as a Run Club</Button>
-                </Link>
-              </div>
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              <Card className="bg-primary-50 border-0 hover:shadow-lg transition-all duration-300 group">
+                <CardHeader className="text-center pb-4">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <Footprints className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Create Your Profile</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-gray-600">Sign up as a running club or brand and build your profile to showcase your community or products.</p>
+                </CardContent>
+              </Card>
               
-              <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-2xl font-semibold mb-4">Brands</h3>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Create a brand profile to showcase your products</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Post sponsorship opportunities for running clubs</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="h-5 w-5 mr-2 mt-0.5" style={{ color: '#021fdf' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Review applications and connect with the perfect club</span>
-                  </li>
-                </ul>
-                <Link to="/auth/user-type">
-                  <Button>Join as a Brand</Button>
-                </Link>
-              </div>
+              <Card className="bg-primary-50 border-0 hover:shadow-lg transition-all duration-300 group">
+                <CardHeader className="text-center pb-4">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <Building className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Browse Opportunities</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-gray-600">Discover sponsorship opportunities that align with your club's values or create opportunities as a brand.</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-primary-50 border-0 hover:shadow-lg transition-all duration-300 group">
+                <CardHeader className="text-center pb-4">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <Handshake className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-xl">Connect & Collaborate</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-gray-600">Apply to opportunities, manage applications, and build lasting partnerships between clubs and brands.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Who It's For */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Who It's For</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Built for running communities and brands looking to create meaningful partnerships
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                <CardHeader className="bg-primary-50 pb-6">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Footprints className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl text-gray-900">Running Clubs</CardTitle>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Create a profile to showcase your club and community</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Discover sponsorship opportunities from brands</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Apply for partnerships that match your club's values</span>
+                    </li>
+                  </ul>
+                  <Link to="/auth/user-type">
+                    <Button className="w-full group">
+                      Join as a Run Club
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden">
+                <CardHeader className="bg-primary-50 pb-6">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Building className="h-8 w-8 text-primary" />
+                  </div>
+                  <CardTitle className="text-2xl text-gray-900">Brands</CardTitle>
+                </CardHeader>
+                <CardContent className="p-8">
+                  <ul className="space-y-4 mb-8">
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Create a brand profile to showcase your products</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Post sponsorship opportunities for running clubs</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                        <svg className="h-3 w-3 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
+                      <span className="text-gray-700">Review applications and connect with the perfect club</span>
+                    </li>
+                  </ul>
+                  <Link to="/auth/user-type">
+                    <Button className="w-full group">
+                      Join as a Brand
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
       </main>
 
-      <footer style={{ backgroundColor: '#021fdf' }} className="text-white py-12">
+      <footer className="bg-primary text-primary-foreground py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">RUNHUB</h3>
-              <p className="text-gray-300">Connecting running communities with brands for authentic partnerships.</p>
+              <h3 className="text-2xl font-bold mb-4">RUNHUB</h3>
+              <p className="text-primary-foreground/80 leading-relaxed">
+                Connecting running communities with brands for authentic partnerships.
+              </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white">Help Center</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">Blog</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">Success Stories</a></li>
+              <h4 className="font-semibold mb-6 text-lg">Resources</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Help Center
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Success Stories
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white">About Us</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">Careers</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">Contact</a></li>
+              <h4 className="font-semibold mb-6 text-lg">Company</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Careers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Contact
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white">Terms of Service</a></li>
+              <h4 className="font-semibold mb-6 text-lg">Legal</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                    Terms of Service
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-400 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; {new Date().getFullYear()} RUNHUB Connect. All rights reserved.</p>
+          <div className="border-t border-primary-foreground/20 mt-12 pt-8 text-center">
+            <p className="text-primary-foreground/80">
+              &copy; {new Date().getFullYear()} RUNHUB LINK. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

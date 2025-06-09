@@ -2,7 +2,7 @@
 
 ## Overview
 
-We have successfully integrated the chat notification system with the synchronized notification system in RUNHUB Connect. This ensures that chat messages now create notifications in the main notification bell while keeping the separate chat indicator working independently.
+We have successfully integrated the chat notification system with the synchronized notification system in RUNHUB LINK. This ensures that chat messages now create notifications in the main notification bell while keeping the separate chat indicator working independently.
 
 ## What We Implemented
 
