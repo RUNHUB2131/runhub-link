@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -116,6 +117,7 @@ export const AddOpportunityForm = () => {
     online_reach_preference: "",
     additional_notes: "",
     submission_deadline: "",
+    quotes_requested: false,
   });
 
   const [showObjectiveOther, setShowObjectiveOther] = useState(false);
@@ -161,7 +163,7 @@ export const AddOpportunityForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name: string, value: string | boolean) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -186,7 +188,7 @@ export const AddOpportunityForm = () => {
     if (name === "professional_media") {
       setShowMediaRequirements(value !== "None");
       if (value === "None") {
-        setFormData(prev => ({ ...prev, media_requirements: "" }));
+        setFormData(prev => ({ ...prev, media_requirements: "", quotes_requested: false }));
       }
     }
   };
@@ -264,21 +266,67 @@ export const AddOpportunityForm = () => {
         online_reach_preference: formData.online_reach_preference,
         additional_notes: formData.additional_notes.trim() || null,
         submission_deadline: formData.submission_deadline,
+        quotes_requested: formData.quotes_requested,
+        quotes_requested_at: formData.quotes_requested ? new Date().toISOString() : null,
       };
 
       console.log('Attempting to create opportunity with data:', opportunityData);
 
-      const { error } = await supabase.from("opportunities").insert(opportunityData);
+      const { data: newOpportunity, error } = await supabase
+        .from("opportunities")
+        .insert(opportunityData)
+        .select()
+        .single();
       
       if (error) {
         console.error('Opportunity creation error:', error);
         throw error;
       }
+
+      // If quotes were requested, send notification email via Edge Function
+      if (formData.quotes_requested && newOpportunity) {
+        try {
+          // Get brand profile for email
+          const { data: brandProfile } = await supabase
+            .from('brand_profiles')
+            .select('company_name')
+            .eq('id', user.id)
+            .single();
+
+          // Call the Edge Function to send quote request email
+          const { data: edgeFunctionResult, error: edgeFunctionError } = await supabase.functions.invoke('send-quote-request', {
+            body: {
+              opportunity: newOpportunity,
+              brandDetails: {
+                company_name: brandProfile?.company_name || 'Unknown Company',
+                contact_email: user.email || '',
+              }
+            }
+          });
+
+          if (edgeFunctionError) {
+            throw edgeFunctionError;
+          }
+
+          toast({
+            title: "Success!",
+            description: "Your opportunity has been created and quote request sent to RUNHUB.",
+          });
+        } catch (emailError) {
+          console.error('Failed to send quote request email:', emailError);
+          toast({
+            title: "Opportunity Created",
+            description: "Your opportunity was created successfully, but there was an issue sending the quote request. Please contact support.",
+            variant: "default",
+          });
+        }
+      } else {
+        toast({
+          title: "Success!",
+          description: "Your sponsorship opportunity has been created successfully.",
+        });
+      }
       
-      toast({
-        title: "Success!",
-        description: "Your sponsorship opportunity has been created successfully.",
-      });
       navigate("/opportunities");
     } catch (error: any) {
       console.error('Full error details:', error);
@@ -473,6 +521,32 @@ export const AddOpportunityForm = () => {
                   className={errors.media_requirements ? "border-red-500" : ""}
                 />
               </FormField>
+            )}
+
+            {/* Quote Request Checkbox - Only show if professional media is required */}
+            {showMediaRequirements && (
+              <div className="flex items-start space-x-3 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                <Checkbox
+                  id="quotes_requested"
+                  checked={formData.quotes_requested}
+                  onCheckedChange={(checked) => 
+                    handleChange("quotes_requested", checked === true)
+                  }
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="quotes_requested"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    Request RUNHUB to generate quotes
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Check this box if you'd like RUNHUB to provide 3 professional quotes 
+                    for your professional media requirements. Our team will review your opportunity 
+                    details and send quotes directly to your email.
+                  </p>
+                </div>
+              </div>
             )}
           </FormSection>
 

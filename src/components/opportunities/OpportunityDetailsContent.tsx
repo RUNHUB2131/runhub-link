@@ -371,6 +371,21 @@ const OpportunityDetailsContent = ({ opportunity }: OpportunityDetailsContentPro
                 )}
               </div>
             </div>
+
+            {/* Quote Request Status */}
+            {opportunity.quotes_requested && (
+              <div>
+                <h4 className="font-semibold text-gray-900 text-base mb-2">Quote Request Status</h4>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-blue-700 font-medium">✓ Quotes requested from RUNHUB</p>
+                  {opportunity.quotes_requested_at && (
+                    <p className="text-blue-600 text-sm mt-1">
+                      Requested on: {formatDate(opportunity.quotes_requested_at)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -7,24 +7,28 @@ alwaysApply: true
 
 This document is an overview of the project and rules and context for the project and how to build it. Please refer to this in full.
 
-Application Overview
+## Application Overview
 RUNHUB Connect is a SaaS platform that facilitates partnerships between running clubs and brands for sponsorship opportunities. The platform has two primary user types:
-Run Clubs: Create profiles, browse sponsorship opportunities, and apply for partnerships
-Brands: Create company profiles, post sponsorship opportunities, and review applications
+- **Run Clubs**: Create profiles, browse sponsorship opportunities, apply for partnerships, and manage applications
+- **Brands**: Create company profiles, post sponsorship opportunities, review applications, and browse/connect with clubs
 
-Technical Stack & Architecture
+## Technical Stack & Architecture
 
-Core Technologies
-Frontend: React 18 + TypeScript + Vite
-UI Framework: shadcn/ui (Radix UI components) + Tailwind CSS
-Database: Supabase (PostgreSQL with real-time capabilities)
-Authentication: Supabase Auth
-State Management: React Query (@tanstack/react-query)
-Routing: React Router DOM v6
-Form Handling: React Hook Form with Zod validation
-Styling: Tailwind CSS with animations
+### Core Technologies
+- Frontend: React 18 + TypeScript + Vite
+- UI Framework: shadcn/ui (Radix UI components) + Tailwind CSS
+- Database: Supabase (PostgreSQL with real-time capabilities)
+- Authentication: Supabase Auth
+- State Management: React Query (@tanstack/react-query)
+- Routing: React Router DOM v6
+- Form Handling: React Hook Form with Zod validation
+- Styling: Tailwind CSS with animations
+- Animations: Framer Motion
+- Charts: Recharts
+- Date handling: date-fns
 
-Project structure
+### Project Structure
+```
 src/
 ├── components/          # Reusable UI components organized by feature
 │   ├── ui/             # Base shadcn/ui components
@@ -34,8 +38,13 @@ src/
 │   ├── profile/        # Profile components
 │   ├── dashboard/      # Dashboard components
 │   ├── chat/          # Chat/messaging components
+│   ├── clubs/         # Club browsing and filtering components
 │   └── notifications/ # Notification components
 ├── pages/              # Route components
+│   ├── auth/          # Authentication pages
+│   ├── opportunities/ # Opportunity management pages
+│   ├── applications/  # Application management pages
+│   └── chat/          # Chat pages
 ├── hooks/              # Custom React hooks
 ├── contexts/           # React contexts (AuthContext)
 ├── services/           # API service layers
@@ -43,79 +52,104 @@ src/
 ├── utils/              # Utility functions
 ├── lib/                # Library configurations
 └── integrations/       # Third-party integrations (Supabase)
+```
 
-Database Schema & Data Models
+## Database Schema & Data Models
 
-Core Tables
--profiles: Base user profiles with user_type ('run_club' | 'brand')
--run_club_profiles: Extended profiles for running clubs
--brand_profiles: Extended profiles for brands
--opportunities: Brand-posted sponsorship opportunities
--applications: Run club applications to opportunities
--notifications: System notifications
--chats/messages: Chat functionality between brands and clubs
+### Core Tables
+- **profiles**: Base user profiles with user_type ('run_club' | 'brand')
+- **run_club_profiles**: Extended profiles for running clubs with social media data, location, member count
+- **brand_profiles**: Extended profiles for brands with company information
+- **opportunities**: Brand-posted sponsorship opportunities with detailed requirements
+- **applications**: Run club applications to opportunities with status tracking
+- **chats**: Chat sessions between brands and clubs
+- **chat_messages**: Individual messages within chats
+- **notifications**: System notifications
+- **user_favorites**: User favorited clubs (brands can favorite run clubs)
+- **analytics_events**: Event tracking for internal analytics
 
-Key Relationships
--profiles (1:1) → run_club_profiles/brand_profiles
--brand_profiles (1:many) → opportunities
--opportunities (1:many) → applications
--run_club_profiles (1:many) → applications
--applications trigger notifications
+### Key Relationships
+- profiles (1:1) → run_club_profiles/brand_profiles
+- brand_profiles (1:many) → opportunities
+- opportunities (1:many) → applications
+- run_club_profiles (1:many) → applications
+- applications trigger notifications and chats
+- users (1:many) → user_favorites
+- users (1:many) → analytics_events
 
-Business Logic & User Flows
+## Business Logic & User Flows
 
-Run Club User Journey
-1. Register → Select "Run Club" type → Complete profile
+### Run Club User Journey
+1. Register → Select "Run Club" type → Complete profile with social media data
 2. Browse available opportunities → Apply to relevant ones
 3. Manage applications → Chat with brands → Track status
 
-Brand User Journey
+### Brand User Journey
 1. Register → Select "Brand" type → Complete company profile
 2. Create sponsorship opportunities → Review applications
 3. Accept/reject applications → Chat with clubs → Manage partnerships
+4. Browse all clubs → Filter by location, size, followers → Favorite clubs → Contact clubs
 
-Key Business Rules
+### Key Business Rules
 1. Profile completion required before applying to opportunities
 2. Run clubs can only see opportunities they haven't applied to
 3. Brands can only see applications for their own opportunities
 4. Row-level security (RLS) enforces data access permissions
 5. Real-time notifications for new applications
+6. Analytics tracking for premium feature usage
 
-Feature Areas
+## Feature Areas
 
-Authentication & Profiles
+### Authentication & Profiles
 1. Supabase Auth with email/password
 2. User type selection during registration
 3. Comprehensive profile forms with validation
-4. Social media integration fields
+4. Social media integration fields with follower count ranges
 5. Logo/image upload capabilities
+6. Location data (city, state) for clubs
 
-Opportunities Management
+### Opportunities Management
 1. Rich opportunity creation forms for brands
 2. Filtering and search capabilities
 3. Deadline and geographic targeting
 4. Club size and reach preferences
+5. CRUD operations for opportunities
 
-Applications System
+### Applications System
 1. Status tracking (pending/accepted/rejected)
 2. Bulk application management for brands
 3. Integration with notification system
+4. Real-time updates
 
-Chat/Messaging
+### Chat/Messaging
 1. Real-time chat between brands and clubs
-2. Context-aware messaging (opportunity-specific)
+2. Context-aware messaging (opportunity/application-specific)
 3. Message history and threading
+4. Read status tracking
 
-Code Patterns & Conventions
+### Club Discovery & Management
+1. **All Clubs Page** (Brand-only): Browse and search all running clubs
+2. **Advanced Filtering**: Filter by state, member count, follower ranges, search text
+3. **Favorites System**: Brands can favorite clubs with localStorage fallback
+4. **Club Detail Modal**: Detailed club information with social media links
+5. **Contact Club Feature**: Premium feature tracking for brand-club connections
 
-Component Structure
+### Analytics & Tracking
+1. **Internal Analytics**: Track user interactions for business insights
+2. **Event Tracking**: Contact club clicks, club views, favorites
+3. **Analytics Dashboard**: Admin view of platform usage
+4. **Premium Feature Tracking**: Monitor usage of paid features
+
+## Code Patterns & Conventions
+
+### Component Structure
 1. Functional components with hooks
 2. Props interfaces defined for all components
 3. Separation of concerns (presentation vs. logic)
 4. Custom hooks for data fetching and business logic
 
-Data fetching patterns
-
+### Data Fetching Patterns
+```typescript
 // Use React Query for caching and state management
 const { data, isLoading, error } = useQuery({
   queryKey: ['opportunities', filters],
@@ -127,57 +161,125 @@ const { data, error } = await supabase
   .from('table_name')
   .select('columns')
   .eq('field', value);
+```
 
-Type Safety
+### Type Safety
 1. Comprehensive TypeScript interfaces for all data models
 2. Database types generated from Supabase schema
 3. Props interfaces for all components
 4. Utility types for common patterns
 
-AI Assistant Guidelines
+## AI Assistant Guidelines
 
-When Working with This Codebase:
-1. Follow Existing Patterns
-    - Use functional components with hooks
-    - Implement proper TypeScript typing
-    - Follow the established folder structure
-    - Use existing UI components from shadcn/ui
-2. Database Operations
-    - Always consider RLS policies when suggesting database queries
-    - Use proper error handling for Supabase operations
-    - Consider real-time subscriptions for live data
-    - Validate data before database operations
-3.User Experience Considerations
-    - Ensure profile completion checks before critical actions
-    - Implement proper loading states and error handling
-    - Consider user type-specific functionality
-    - Maintain consistent navigation patterns
-4. Security & Permissions
-    - Respect user type restrictions (run_club vs brand)
-    - Implement proper authentication checks
-    - Consider data privacy in queries
-    - Follow RLS policy patterns
-5. Code Quality
-    - Use React Query for data fetching and caching
-    - Implement proper error boundaries
-    - Use TypeScript strictly
-    - Follow accessibility best practices
-    - Implement responsive design patterns
+### When Working with This Codebase:
 
-Common Tasks & Approaches
-1. New features: Follow feature-based folder structure
-2. API changes: Update types first, then implementations
-3. UI components: Extend shadcn/ui components consistently
-4. Database changes: Create migrations and update TypeScript types
-5. Authentication: Use existing AuthContext patterns
+#### 1. Follow Existing Patterns
+- Use functional components with hooks
+- Implement proper TypeScript typing
+- Follow the established folder structure
+- Use existing UI components from shadcn/ui
+- Utilize React Query for data fetching and caching
 
-Performance Considerations
+#### 2. Database Operations & Supabase MCP Usage
+- **Always use the Supabase MCP server** to get live database schema and data insights
+- **Project ID**: `mixmymlwnnievklhcrns` (RUNHUB LOVABLE 2.0)
+- **Available MCP Tools**: Use `list_tables`, `execute_sql`, `apply_migration`, `generate_typescript_types`
+- Always consider RLS policies when suggesting database queries
+- Use proper error handling for Supabase operations
+- Consider real-time subscriptions for live data
+- Validate data before database operations
+- Use upsert operations for profile updates
+- **Never run destructive operations** without explicit user consent
+- **Use read-only queries** for analysis and schema discovery
+- **Apply migrations properly** using `apply_migration` for schema changes
+
+#### 3. User Experience Considerations
+- Ensure profile completion checks before critical actions
+- Implement proper loading states and error handling
+- Consider user type-specific functionality (brand vs run_club)
+- Maintain consistent navigation patterns
+- Use optimistic updates where appropriate
+
+#### 4. Security & Permissions
+- Respect user type restrictions (run_club vs brand)
+- Implement proper authentication checks
+- Consider data privacy in queries
+- Follow RLS policy patterns
+- Protect admin features appropriately
+
+#### 5. Code Quality
+- Use React Query for data fetching and caching
+- Implement proper error boundaries
+- Use TypeScript strictly
+- Follow accessibility best practices
+- Implement responsive design patterns
+- Use proper form validation with React Hook Form and Zod
+
+### Supabase MCP Best Practices
+
+#### Database Analysis & Schema Discovery
+- **Always start** by checking current schema with `list_tables` for the project
+- **Use `execute_sql`** for read-only queries to understand data patterns
+- **Generate TypeScript types** with `generate_typescript_types` when schema changes
+- **Check relationships** between tables before making modifications
+
+#### Safe Database Operations
+- **Read-only first**: Use `SELECT` queries to understand current state
+- **Validate data integrity**: Check foreign key relationships before modifications
+- **Use transactions**: For complex operations that affect multiple tables
+- **Test locally**: Apply changes to local database before production
+
+#### Migration Management
+- **Use `apply_migration`** for all schema changes (DDL operations)
+- **Name migrations descriptively**: Use clear, sequential naming
+- **Include rollback strategies**: Document how to reverse changes
+- **Test migrations thoroughly**: Ensure no data loss or corruption
+
+#### Data Safety Rules
+- **NEVER DELETE** production data without explicit user confirmation
+- **NEVER DROP TABLES** or columns without backup verification
+- **Use WHERE clauses** carefully in UPDATE/DELETE operations
+- **Confirm operations** that affect multiple rows
+
+### Common Tasks & Approaches
+1. **New features**: Follow feature-based folder structure
+2. **API changes**: Update types first, then implementations
+3. **UI components**: Extend shadcn/ui components consistently
+4. **Database changes**: Use MCP to check schema, create migrations, update TypeScript types
+5. **Authentication**: Use existing AuthContext patterns
+6. **Analytics**: Use existing tracking service for user interactions
+7. **Schema analysis**: Always use MCP `list_tables` and `execute_sql` for current state
+
+### Performance Considerations
 1. Use React Query for efficient data caching
-2. Implement proper pagination for large data sets
+2. Implement proper pagination for large data sets (clubs, opportunities)
 3. Optimize Supabase queries with proper indexes
 4. Use loading skeletons for better UX
 5. Implement error boundaries for robust error handling
-6. Utilise docker and local database
+6. Utilize localStorage for offline functionality (favorites)
+7. Use optimistic updates for better perceived performance
+
+### Current Feature Status
+- ✅ Authentication & User Management
+- ✅ Profile Management (Run Clubs & Brands)
+- ✅ Opportunity Creation & Management
+- ✅ Application System
+- ✅ Real-time Chat/Messaging
+- ✅ Club Discovery & Browsing (Brand feature)
+- ✅ Favorites System
+- ✅ Advanced Filtering
+- ✅ Analytics Tracking
+- ✅ Admin Analytics Dashboard
+- ✅ Notifications System
+- ✅ Responsive Design
+- ✅ Social Media Integration
+- ✅ Storage for logos/images
+
+### Development Environment
+- Uses local Supabase instance via Docker
+- Configuration in `supabase/config.toml`
+- Migrations managed in `supabase/migrations/`
+- Database port: 54322, API port: 54321
 
 
 

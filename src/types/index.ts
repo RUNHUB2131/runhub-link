@@ -79,6 +79,8 @@ export interface Opportunity {
   online_reach_preference: string;
   additional_notes: string | null;
   submission_deadline: string;
+  quotes_requested?: boolean;
+  quotes_requested_at?: string;
   created_at: string;
   brand?: {
     company_name: string;
