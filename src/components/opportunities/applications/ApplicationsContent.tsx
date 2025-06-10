@@ -17,6 +17,21 @@ export interface RunClubApplication extends Application {
     city?: string;
     state?: string;
     member_count: number;
+    social_media?: {
+      instagram?: string;
+      facebook?: string;
+      instagram_follower_range?: string;
+      facebook_follower_range?: string;
+    };
+    community_data?: {
+      run_types?: string[];
+      demographics?: {
+        core_demographic?: string;
+        average_pace?: string;
+        average_group_size?: string;
+        event_experience?: string[];
+      };
+    };
   } | null;
 }
 
@@ -95,46 +110,56 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
             </div>
           ) : (
             filteredApplications.map(app => (
-              <Card key={app.id} className="p-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-bold">
-                        {app.run_club_profile?.club_name || "Unknown Run Club"}
-                      </h3>
-                      <ApplicationStatusBadge status={app.status} />
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row gap-4 text-sm text-muted-foreground">
-                      {(app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location) && (
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {app.run_club_profile?.city && app.run_club_profile?.state 
-                            ? `${app.run_club_profile.city}, ${app.run_club_profile.state}`
-                            : app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location
-                          }
-                        </div>
-                      )}
-                      
-                      {app.run_club_profile?.member_count && (
-                        <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {app.run_club_profile.member_count} members
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center">
+              <Card key={app.id} className="p-6 hover:shadow-md transition-shadow">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                  {/* Left Column - Club Info */}
+                  <div className="flex-1 space-y-3">
+                    {/* Header with Club Name and Status */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-xl font-bold text-gray-900">
+                          {app.run_club_profile?.club_name || "Unknown Run Club"}
+                        </h3>
+                        <ApplicationStatusBadge status={app.status} />
+                      </div>
+                      <div className="text-sm text-muted-foreground flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
                         Applied {new Date(app.created_at).toLocaleDateString()}
                       </div>
                     </div>
+
+                    {/* Key Metrics Row */}
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      {/* Location */}
+                      {(app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location) && (
+                        <div className="flex items-center text-gray-600">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          <span className="font-medium">
+                            {app.run_club_profile?.city && app.run_club_profile?.state 
+                              ? `${app.run_club_profile.city}, ${app.run_club_profile.state}`
+                              : app.run_club_profile?.city || app.run_club_profile?.state || app.run_club_profile?.location
+                            }
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Member Count */}
+                      {app.run_club_profile?.member_count && (
+                        <div className="flex items-center text-gray-600">
+                          <Users className="h-4 w-4 mr-1" />
+                          <span className="font-medium">{app.run_club_profile.member_count} members</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 self-end md:self-auto">
+                  {/* Right Column - Actions */}
+                  <div className="flex flex-col gap-2 lg:min-w-[200px]">
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => openRunClubProfile(app.run_club_id)}
+                      className="w-full"
                     >
                       View Profile
                     </Button>
@@ -143,10 +168,10 @@ const ApplicationsContent = ({ applications, isLoading, handleUpdateStatus }: Ap
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="bg-white text-primary-500 border-primary-500 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-600"
+                        className="w-full bg-white text-primary-500 border-primary-500 hover:bg-primary-50 hover:text-primary-600 hover:border-primary-600"
                         onClick={() => openPitchDialog(app.pitch || "", app.run_club_profile?.club_name || "Unknown Club")}
                       >
-                        View pitch
+                        View Pitch
                       </Button>
                     )}
                     

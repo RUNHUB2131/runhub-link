@@ -13,7 +13,11 @@ interface RunClubApplication extends Application {
   run_club_profile?: {
     club_name: string;
     location: string;
+    city?: string;
+    state?: string;
     member_count: number;
+    social_media?: any;
+    community_data?: any;
   } | null;
 }
 
@@ -86,7 +90,7 @@ const OpportunityApplications = () => {
           console.log("Fetching profile for run club:", app.run_club_id);
           const { data: profileData, error: profileError } = await supabase
             .from('run_club_profiles')
-            .select('club_name, location, member_count')
+            .select('club_name, location, city, state, member_count, social_media, community_data')
             .eq('id', app.run_club_id)
             .single();
 

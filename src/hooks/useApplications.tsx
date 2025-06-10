@@ -10,6 +10,8 @@ interface RunClubApplication extends Application {
     city?: string;
     state?: string;
     member_count: number;
+    social_media?: any;
+    community_data?: any;
   } | null;
 }
 
@@ -40,7 +42,7 @@ export const useApplications = (opportunityId: string) => {
         initialApps.map(async (app) => {
           const { data: profileData, error: profileError } = await supabase
             .from('run_club_profiles')
-            .select('club_name, location, city, state, member_count')
+            .select('club_name, location, city, state, member_count, social_media, community_data')
             .eq('id', app.run_club_id)
             .single();
 
@@ -73,33 +75,30 @@ export const useApplications = (opportunityId: string) => {
 
       if (error) throw error;
 
-      // Update local state to reflect the change
-      setApplications(applications.map(app => 
-        app.id === applicationId ? { ...app, status } : app
-      ));
+      // Update local state
+      setApplications(prev => 
+        prev.map(app => 
+          app.id === applicationId ? { ...app, status } : app
+        )
+      );
 
-      toast({
-        title: "Status updated",
-        description: `Application ${status === 'accepted' ? 'approved' : 'rejected'} successfully`,
-      });
+      return { success: true };
     } catch (error: any) {
       console.error("Error updating application status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update application status",
-        variant: "destructive",
-      });
+      throw error;
     }
   };
 
   useEffect(() => {
-    fetchApplications();
+    if (opportunityId) {
+      fetchApplications();
+    }
   }, [opportunityId]);
 
   return {
     applications,
     isLoading,
-    fetchApplications,
     updateApplicationStatus,
+    refetch: fetchApplications
   };
 };

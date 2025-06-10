@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -67,12 +66,12 @@ const ApplicationActionButtons = ({
   
   if (status === "pending") {
     return (
-      <div className="space-x-2">
+      <div className="flex flex-col gap-2 w-full">
         <Button 
           variant="outline" 
           size="sm" 
           onClick={() => onUpdateStatus(applicationId, "accepted")}
-          className="border-green-500 text-green-500 hover:bg-green-50"
+          className="w-full border-green-500 text-green-500 hover:bg-green-50 hover:border-green-600 hover:text-green-600"
         >
           Approve
         </Button>
@@ -80,7 +79,7 @@ const ApplicationActionButtons = ({
           variant="outline"
           size="sm"
           onClick={() => onUpdateStatus(applicationId, "rejected")}
-          className="border-red-500 text-red-500 hover:bg-red-50"
+          className="w-full border-red-500 text-red-500 hover:bg-red-50 hover:border-red-600 hover:text-red-600"
         >
           Reject
         </Button>
@@ -90,17 +89,15 @@ const ApplicationActionButtons = ({
   
   if (status === "accepted") {
     return (
-      <div className="space-x-2">
-        <Button 
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
-          onClick={handleChatClick}
-        >
-          <MessageCircle className="h-4 w-4" />
-          Chat
-        </Button>
-      </div>
+      <Button 
+        variant="outline"
+        size="sm"
+        className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+        onClick={handleChatClick}
+      >
+        <MessageCircle className="h-4 w-4" />
+        Chat
+      </Button>
     );
   }
   
