@@ -3,7 +3,7 @@ import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInf
 import OpportunityActionButton from "@/components/opportunities/OpportunityActionButton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface OpportunityDetailsHeaderProps {
   opportunity: Opportunity;
@@ -29,6 +29,31 @@ const OpportunityDetailsHeader = ({
   runClubProfile
 }: OpportunityDetailsHeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine where the user came from to provide correct back navigation
+  const getBackNavigation = () => {
+    // Check if the user came from applications page via state
+    if (location.state?.from === 'applications') {
+      return { path: '/applications', label: 'Back to my applications' };
+    }
+    
+    // Check if there's a referrer in the state
+    if (location.state?.from) {
+      return { path: location.state.from, label: 'Back' };
+    }
+    
+    // For run clubs who have an application, if they're viewing an opportunity they applied to,
+    // it's likely they came from applications
+    if (userType === 'run_club' && application) {
+      return { path: '/applications', label: 'Back to my applications' };
+    }
+    
+    // Default fallback to opportunities
+    return { path: '/opportunities', label: 'Back to opportunities' };
+  };
+
+  const backNavigation = getBackNavigation();
 
   return (
     <div className="space-y-6">
@@ -37,10 +62,10 @@ const OpportunityDetailsHeader = ({
           variant="ghost" 
           size="sm"
           className="mr-3 p-0 hover:bg-transparent text-gray-600 hover:text-gray-900" 
-          onClick={() => navigate('/opportunities')}
+          onClick={() => navigate(backNavigation.path)}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Back to opportunities</span>
+          <span className="text-sm font-medium">{backNavigation.label}</span>
         </Button>
       </div>
 

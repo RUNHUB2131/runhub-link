@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Application } from "@/types";
 import OpportunityBrandInfo from "@/components/opportunities/OpportunityBrandInfo";
+import { Link } from "react-router-dom";
 
 interface ApplicationWithOpportunity extends Application {
   opportunities?: {
@@ -151,7 +152,12 @@ const ApplicationCard = ({ application }: { application: ApplicationWithOpportun
       <CardFooter className="flex justify-between pt-2 text-sm text-gray-500">
         <span>Applied: {new Date(application.created_at).toLocaleDateString()}</span>
         <Button variant="outline" size="sm" asChild>
-          <a href={`/opportunities/${application.opportunity_id}`}>View Opportunity</a>
+          <Link 
+            to={`/opportunities/${application.opportunity_id}`}
+            state={{ from: 'applications' }}
+          >
+            View Opportunity
+          </Link>
         </Button>
       </CardFooter>
     </Card>

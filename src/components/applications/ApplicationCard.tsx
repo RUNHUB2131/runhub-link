@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
@@ -145,7 +144,10 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
       <CardFooter className="flex justify-between pt-2">
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to={`/opportunities/${application.opportunity_id}`}>
+            <Link 
+              to={`/opportunities/${application.opportunity_id}`}
+              state={{ from: 'applications' }}
+            >
               View Details
             </Link>
           </Button>
