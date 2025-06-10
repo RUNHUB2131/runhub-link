@@ -61,6 +61,10 @@ const Notifications = () => {
         case 'opportunity':
           navigate(`/opportunities`);
           break;
+        case 'targeted_opportunity':
+          // Navigate to the specific opportunity page for targeted opportunities
+          navigate(`/opportunities/${notification.related_id}`);
+          break;
         case 'chat':
         case 'new_chat':
           navigate(`/chat`);

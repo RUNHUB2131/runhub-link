@@ -71,6 +71,11 @@ const NotificationsDropdown = () => {
             setIsOpen(false);
             navigate(`/opportunities`);
             break;
+          case 'targeted_opportunity':
+            // Navigate to the specific opportunity page for targeted opportunities
+            setIsOpen(false);
+            navigate(`/opportunities/${relatedId}`);
+            break;
           default:
             break;
         }
