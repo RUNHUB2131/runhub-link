@@ -2,18 +2,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { BrandProfile } from "@/types";
-import { BrandProfileView } from "@/components/profile/BrandProfileView";
+import { BrandProfileInputView } from "@/components/profile/BrandProfileInputView";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { fetchBrandProfile } from "@/utils/profileUtils";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const BrandPersonalInformation = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [brandProfile, setBrandProfile] = useState<Partial<BrandProfile>>({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,24 +52,7 @@ const BrandPersonalInformation = () => {
 
   return (
     <PageContainer>
-      <div className="flex items-center gap-4 mb-6">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate("/profile")}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-      </div>
-      
-      <PageHeader 
-        title="Personal Information" 
-        description="Manage your brand profile and company details"
-      />
-      
-      <BrandProfileView profile={brandProfile} onProfileUpdate={fetchProfileData} />
+      <BrandProfileInputView profile={brandProfile} onProfileUpdate={fetchProfileData} />
     </PageContainer>
   );
 };

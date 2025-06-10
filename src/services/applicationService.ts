@@ -163,6 +163,7 @@ export const fetchRunClubApplications = async (runClubId: string) => {
         opportunities:opportunity_id(
           id, 
           title, 
+          activation_overview,
           brand_id, 
           club_incentives, 
           submission_deadline, 
@@ -199,6 +200,7 @@ export const fetchRunClubApplications = async (runClubId: string) => {
             run_club_profile: profileError ? null : profileData,
             opportunities: {
               ...app.opportunities,
+              description: app.opportunities.activation_overview, // Map activation_overview to description for component compatibility
               brand: brandError ? null : brandData
             }
           };
@@ -207,7 +209,11 @@ export const fetchRunClubApplications = async (runClubId: string) => {
         return {
           ...app,
           status: app.status as "pending" | "accepted" | "rejected",
-          run_club_profile: profileError ? null : profileData
+          run_club_profile: profileError ? null : profileData,
+          opportunities: app.opportunities ? {
+            ...app.opportunities,
+            description: app.opportunities.activation_overview // Map activation_overview to description for component compatibility
+          } : null
         };
       })
     );

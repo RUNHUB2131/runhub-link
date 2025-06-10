@@ -13,7 +13,6 @@ export const useDashboardData = () => {
   const { userType, user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [profileCompletionPercentage, setProfileCompletionPercentage] = useState(0);
   const [stats, setStats] = useState<DashboardStats>({
     opportunities: 0,
     applications: 0
@@ -37,9 +36,7 @@ export const useDashboardData = () => {
           .eq('id', user?.id)
           .single();
           
-        if (profileData) {
-          calculateProfileCompletion(profileData, 'run_club');
-        }
+        // Profile completion is now handled directly in Dashboard component
         
         // Fetch applications for run clubs
         const { data: applicationsData } = await supabase
@@ -80,9 +77,7 @@ export const useDashboardData = () => {
           .eq('id', user?.id)
           .single();
           
-        if (profileData) {
-          calculateProfileCompletion(profileData, 'brand');
-        }
+        // Profile completion is now handled directly in component
         
         // Fetch opportunities created by this brand
         const { data: opportunitiesData } = await supabase
@@ -120,36 +115,9 @@ export const useDashboardData = () => {
       setIsLoading(false);
     }
   };
-  
-  const calculateProfileCompletion = (profileData: any, type: 'run_club' | 'brand') => {
-    let totalFields = 0;
-    let completedFields = 0;
-    
-    // Count total fields and completed fields
-    Object.entries(profileData).forEach(([key, value]) => {
-      // Skip id and technical fields
-      if (!['id', 'created_at'].includes(key)) {
-        totalFields++;
-        if (value && 
-            // Check for non-empty strings
-            ((typeof value === 'string' && value.trim() !== '') || 
-            // Check for non-zero numbers
-            (typeof value === 'number' && value !== 0) ||
-            // Check for non-empty objects
-            (typeof value === 'object' && value !== null && Object.keys(value).length > 0))
-          ) {
-          completedFields++;
-        }
-      }
-    });
-    
-    const percentage = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
-    setProfileCompletionPercentage(percentage);
-  };
 
   return {
     isLoading,
-    profileCompletionPercentage,
     stats
   };
 };

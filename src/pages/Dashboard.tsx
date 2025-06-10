@@ -12,6 +12,7 @@ import { ProfileCompletionCard } from "@/components/dashboard/ProfileCompletionC
 import { PageContainer } from "@/components/layout/PageContainer";
 import { RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
+import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
 
 const Dashboard = () => {
   const { user, userType } = useAuth();
@@ -45,35 +46,20 @@ const Dashboard = () => {
         if (profileData) {
           setRunClubProfile(profileData);
           
-          // Calculate profile completion percentage
-          let completedFields = 0;
-          let totalFields = 0;
-          
-          // Basic fields
-          const basicFields = ['club_name', 'description', 'location', 'member_count', 'website', 'logo_url'];
-          basicFields.forEach(field => {
-            totalFields++;
-            if (profileData[field as keyof RunClubProfile]) completedFields++;
-          });
-          
-          // Social media
-          if (profileData.social_media) {
-            const socialMediaFields = ['instagram', 'facebook', 'tiktok', 'strava'];
-            socialMediaFields.forEach(platform => {
-              totalFields++;
-              if (profileData.social_media?.[platform as keyof typeof profileData.social_media]) completedFields++;
-            });
+          // Use the same profile completion logic as the rest of the app
+          if (isProfileComplete(profileData)) {
+            setProfilePercentage(100);
+          } else {
+            // Calculate percentage based on completed vs missing required fields
+            const missingFields = getMissingProfileFields(profileData);
+            
+            // Total required categories for completion
+            const totalRequiredCategories = 5; // club_name, location, member_count, description, (social_media OR run_types)
+            const completedCategories = totalRequiredCategories - missingFields.length;
+            
+            const percentage = Math.round((completedCategories / totalRequiredCategories) * 100);
+            setProfilePercentage(Math.max(0, percentage));
           }
-          
-          // Community data
-          if (profileData.community_data) {
-            totalFields += 3; // run types, demographics, and events
-            if (profileData.community_data.run_types && profileData.community_data.run_types.length > 0) completedFields++;
-            if (profileData.community_data.demographics && Object.keys(profileData.community_data.demographics).length > 0) completedFields++;
-          }
-          
-          const percentage = Math.round((completedFields / totalFields) * 100);
-          setProfilePercentage(percentage);
         }
       } catch (error) {
         console.error("Error loading profile data:", error);
