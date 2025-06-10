@@ -104,7 +104,24 @@ const OpportunityApplications = () => {
       );
 
       console.log("Final applications with profiles:", appsWithProfiles);
-      setApplications(appsWithProfiles);
+      
+      // Sort applications: pending first, then accepted, then rejected, and within each status by newest first
+      const sortedApplications = appsWithProfiles.sort((a, b) => {
+        // Define status priority: pending = 1, accepted = 2, rejected = 3
+        const statusPriority = { 'pending': 1, 'accepted': 2, 'rejected': 3 };
+        const aPriority = statusPriority[a.status] || 4;
+        const bPriority = statusPriority[b.status] || 4;
+        
+        // First sort by status priority
+        if (aPriority !== bPriority) {
+          return aPriority - bPriority;
+        }
+        
+        // If same status, sort by created_at (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      
+      setApplications(sortedApplications);
     } catch (error) {
       console.error("Error fetching applications:", error);
       toast({
