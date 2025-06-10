@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { isProfileComplete } from "@/utils/profileCompletionUtils";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
 import { Application, RunClubProfile, Opportunity } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { checkChatExistsForApplication } from "@/services/chat";
@@ -41,6 +42,7 @@ const OpportunityActionButton = ({
   const { toast } = useToast();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showPitchDialog, setShowPitchDialog] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   const handleChatClick = async () => {
     if (!application || application.status !== 'accepted') return;
@@ -68,7 +70,17 @@ const OpportunityActionButton = ({
   };
 
   const handleApplyClick = () => {
+    // Check if profile is complete
+    if (!isProfileComplete(runClubProfile)) {
+      setShowProfileDialog(true);
+      return;
+    }
     setShowConfirmDialog(true);
+  };
+
+  const handleCompleteProfile = () => {
+    setShowProfileDialog(false);
+    navigate('/profile/personal-information');
   };
 
   const handleConfirmApply = async () => {
@@ -144,30 +156,14 @@ const OpportunityActionButton = ({
       );
     }
     
-    // Check if profile is complete before showing apply button
-    const isComplete = isProfileComplete(runClubProfile);
-    
     return (
       <>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <Button
-                  onClick={handleApplyClick}
-                  disabled={isApplying || !isComplete}
-                >
-                  {isApplying ? "Applying..." : "Apply Now"}
-                </Button>
-              </div>
-            </TooltipTrigger>
-            {!isComplete && (
-              <TooltipContent>
-                <p>Complete your profile before applying</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <Button
+          onClick={handleApplyClick}
+          disabled={isApplying}
+        >
+          {isApplying ? "Applying..." : "Apply Now"}
+        </Button>
 
         <ApplicationConfirmationDialog
           opportunity={opportunity}
@@ -184,6 +180,35 @@ const OpportunityActionButton = ({
           onSubmit={handlePitchSubmit}
           isSubmitting={isApplying}
         />
+
+        <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Complete Your Profile</DialogTitle>
+              <DialogDescription>
+                You need to complete your run club profile before applying to opportunities.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              <h4 className="font-medium mb-2">Missing information:</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                {getMissingProfileFields(runClubProfile).map((field, index) => (
+                  <li key={index} className="text-sm">{field}</li>
+                ))}
+              </ul>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowProfileDialog(false)}>
+                Later
+              </Button>
+              <Button onClick={handleCompleteProfile}>
+                Complete Profile
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </>
     );
   }

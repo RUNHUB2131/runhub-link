@@ -60,7 +60,7 @@ const BrowseOpportunityCard = ({ opportunity, onApply, runClubProfile = {} }: Br
 
   const handleCompleteProfile = () => {
     setShowProfileDialog(false);
-    navigate('/profile');
+    navigate('/profile/personal-information');
   };
 
   const handleConfirmApply = async () => {

@@ -22,7 +22,7 @@ export const ProfileCompletionCard = ({ isLoading, percentage, profile = {} }: P
   }
 
   const handleCardClick = () => {
-    navigate("/profile");
+    navigate("/profile/personal-information");
   };
 
   return (
@@ -72,7 +72,7 @@ export const ProfileCompletionCard = ({ isLoading, percentage, profile = {} }: P
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm font-medium">{percentage}% complete</p>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/profile" className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                <Link to="/profile/personal-information" className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                   Complete profile <ArrowRight size={16} />
                 </Link>
               </Button>
