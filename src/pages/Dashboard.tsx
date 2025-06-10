@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -13,10 +14,19 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { RunClubProfile } from "@/types";
 import { fetchRunClubProfile } from "@/utils/profileUtils";
 import { isProfileComplete, getMissingProfileFields } from "@/utils/profileCompletionUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Users, Sparkles } from "lucide-react";
 
 const Dashboard = () => {
   const { user, userType } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [viewsPeriod, setViewsPeriod] = useState<ViewsPeriod>('all');
   const [applicationsPeriod, setApplicationsPeriod] = useState<ApplicationsPeriod>('all');
   const { isLoading, stats } = useDashboardData();
@@ -26,6 +36,7 @@ const Dashboard = () => {
   const [profilePercentage, setProfilePercentage] = useState<number>(0);
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
+  const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
 
   const handleViewsPeriodChange = (period: ViewsPeriod) => {
     setViewsPeriod(period);
@@ -33,6 +44,32 @@ const Dashboard = () => {
 
   const handleApplicationsPeriodChange = (period: ApplicationsPeriod) => {
     setApplicationsPeriod(period);
+  };
+
+  // Brand welcome dialog logic
+  useEffect(() => {
+    // Only for brands, after dashboard loads, and if not seen before
+    if (
+      user?.id && 
+      userType === 'brand' && 
+      !isLoading && // Wait for dashboard to load
+      !localStorage.getItem(`brand_welcome_seen_${user.id}`) &&
+      !showWelcomeDialog // Prevent multiple triggers if already showing
+    ) {
+      setShowWelcomeDialog(true);
+    }
+  }, [user?.id, userType, isLoading, showWelcomeDialog]);
+
+  const handleWelcomeAction = (createOpportunity = false) => {
+    // Mark as seen permanently
+    if (user?.id) {
+      localStorage.setItem(`brand_welcome_seen_${user.id}`, 'true');
+    }
+    setShowWelcomeDialog(false);
+    
+    if (createOpportunity) {
+      navigate("/opportunities/add");
+    }
   };
 
   useEffect(() => {
@@ -124,6 +161,65 @@ const Dashboard = () => {
           markAsRead={markAsRead}
         />
       </div>
+
+      {/* Brand Welcome Dialog */}
+      {userType === 'brand' && (
+        <Dialog open={showWelcomeDialog} onOpenChange={(open) => {
+          if (!open) {
+            handleWelcomeAction(false); // Mark as seen when closed via X button
+          }
+        }}>
+          <DialogContent className="sm:max-w-lg">
+            <div className="flex flex-col items-center text-center space-y-6 pt-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              
+              <DialogTitle className="text-2xl font-bold">
+                Welcome to RUNHUB LINK!
+              </DialogTitle>
+            </div>
+
+            <div className="py-4 space-y-4">
+              <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg p-6 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Connect with
+                  </span>
+                </div>
+                <div className="text-3xl font-bold text-primary mb-1">100+</div>
+                <div className="text-sm text-muted-foreground">active run clubs</div>
+              </div>
+
+              <div className="text-center space-y-2">
+                <h4 className="font-semibold">Ready to get started?</h4>
+                <p className="text-sm text-muted-foreground">
+                  Create your first opportunity and start receiving applications from interested run clubs.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button 
+                onClick={() => handleWelcomeAction(true)}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-medium"
+                size="lg"
+              >
+                Create Your First Opportunity
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => handleWelcomeAction(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                I'll do this later
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </PageContainer>
   );
 };

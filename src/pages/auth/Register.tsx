@@ -53,9 +53,9 @@ const Register = () => {
       await register(email, password, userType, userType === 'brand' ? companyName.trim() : undefined);
       toast({
         title: "Registration successful",
-        description: "Your account has been created. Please complete your profile.",
+        description: "Welcome to RUNHUB LINK!",
       });
-      navigate("/profile");
+      navigate("/dashboard");
     } catch (error) {
       console.error(error);
       setIsLoading(false);
