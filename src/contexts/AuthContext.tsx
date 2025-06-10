@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { User, UserType } from "../types";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,7 @@ interface AuthContextType {
   userType: UserType | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, userType: UserType) => Promise<void>;
+  register: (email: string, password: string, userType: UserType, companyName?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -130,7 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (email: string, password: string, userType: UserType) => {
+  const register = async (email: string, password: string, userType: UserType, companyName?: string) => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -138,14 +137,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           data: {
-            user_type: userType
+            user_type: userType,
+            company_name: companyName
           }
         }
       });
       
       if (error) throw error;
       
-      // The trigger function will create the profile records
+      // The database trigger function will automatically create the profile records
+      // including the brand_profiles with company_name from metadata
       
     } catch (error: any) {
       console.error("Registration error:", error);

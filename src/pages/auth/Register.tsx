@@ -11,10 +11,14 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get user type from localStorage to conditionally show company name field
+  const userType = localStorage.getItem("runhub_user_type") as UserType;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,18 +31,26 @@ const Register = () => {
       });
       return;
     }
+
+    // Validate company name for brands
+    if (userType === 'brand' && !companyName.trim()) {
+      toast({
+        title: "Company name required",
+        description: "Please enter your company name.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     
     try {
-      const userType = localStorage.getItem("runhub_user_type") as UserType;
-      
       if (!userType) {
         navigate("/auth/user-type");
         return;
       }
       
-      await register(email, password, userType);
+      await register(email, password, userType, userType === 'brand' ? companyName.trim() : undefined);
       toast({
         title: "Registration successful",
         description: "Your account has been created. Please complete your profile.",
@@ -58,6 +70,21 @@ const Register = () => {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-4">
+        {userType === 'brand' && (
+          <div className="space-y-2">
+            <Label htmlFor="companyName">Company Name</Label>
+            <Input
+              id="companyName"
+              type="text"
+              placeholder="Enter your company name"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              required
+              className="h-11"
+            />
+          </div>
+        )}
+        
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
