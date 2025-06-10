@@ -83,29 +83,34 @@ export const RunClubSelector = ({
               {isLoading ? "Loading..." : "No run clubs found."}
             </CommandEmpty>
             <CommandGroup>
-              {clubs.map((club) => (
-                <CommandItem
-                  key={club.id}
-                  value={club.id}
-                  onSelect={() => handleSelect(club.id)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === club.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{club.club_name}</span>
-                    {(club.city || club.state) && (
-                      <span className="text-sm text-muted-foreground">
-                        {club.city && club.state ? `${club.city}, ${club.state}` : club.city || club.state}
-                        {club.member_count && ` • ${club.member_count} members`}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
+              {clubs.map((club) => {
+                // Create a searchable value that includes only club name
+                const searchableValue = club.club_name.toLowerCase();
+                
+                return (
+                  <CommandItem
+                    key={club.id}
+                    value={searchableValue}
+                    onSelect={() => handleSelect(club.id)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === club.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{club.club_name}</span>
+                      {(club.city || club.state) && (
+                        <span className="text-sm text-muted-foreground">
+                          {club.city && club.state ? `${club.city}, ${club.state}` : club.city || club.state}
+                          {club.member_count && ` • ${club.member_count} members`}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

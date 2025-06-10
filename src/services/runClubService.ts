@@ -18,9 +18,9 @@ export const searchRunClubs = async (searchTerm: string = "", limit: number = 20
       .order('club_name', { ascending: true })
       .limit(limit);
 
-    // Apply search filter if provided
+    // Apply search filter if provided - search only by club name
     if (searchTerm.trim()) {
-      query = query.or(`club_name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`);
+      query = query.ilike('club_name', `%${searchTerm}%`);
     }
 
     const { data, error } = await query;
