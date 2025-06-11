@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import UserTypeSelection from "./pages/auth/UserTypeSelection";
+import MagicLinkAuth from "./pages/auth/MagicLinkAuth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import PersonalInformation from "./pages/PersonalInformation";
@@ -51,6 +52,7 @@ function App() {
               {/* Public routes */}
               <Route path="/" element={<Index />} />
               <Route path="/email-preferences" element={<EmailPreferencesPage />} />
+              <Route path="/auth/magic-link" element={<MagicLinkAuth />} />
               
               {/* Auth routes */}
               <Route element={<AuthLayout />}>

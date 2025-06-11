@@ -272,6 +272,36 @@ export type Database = {
         }
         Relationships: []
       }
+      magic_link_tokens: {
+        Row: {
+          created_at: string | null
+          destination_path: string
+          expires_at: string
+          id: string
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          destination_path: string
+          expires_at?: string
+          id?: string
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          destination_path?: string
+          expires_at?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -556,12 +586,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      cleanup_expired_magic_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      create_magic_link_session: {
+        Args: { validated_user_id: string; magic_token: string }
+        Returns: Json
+      }
       force_process_all_emails: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
       generate_email_preference_token: {
         Args: { user_email: string }
+        Returns: string
+      }
+      generate_magic_link_token: {
+        Args: { user_email: string; destination_path?: string }
         Returns: string
       }
       get_email_queue_status: {
@@ -616,6 +658,10 @@ export type Database = {
           new_email_new_opportunities?: boolean
         }
         Returns: boolean
+      }
+      validate_magic_link_token: {
+        Args: { token_value: string }
+        Returns: Json
       }
       webhook_process_emails: {
         Args: Record<PropertyKey, never>
