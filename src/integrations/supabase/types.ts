@@ -212,6 +212,42 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          attempts: number | null
+          created_at: string | null
+          email_data: Json
+          email_type: string
+          id: string
+          processed_at: string | null
+          recipient_email: string
+          recipient_name: string
+          status: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string | null
+          email_data: Json
+          email_type: string
+          id?: string
+          processed_at?: string | null
+          recipient_email: string
+          recipient_name: string
+          status?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string | null
+          email_data?: Json
+          email_type?: string
+          id?: string
+          processed_at?: string | null
+          recipient_email?: string
+          recipient_name?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -492,6 +528,30 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      cleanup_and_process_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      force_process_all_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_email_queue_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_user_email: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      process_email_queue: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      process_pending_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       send_email_notification: {
         Args: {
           email_type: string
@@ -500,6 +560,10 @@ export type Database = {
           email_data: Json
         }
         Returns: undefined
+      }
+      webhook_process_emails: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
     }
     Enums: {
