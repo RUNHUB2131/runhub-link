@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { PermissionsSettings } from "@/components/profile/PermissionsSettings";
 import { ContactSupportForm } from "@/components/profile/ContactSupportForm";
+import { FeedbackForm } from "@/components/profile/FeedbackForm";
 
 interface RunClubSettingsViewProps {
   profile: Partial<RunClubProfile>;
@@ -40,6 +41,7 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showPermissions, setShowPermissions] = useState(false);
   const [showContactSupport, setShowContactSupport] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleProfileClick = () => {
     navigate("/profile/personal-information");
@@ -120,7 +122,7 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
     {
       icon: MessageSquare,
       title: "Give us feedback",
-      onClick: () => {}, // Placeholder for future implementation
+      onClick: () => setShowFeedback(true),
     },
   ];
 
@@ -143,6 +145,10 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
 
   if (showContactSupport) {
     return <ContactSupportForm onBack={() => setShowContactSupport(false)} />;
+  }
+
+  if (showFeedback) {
+    return <FeedbackForm onBack={() => setShowFeedback(false)} />;
   }
 
   return (
