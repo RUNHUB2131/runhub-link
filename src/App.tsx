@@ -34,6 +34,9 @@ import MyApplications from "./pages/applications/MyApplications";
 import ChatPage from "./pages/chat/ChatPage";
 import ChatListPage from "./pages/chat/ChatListPage";
 
+// Email preferences (public route)
+import { EmailPreferencesPage } from "./pages/EmailPreferencesPage";
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -47,6 +50,7 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
+              <Route path="/email-preferences" element={<EmailPreferencesPage />} />
               
               {/* Auth routes */}
               <Route element={<AuthLayout />}>

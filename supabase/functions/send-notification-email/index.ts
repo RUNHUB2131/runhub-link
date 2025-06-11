@@ -16,7 +16,7 @@ interface EmailData {
   };
 }
 
-const generateEmailHTML = (emailData: EmailData): string => {
+const generateEmailHTML = (emailData: EmailData, unsubscribeToken?: string): string => {
   const baseStyle = `
     <style>
       body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
@@ -25,7 +25,20 @@ const generateEmailHTML = (emailData: EmailData): string => {
       .highlight { background-color: #eff6ff; padding: 15px; border-left: 4px solid #2563eb; border-radius: 4px; margin: 15px 0; }
       .button { display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-top: 15px; }
       .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
+      .footer a { color: #2563eb; text-decoration: none; }
+      .footer a:hover { text-decoration: underline; }
+      .preferences-links { margin-top: 15px; }
+      .preferences-links a { margin-right: 15px; }
     </style>
+  `;
+
+  const footerLinks = unsubscribeToken ? `
+    <div class="preferences-links">
+      <a href="https://runhub.co/email-preferences?token=${unsubscribeToken}">Update email preferences</a>
+      <a href="https://runhub.co/email-preferences?token=${unsubscribeToken}&unsubscribe=all">Unsubscribe from all emails</a>
+    </div>
+  ` : `
+    <p>Update your email preferences in your account settings at <a href="https://runhub.co">runhub.co</a></p>
   `;
 
   switch (emailData.type) {
@@ -42,7 +55,7 @@ const generateEmailHTML = (emailData: EmailData): string => {
           </div>
           <a href="https://runhub.co/applications" class="button">Review Application</a>
           <div class="footer">
-            <p>Update your email preferences in your account settings.</p>
+            ${footerLinks}
           </div>
         </div></body></html>
       `;
@@ -58,7 +71,7 @@ const generateEmailHTML = (emailData: EmailData): string => {
           ${isAccepted ? '<p>Congratulations! The brand will be in touch soon.</p>' : '<p>Thank you for your interest. Keep looking for new opportunities!</p>'}
           <a href="https://runhub.co/applications" class="button">View My Applications</a>
           <div class="footer">
-            <p>Update your email preferences in your account settings.</p>
+            ${footerLinks}
           </div>
         </div></body></html>
       `;
@@ -75,7 +88,7 @@ const generateEmailHTML = (emailData: EmailData): string => {
           </div>
           <a href="https://runhub.co/chat" class="button">View Message</a>
           <div class="footer">
-            <p>Update your email preferences in your account settings.</p>
+            ${footerLinks}
           </div>
         </div></body></html>
       `;
@@ -93,7 +106,7 @@ const generateEmailHTML = (emailData: EmailData): string => {
           </div>
           <a href="https://runhub.co/opportunities" class="button">View Opportunity</a>
           <div class="footer">
-            <p>Update your email preferences in your account settings.</p>
+            ${footerLinks}
           </div>
         </div></body></html>
       `;
@@ -131,6 +144,38 @@ const handler = async (request: Request): Promise<Response> => {
     const emailData: EmailData = await request.json();
     
     console.log('Sending notification email:', emailData.type);
+
+    // Generate unsubscribe token for the recipient
+    let unsubscribeToken = '';
+    
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL');
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      
+      if (supabaseUrl && supabaseServiceKey) {
+        const tokenResponse = await fetch(`${supabaseUrl}/rest/v1/rpc/generate_email_preference_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseServiceKey}`,
+            'apikey': supabaseServiceKey
+          },
+          body: JSON.stringify({
+            user_email: emailData.to
+          })
+        });
+        
+        if (tokenResponse.ok) {
+          const result = await tokenResponse.text();
+          unsubscribeToken = result.replace(/"/g, ''); // Remove quotes if returned as string
+          console.log('Generated unsubscribe token for:', emailData.to);
+        } else {
+          console.warn('Failed to generate token, response:', tokenResponse.status);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to generate unsubscribe token:', error);
+    }
     
     const subjectMap = {
       'new_application': `New Application: ${emailData.data.opportunityTitle}`,
@@ -151,7 +196,7 @@ const handler = async (request: Request): Promise<Response> => {
         from: 'RUNHUB Connect <noreply@mail.runhub.co>',
         to: [emailData.to],
         subject: subjectMap[emailData.type],
-        html: generateEmailHTML(emailData),
+        html: generateEmailHTML(emailData, unsubscribeToken),
       }),
     });
 
@@ -162,14 +207,15 @@ const handler = async (request: Request): Promise<Response> => {
       throw new Error(result.message || 'Email failed');
     }
 
-    console.log('Notification email sent successfully:', result.id);
+    console.log('Notification email sent successfully:', result.id, 'with token:', unsubscribeToken ? 'yes' : 'no');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Notification email sent successfully',
         emailId: result.id,
-        type: emailData.type
+        type: emailData.type,
+        hasUnsubscribeToken: !!unsubscribeToken
       }), 
       { 
         status: 200, 

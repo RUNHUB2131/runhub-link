@@ -212,6 +212,30 @@ export type Database = {
           },
         ]
       }
+      email_preference_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          token: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          token?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_queue: {
         Row: {
           attempts: number | null
@@ -536,6 +560,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      generate_email_preference_token: {
+        Args: { user_email: string }
+        Returns: string
+      }
       get_email_queue_status: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -543,6 +571,19 @@ export type Database = {
       get_user_email: {
         Args: { user_id: string }
         Returns: string
+      }
+      get_user_preferences_by_token: {
+        Args: { token_value: string }
+        Returns: {
+          user_id: string
+          email: string
+          full_name: string
+          email_notifications_enabled: boolean
+          email_new_applications: boolean
+          email_application_updates: boolean
+          email_new_messages: boolean
+          email_new_opportunities: boolean
+        }[]
       }
       process_email_queue: {
         Args: Record<PropertyKey, never>
@@ -560,6 +601,21 @@ export type Database = {
           email_data: Json
         }
         Returns: undefined
+      }
+      unsubscribe_all_by_token: {
+        Args: { token_value: string }
+        Returns: boolean
+      }
+      update_preferences_by_token: {
+        Args: {
+          token_value: string
+          new_email_notifications_enabled?: boolean
+          new_email_new_applications?: boolean
+          new_email_application_updates?: boolean
+          new_email_new_messages?: boolean
+          new_email_new_opportunities?: boolean
+        }
+        Returns: boolean
       }
       webhook_process_emails: {
         Args: Record<PropertyKey, never>
