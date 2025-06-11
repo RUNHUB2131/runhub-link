@@ -8,7 +8,7 @@ alwaysApply: true
 This document is an overview of the project and rules and context for the project and how to build it. Please refer to this in full.
 
 ## Application Overview
-RUNHUB Connect is a SaaS platform that facilitates partnerships between running clubs and brands for sponsorship opportunities. The platform has two primary user types:
+RUNHUB LINK is a SaaS platform that facilitates partnerships between running clubs and brands for sponsorship opportunities. The platform has two primary user types:
 - **Run Clubs**: Create profiles, browse sponsorship opportunities, apply for partnerships, and manage applications
 - **Brands**: Create company profiles, post sponsorship opportunities, review applications, and browse/connect with clubs
 
@@ -57,14 +57,15 @@ src/
 ## Database Schema & Data Models
 
 ### Core Tables
-- **profiles**: Base user profiles with user_type ('run_club' | 'brand')
+- **profiles**: Base user profiles with user_type ('run_club' | 'brand') and email notification preferences
 - **run_club_profiles**: Extended profiles for running clubs with social media data, location, member count
 - **brand_profiles**: Extended profiles for brands with company information
 - **opportunities**: Brand-posted sponsorship opportunities with detailed requirements
 - **applications**: Run club applications to opportunities with status tracking
 - **chats**: Chat sessions between brands and clubs
 - **chat_messages**: Individual messages within chats
-- **notifications**: System notifications
+- **notifications**: System notifications (in-app)
+- **email_queue**: Email notifications queue with automated processing
 - **user_favorites**: User favorited clubs (brands can favorite run clubs)
 - **analytics_events**: Event tracking for internal analytics
 

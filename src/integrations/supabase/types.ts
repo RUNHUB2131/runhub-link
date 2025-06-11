@@ -382,16 +382,31 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          email_application_updates: boolean | null
+          email_new_applications: boolean | null
+          email_new_messages: boolean | null
+          email_new_opportunities: boolean | null
+          email_notifications_enabled: boolean | null
           id: string
           user_type: string
         }
         Insert: {
           created_at?: string | null
+          email_application_updates?: boolean | null
+          email_new_applications?: boolean | null
+          email_new_messages?: boolean | null
+          email_new_opportunities?: boolean | null
+          email_notifications_enabled?: boolean | null
           id: string
           user_type: string
         }
         Update: {
           created_at?: string | null
+          email_application_updates?: boolean | null
+          email_new_applications?: boolean | null
+          email_new_messages?: boolean | null
+          email_new_opportunities?: boolean | null
+          email_notifications_enabled?: boolean | null
           id?: string
           user_type?: string
         }
@@ -476,6 +491,15 @@ export type Database = {
       check_opportunity_access: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      send_email_notification: {
+        Args: {
+          email_type: string
+          recipient_email: string
+          recipient_name: string
+          email_data: Json
+        }
+        Returns: undefined
       }
     }
     Enums: {

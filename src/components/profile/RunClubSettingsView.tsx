@@ -24,8 +24,10 @@ import {
   MessageCircle, 
   MessageSquare, 
   FileText, 
-  Lock 
+  Lock,
+  Mail 
 } from "lucide-react";
+import { EmailNotificationSettings } from "@/components/profile/EmailNotificationSettings";
 
 interface RunClubSettingsViewProps {
   profile: Partial<RunClubProfile>;
@@ -37,6 +39,7 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEmailSettings, setShowEmailSettings] = useState(false);
 
   const handleProfileClick = () => {
     navigate("/profile/personal-information");
@@ -102,6 +105,11 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
 
   const settingsItems = [
     {
+      icon: Mail,
+      title: "Email notifications",
+      onClick: () => setShowEmailSettings(true),
+    },
+    {
       icon: Globe,
       title: "App language",
       onClick: () => {}, // Placeholder for future implementation
@@ -138,6 +146,10 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
       onClick: () => {}, // Placeholder for future implementation
     },
   ];
+
+  if (showEmailSettings) {
+    return <EmailNotificationSettings onBack={() => setShowEmailSettings(false)} />;
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
