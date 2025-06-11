@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Users, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { user, userType } = useAuth();
@@ -37,6 +38,7 @@ const Dashboard = () => {
   const [runClubProfile, setRunClubProfile] = useState<Partial<RunClubProfile>>({});
   const [profileLoading, setProfileLoading] = useState(true);
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
+  const [welcomeDialogChecked, setWelcomeDialogChecked] = useState(false);
 
   const handleViewsPeriodChange = (period: ViewsPeriod) => {
     setViewsPeriod(period);
@@ -46,25 +48,55 @@ const Dashboard = () => {
     setApplicationsPeriod(period);
   };
 
-  // Brand welcome dialog logic
+  // Check if brand has seen welcome dialog
   useEffect(() => {
-    // Only for brands, after dashboard loads, and if not seen before
-    if (
-      user?.id && 
-      userType === 'brand' && 
-      !isLoading && // Wait for dashboard to load
-      !localStorage.getItem(`brand_welcome_seen_${user.id}`) &&
-      !showWelcomeDialog // Prevent multiple triggers if already showing
-    ) {
-      setShowWelcomeDialog(true);
-    }
-  }, [user?.id, userType, isLoading, showWelcomeDialog]);
+    const checkWelcomeDialogStatus = async () => {
+      if (user?.id && userType === 'brand' && !welcomeDialogChecked) {
+        try {
+          const { data: brandProfile, error } = await supabase
+            .from('brand_profiles')
+            .select('welcome_dialog_seen')
+            .eq('id', user.id)
+            .single();
 
-  const handleWelcomeAction = (createOpportunity = false) => {
-    // Mark as seen permanently
+          if (error) {
+            console.error('Error checking welcome dialog status:', error);
+            return;
+          }
+
+          setWelcomeDialogChecked(true);
+
+          // Show dialog if not seen before and dashboard has loaded
+          if (!(brandProfile as any)?.welcome_dialog_seen && !isLoading) {
+            setShowWelcomeDialog(true);
+          }
+        } catch (error) {
+          console.error('Error in welcome dialog check:', error);
+          setWelcomeDialogChecked(true);
+        }
+      }
+    };
+
+    checkWelcomeDialogStatus();
+  }, [user?.id, userType, isLoading, welcomeDialogChecked]);
+
+  const handleWelcomeAction = async (createOpportunity = false) => {
+    // Mark as seen in database
     if (user?.id) {
-      localStorage.setItem(`brand_welcome_seen_${user.id}`, 'true');
+      try {
+        const { error } = await supabase
+          .from('brand_profiles')
+          .update({ welcome_dialog_seen: true } as any)
+          .eq('id', user.id);
+
+        if (error) {
+          console.error('Error updating welcome dialog status:', error);
+        }
+      } catch (error) {
+        console.error('Error in welcome dialog update:', error);
+      }
     }
+    
     setShowWelcomeDialog(false);
     
     if (createOpportunity) {
