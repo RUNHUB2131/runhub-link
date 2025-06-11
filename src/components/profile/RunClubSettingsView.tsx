@@ -23,11 +23,13 @@ import {
   MessageCircle, 
   MessageSquare, 
   FileText, 
-  Lock
+  Lock,
+  HelpCircle
 } from "lucide-react";
 import { PermissionsSettings } from "@/components/profile/PermissionsSettings";
 import { ContactSupportForm } from "@/components/profile/ContactSupportForm";
 import { FeedbackForm } from "@/components/profile/FeedbackForm";
+import { FAQSection } from "@/components/profile/FAQSection";
 
 interface RunClubSettingsViewProps {
   profile: Partial<RunClubProfile>;
@@ -42,6 +44,7 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
   const [showPermissions, setShowPermissions] = useState(false);
   const [showContactSupport, setShowContactSupport] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(false);
 
   const handleProfileClick = () => {
     navigate("/profile/personal-information");
@@ -115,6 +118,11 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
 
   const supportItems = [
     {
+      icon: HelpCircle,
+      title: "Frequently Asked Questions",
+      onClick: () => setShowFAQ(true),
+    },
+    {
       icon: MessageCircle,
       title: "Contact support",
       onClick: () => setShowContactSupport(true),
@@ -141,6 +149,16 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
 
   if (showPermissions) {
     return <PermissionsSettings onBack={() => setShowPermissions(false)} />;
+  }
+
+  if (showFAQ) {
+    return <FAQSection 
+      onBack={() => setShowFAQ(false)} 
+      onContactSupport={() => {
+        setShowFAQ(false);
+        setShowContactSupport(true);
+      }}
+    />;
   }
 
   if (showContactSupport) {
