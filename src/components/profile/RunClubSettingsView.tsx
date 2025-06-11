@@ -19,15 +19,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { 
   ChevronRight, 
-  Globe, 
   Shield, 
   MessageCircle, 
   MessageSquare, 
   FileText, 
-  Lock,
-  Mail 
+  Lock
 } from "lucide-react";
-import { EmailNotificationSettings } from "@/components/profile/EmailNotificationSettings";
+import { PermissionsSettings } from "@/components/profile/PermissionsSettings";
+import { ContactSupportForm } from "@/components/profile/ContactSupportForm";
 
 interface RunClubSettingsViewProps {
   profile: Partial<RunClubProfile>;
@@ -39,7 +38,8 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
   const { toast } = useToast();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showEmailSettings, setShowEmailSettings] = useState(false);
+  const [showPermissions, setShowPermissions] = useState(false);
+  const [showContactSupport, setShowContactSupport] = useState(false);
 
   const handleProfileClick = () => {
     navigate("/profile/personal-information");
@@ -105,19 +105,9 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
 
   const settingsItems = [
     {
-      icon: Mail,
-      title: "Email notifications",
-      onClick: () => setShowEmailSettings(true),
-    },
-    {
-      icon: Globe,
-      title: "App language",
-      onClick: () => {}, // Placeholder for future implementation
-    },
-    {
       icon: Shield,
       title: "Permissions",
-      onClick: () => {}, // Placeholder for future implementation
+      onClick: () => setShowPermissions(true),
     },
   ];
 
@@ -125,7 +115,7 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
     {
       icon: MessageCircle,
       title: "Contact support",
-      onClick: () => {}, // Placeholder for future implementation
+      onClick: () => setShowContactSupport(true),
     },
     {
       icon: MessageSquare,
@@ -147,8 +137,12 @@ export const RunClubSettingsView = ({ profile }: RunClubSettingsViewProps) => {
     },
   ];
 
-  if (showEmailSettings) {
-    return <EmailNotificationSettings onBack={() => setShowEmailSettings(false)} />;
+  if (showPermissions) {
+    return <PermissionsSettings onBack={() => setShowPermissions(false)} />;
+  }
+
+  if (showContactSupport) {
+    return <ContactSupportForm onBack={() => setShowContactSupport(false)} />;
   }
 
   return (
