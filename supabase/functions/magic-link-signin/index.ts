@@ -88,7 +88,7 @@ const handler = async (request: Request): Promise<Response> => {
       type: 'magiclink',
       email: userData.user.email!,
       options: {
-        redirectTo: 'https://runhublink.netlify.app/auth/callback'
+        redirectTo: 'https://runhub.co/auth/callback'
       }
     });
 

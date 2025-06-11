@@ -36,20 +36,20 @@ const generateEmailHTML = (emailData: EmailData, unsubscribeToken?: string, magi
 
   const footerLinks = unsubscribeToken ? `
     <div class="preferences-links">
-      <a href="https://runhublink.netlify.app/email-preferences?token=${unsubscribeToken}">Update email preferences</a>
-      <a href="https://runhublink.netlify.app/email-preferences?token=${unsubscribeToken}&unsubscribe=all">Unsubscribe from all emails</a>
+      <a href="https://runhub.co/email-preferences?token=${unsubscribeToken}">Update email preferences</a>
+      <a href="https://runhub.co/email-preferences?token=${unsubscribeToken}&unsubscribe=all">Unsubscribe from all emails</a>
     </div>
   ` : `
-    <p>Update your email preferences in your account settings at <a href="https://runhublink.netlify.app">runhublink.netlify.app</a></p>
+    <p>Update your email preferences in your account settings at <a href="https://runhub.co">runhub.co</a></p>
   `;
 
   // Generate primary and fallback links
   const getActionLinks = (primaryPath: string) => {
     const magicLink = magicLinkToken 
-      ? `https://runhublink.netlify.app/auth/magic-link?token=${magicLinkToken}`
-      : `https://runhublink.netlify.app/auth/login?redirect=${encodeURIComponent(primaryPath)}`;
+      ? `https://runhub.co/auth/magic-link?token=${magicLinkToken}`
+      : `https://runhub.co/auth/login?redirect=${encodeURIComponent(primaryPath)}`;
     
-    const fallbackLink = `https://runhublink.netlify.app/auth/login?redirect=${encodeURIComponent(primaryPath)}`;
+    const fallbackLink = `https://runhub.co/auth/login?redirect=${encodeURIComponent(primaryPath)}`;
     
     return {
       primary: magicLink,
