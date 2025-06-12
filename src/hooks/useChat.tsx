@@ -134,7 +134,13 @@ export const useChat = (chatId: string) => {
     
     // Subscribe to new messages with a unique channel name per chat
     const channel = supabase
-      .channel(`chat-messages-${chatId}`)
+      .channel(`chat-messages-${chatId}`, {
+        config: {
+          presence: {
+            key: user.id,
+          },
+        },
+      })
       .on(
         'postgres_changes',
         {
@@ -145,8 +151,17 @@ export const useChat = (chatId: string) => {
         },
         (payload) => {
           const newMessage = payload.new as ChatMessage;
-          console.log('New message received:', newMessage);
-          setMessages(prev => [...prev, newMessage]);
+          console.log('New message received via realtime:', newMessage);
+          
+          // Prevent duplicate messages by checking if it already exists
+          setMessages(prev => {
+            const messageExists = prev.some(msg => msg.id === newMessage.id);
+            if (messageExists) {
+              console.log('Message already exists, skipping duplicate');
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
           
           // Mark the message as read if it's not from the current user
           if (newMessage.sender_id !== user.id) {
@@ -154,9 +169,17 @@ export const useChat = (chatId: string) => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Chat ${chatId} subscription status:`, status);
+        if (status === 'SUBSCRIBED') {
+          console.log(`✅ Real-time subscription active for chat ${chatId}`);
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error(`❌ Real-time subscription failed for chat ${chatId}`);
+        }
+      });
     
     return () => {
+      console.log(`Cleaning up chat ${chatId} subscription`);
       supabase.removeChannel(channel);
     };
   }, [chatId, user?.id, markChatAsRead]);
@@ -194,6 +217,77 @@ export const useChatList = () => {
   useEffect(() => {
     loadChats();
   }, [loadChats]);
+  
+  // Add real-time subscription for chat list updates
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    // Subscribe to new messages to update chat list
+    const messageChannel = supabase
+      .channel('chat-list-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages'
+        },
+        (payload) => {
+          const newMessage = payload.new as ChatMessage;
+          console.log('New message for chat list update:', newMessage);
+          
+          // Update the chat's updated_at and last message info
+          setChats(prev => {
+            const updatedChats = prev.map(chat => {
+              if (chat.id === newMessage.chat_id) {
+                // Update the chat's timestamp
+                return {
+                  ...chat,
+                  updated_at: newMessage.created_at,
+                  // Increment unread count if message is not from current user
+                  unread_count: newMessage.sender_id !== user.id 
+                    ? (chat.unread_count || 0) + 1 
+                    : chat.unread_count
+                };
+              }
+              return chat;
+            });
+            
+            // Sort chats by updated_at to move the most recent to top
+            return updatedChats.sort((a, b) => 
+              new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+            );
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Chat list subscription status:', status);
+      });
+    
+    // Subscribe to chat updates (for when chats are marked as read, etc.)
+    const chatChannel = supabase
+      .channel('chat-list-chats')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chats'
+        },
+        (payload) => {
+          console.log('Chat updated:', payload.new);
+          // Refresh the chat list to get updated data
+          loadChats();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      console.log('Cleaning up chat list subscriptions');
+      supabase.removeChannel(messageChannel);
+      supabase.removeChannel(chatChannel);
+    };
+  }, [user?.id, loadChats]);
   
   return {
     chats,
