@@ -268,7 +268,7 @@ const handler = async (request: Request): Promise<Response> => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'RUNHUB Connect <noreply@mail.runhub.co>',
+        from: 'RUNHUB LINK <noreply@mail.runhub.co>',
         to: [emailData.to],
         subject: subjectMap[emailData.type],
         html: generateEmailHTML(emailData, unsubscribeToken, magicLinkToken),

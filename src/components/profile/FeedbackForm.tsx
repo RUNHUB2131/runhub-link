@@ -83,7 +83,7 @@ export const FeedbackForm = ({ onBack }: FeedbackFormProps) => {
 
       toast({
         title: "Feedback sent!",
-        description: "Thank you for helping us improve RUNHUB Connect!",
+                  description: "Thank you for helping us improve RUNHUB LINK!",
       });
 
       reset();
@@ -113,7 +113,7 @@ export const FeedbackForm = ({ onBack }: FeedbackFormProps) => {
       {/* Feedback Form */}
       <Card className="p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Help us improve RUNHUB Connect</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Help us improve RUNHUB LINK</h2>
           <p className="text-sm text-gray-600">
             We're in our MVP phase and your feedback is invaluable! Share your thoughts, suggestions, or ideas to help us build a better platform.
           </p>

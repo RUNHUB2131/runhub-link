@@ -1,4 +1,3 @@
-
 import { Application } from "@/types";
 import ApplicationCard from "./ApplicationCard";
 import { motion } from "framer-motion";
@@ -9,9 +8,9 @@ interface ApplicationWithOpportunity extends Application {
     title: string;
     description: string;
     brand_id: string;
-    reward: string;
-    deadline: string | null;
-    created_at: string;
+    club_incentives: string;
+    submission_deadline: string;
+    target_launch_date: string;
     brand?: {
       company_name: string;
       logo_url?: string;
@@ -51,7 +50,7 @@ const ApplicationsList = ({ applications, onWithdraw }: ApplicationsListProps) =
         <motion.div key={application.id} variants={item}>
           <ApplicationCard 
             application={application} 
-            onWithdraw={application.status === 'pending' ? onWithdraw : undefined}
+            onWithdraw={application.status === 'pending' || application.status === 'accepted' ? onWithdraw : undefined}
           />
         </motion.div>
       ))}

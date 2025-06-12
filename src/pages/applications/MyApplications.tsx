@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchRunClubApplications } from "@/services/applicationService";
+import { fetchRunClubApplications, withdrawApplication } from "@/services/applicationService";
 import { Application } from "@/types";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import ApplicationsFilters from "@/components/applications/ApplicationsFilters";
@@ -20,9 +20,9 @@ interface ApplicationWithOpportunity extends Application {
     title: string;
     description: string;
     brand_id: string;
-    reward: string;
-    deadline: string | null;
-    created_at: string;
+    club_incentives: string;
+    submission_deadline: string;
+    target_launch_date: string;
     brand?: {
       company_name: string;
       logo_url?: string;
@@ -68,20 +68,36 @@ const MyApplications = () => {
     loadApplications();
   }, [loadApplications]);
 
-  const handleWithdrawApplication = useCallback((applicationId: string) => {
-    // Add to withdrawn applications set
-    setWithdrawnApplicationIds(prev => {
-      const newSet = new Set(prev);
-      newSet.add(applicationId);
-      return newSet;
-    });
-    
-    // Remove the application from the local state
-    setApplications(prevApps => prevApps.filter(app => app.id !== applicationId));
-    
-    // Note: The actual withdrawal API call and navigation is handled in ApplicationCard
-    // This function is just for updating the local state
-  }, []);
+  const handleWithdrawApplication = useCallback(async (applicationId: string) => {
+    try {
+      // Call the actual withdrawal service
+      const result = await withdrawApplication(applicationId);
+      
+      if (result.success) {
+        // Remove the application from the local state
+        setApplications(prevApps => prevApps.filter(app => app.id !== applicationId));
+        
+        // Add to withdrawn applications set
+        setWithdrawnApplicationIds(prev => {
+          const newSet = new Set(prev);
+          newSet.add(applicationId);
+          return newSet;
+        });
+        
+        toast({
+          title: "Application withdrawn",
+          description: "Your application has been successfully withdrawn.",
+        });
+      }
+    } catch (error) {
+      console.error("Error withdrawing application:", error);
+      toast({
+        title: "Error",
+        description: "Failed to withdraw application. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   const pendingApplications = applications.filter(app => app.status === 'pending');
   const acceptedApplications = applications.filter(app => app.status === 'accepted');
@@ -136,6 +152,7 @@ const MyApplications = () => {
               {acceptedApplications.length > 0 ? (
                 <ApplicationsList 
                   applications={acceptedApplications}
+                  onWithdraw={handleWithdrawApplication}
                 />
               ) : (
                 <ApplicationsEmptyState message="You don't have any accepted applications" />

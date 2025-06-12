@@ -15,6 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import ChatMessages from "@/components/chat/ChatMessages";
 import ChatMessageInput from "@/components/chat/ChatMessageInput";
 
@@ -24,9 +34,9 @@ interface ApplicationWithOpportunity extends Application {
     title: string;
     description: string;
     brand_id: string;
-    reward: string;
-    deadline: string | null;
-    created_at: string;
+    club_incentives: string;
+    submission_deadline: string;
+    target_launch_date: string;
     brand?: {
       company_name: string;
       logo_url?: string;
@@ -44,6 +54,7 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   
   const {
     chat,
@@ -74,7 +85,26 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   const handleWithdraw = async () => {
     if (!onWithdraw) return;
     
+    // For accepted applications, show confirmation dialog
+    if (application.status === "accepted") {
+      setShowWithdrawDialog(true);
+      return;
+    }
+    
+    // For pending applications, withdraw immediately
     setIsWithdrawing(true);
+    try {
+      await onWithdraw(application.id);
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+  
+  const confirmWithdraw = async () => {
+    if (!onWithdraw) return;
+    
+    setIsWithdrawing(true);
+    setShowWithdrawDialog(false);
     try {
       await onWithdraw(application.id);
     } finally {
@@ -109,64 +139,64 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
   };
   
   return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <Badge 
-            className={`${getStatusColor(application.status)} flex w-fit items-center gap-1 border-none`}
-          >
-            {getStatusIcon(application.status)}
-            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-          </Badge>
-          
-          <div className="text-sm text-muted-foreground">
-            {format(new Date(application.created_at), "MMM d, yyyy")}
+    <>
+      <Card className="transition-shadow hover:shadow-md">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <Badge 
+              className={`${getStatusColor(application.status)} flex w-fit items-center gap-1 border-none`}
+            >
+              {getStatusIcon(application.status)}
+              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+            </Badge>
+            
+            <div className="text-sm text-muted-foreground">
+              {format(new Date(application.created_at), "MMM d, yyyy")}
+            </div>
           </div>
-        </div>
-        
-        <CardTitle className="mt-2 text-lg">
-          {application.opportunities?.title || "Untitled Opportunity"}
-        </CardTitle>
-        
-        {application.opportunities?.brand && (
-          <CardDescription>
-            {application.opportunities.brand.company_name || "Unknown Brand"}
-          </CardDescription>
-        )}
-      </CardHeader>
-      
-      <CardContent>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {application.opportunities?.description || "No description available."}
-        </p>
-      </CardContent>
-      
-      <CardFooter className="flex justify-between pt-2">
-        <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link 
-              to={`/opportunities/${application.opportunity_id}`}
-              state={{ from: 'applications' }}
-            >
-              View Details
-            </Link>
-          </Button>
           
-          {onWithdraw && application.status === "pending" && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleWithdraw}
-              disabled={isWithdrawing}
-              className="text-red-500 hover:text-red-700 hover:bg-red-50"
-            >
-              {isWithdrawing ? "Withdrawing..." : "Withdraw"}
-            </Button>
+          <CardTitle className="mt-2 text-lg">
+            {application.opportunities?.title || "Untitled Opportunity"}
+          </CardTitle>
+          
+          {application.opportunities?.brand && (
+            <CardDescription>
+              {application.opportunities.brand.company_name || "Unknown Brand"}
+            </CardDescription>
           )}
-        </div>
+        </CardHeader>
         
-        {application.status === "accepted" && (
-          <>
+        <CardContent>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {application.opportunities?.description || "No description available."}
+          </p>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between pt-2">
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link 
+                to={`/opportunities/${application.opportunity_id}`}
+                state={{ from: 'applications' }}
+              >
+                View Details
+              </Link>
+            </Button>
+            
+            {onWithdraw && (application.status === "pending" || application.status === "accepted") && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleWithdraw}
+                disabled={isWithdrawing}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              >
+                {isWithdrawing ? "Withdrawing..." : "Withdraw"}
+              </Button>
+            )}
+          </div>
+          
+          {application.status === "accepted" && (
             <Button
               variant="outline"
               size="sm"
@@ -176,36 +206,59 @@ const ApplicationCard = ({ application, onWithdraw }: ApplicationCardProps) => {
               <MessageCircle className="h-4 w-4" />
               Chat
             </Button>
+          )}
+        </CardFooter>
+      </Card>
+
+      {/* Withdrawal Confirmation Dialog for Accepted Applications */}
+      <AlertDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Withdraw Accepted Application</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to withdraw your application for "{application.opportunities?.title}"? 
+              This application has already been accepted by the brand. They will be notified of your withdrawal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmWithdraw}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Withdraw Application
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Chat Dialog */}
+      <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+        <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {application.opportunities?.brand?.company_name || "Chat"}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <ChatMessages 
+              messages={messages} 
+              chatParticipants={{
+                brand: chat?.brand_profile,
+                runClub: chat?.run_club_profile
+              }} 
+              isLoading={isLoading} 
+            />
             
-            <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-              <DialogContent className="max-w-md sm:max-w-lg md:max-w-xl h-[80vh] flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>
-                    {application.opportunities?.brand?.company_name || "Chat"}
-                  </DialogTitle>
-                </DialogHeader>
-                
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  <ChatMessages 
-                    messages={messages} 
-                    chatParticipants={{
-                      brand: chat?.brand_profile,
-                      runClub: chat?.run_club_profile
-                    }} 
-                    isLoading={isLoading} 
-                  />
-                  
-                  <ChatMessageInput 
-                    onSendMessage={sendMessage} 
-                    isSending={isSending} 
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </>
-        )}
-      </CardFooter>
-    </Card>
+            <ChatMessageInput 
+              onSendMessage={sendMessage} 
+              isSending={isSending} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

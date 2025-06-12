@@ -65,7 +65,7 @@ const generateContactEmailHTML = (data: ContactFormData): string => {
         </div>
 
         <div class="footer">
-          <p>This message was sent via the RUNHUB Connect contact form.</p>
+          <p>This message was sent via the RUNHUB LINK contact form.</p>
           ${data.userId ? `<p><strong>User ID:</strong> ${data.userId}</p>` : ''}
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>

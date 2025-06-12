@@ -162,7 +162,7 @@ export const EmailPreferencesPage = () => {
           <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Invalid Link</h1>
           <p className="text-muted-foreground">
-            This email preferences link is invalid. Please use a recent email from RUNHUB Connect.
+            This email preferences link is invalid. Please use a recent email from RUNHUB LINK.
           </p>
         </div>
       </div>
@@ -182,7 +182,7 @@ export const EmailPreferencesPage = () => {
             onClick={() => window.location.href = 'https://runhub.co'}
             className="w-full"
           >
-            Visit RUNHUB Connect
+            Visit RUNHUB LINK
           </Button>
         </div>
       </div>
@@ -196,7 +196,7 @@ export const EmailPreferencesPage = () => {
           <X className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Link Expired</h1>
           <p className="text-muted-foreground">
-            This email preferences link has expired. Please use a recent email from RUNHUB Connect.
+            This email preferences link has expired. Please use a recent email from RUNHUB LINK.
           </p>
         </div>
       </div>
@@ -328,13 +328,13 @@ export const EmailPreferencesPage = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-muted-foreground mb-4">
-            You can also manage these settings when logged into your RUNHUB Connect account.
+            You can also manage these settings when logged into your RUNHUB LINK account.
           </p>
           <Button 
             variant="outline"
             onClick={() => window.location.href = 'https://runhub.co'}
           >
-            Visit RUNHUB Connect
+            Visit RUNHUB LINK
           </Button>
         </div>
       </div>

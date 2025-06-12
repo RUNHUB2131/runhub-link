@@ -230,10 +230,10 @@ export const withdrawApplication = async (applicationId: string) => {
   try {
     console.log("Withdrawing application:", applicationId);
     
-    // First, get the opportunity ID associated with this application
+    // First, get the application details including status
     const { data: applicationData, error: fetchError } = await supabase
       .from('applications')
-      .select('opportunity_id')
+      .select('opportunity_id, status, run_club_id')
       .eq('id', applicationId)
       .single();
     
@@ -242,8 +242,54 @@ export const withdrawApplication = async (applicationId: string) => {
       throw fetchError;
     }
     
-    const opportunityId = applicationData?.opportunity_id;
-    console.log("Found opportunity ID:", opportunityId);
+    const { opportunity_id: opportunityId, status, run_club_id } = applicationData;
+    console.log("Found application data:", applicationData);
+    
+    // If this is an accepted application, we need to notify the brand
+    if (status === 'accepted') {
+      // Get opportunity and brand details for notification
+      const { data: opportunityData, error: oppError } = await supabase
+        .from('opportunities')
+        .select('brand_id, title')
+        .eq('id', opportunityId)
+        .single();
+
+      if (oppError) {
+        console.error("Error fetching opportunity details:", oppError);
+        throw oppError;
+      }
+
+      // Get run club name for notification
+      const { data: runClubData, error: clubError } = await supabase
+        .from('run_club_profiles')
+        .select('club_name')
+        .eq('id', run_club_id)
+        .single();
+
+      if (clubError) {
+        console.error("Error fetching run club details:", clubError);
+        throw clubError;
+      }
+
+      // Create notification for the brand
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: opportunityData.brand_id,
+          title: 'Application Withdrawn',
+          message: `${runClubData.club_name} has withdrawn their accepted application for "${opportunityData.title}"`,
+          type: 'application_withdrawn',
+          related_id: applicationId,
+          read: false
+        });
+
+      if (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't throw here - we still want to delete the application even if notification fails
+      } else {
+        console.log("Successfully created withdrawal notification for brand");
+      }
+    }
     
     // Now delete the application
     const { error: deleteError } = await supabase
