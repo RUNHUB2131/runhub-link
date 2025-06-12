@@ -59,44 +59,44 @@ const runClubFAQs: FAQItem[] = [
 
 const brandFAQs: FAQItem[] = [
   {
-    question: "How do I create effective sponsorship opportunities?",
-    answer: "Create clear, specific opportunities by defining your goals, target club size, geographic preferences, and what you're offering. Include details about deliverables, timeline, and application requirements. The more specific you are, the better quality applications you'll receive."
+    question: "How do I set up my brand profile to attract run clubs?",
+    answer: "Complete all sections of your profile: upload your logo, add your company description, website, and social media accounts. Turn on 'Open to Pitches' to let clubs know you're actively seeking partnerships. A complete profile with clear branding builds trust and makes clubs more likely to apply to your opportunities."
   },
   {
-    question: "How can I find the right run clubs to partner with?",
-    answer: "Use the 'All Clubs' section to browse and filter clubs by location, member count, and social media following. You can favorite clubs that interest you and contact them directly. Review their profiles, social media presence, and community engagement to find the best fit."
+    question: "How do I create and post sponsorship opportunities?",
+    answer: "Go to 'Opportunities' → 'Add New Opportunity'. Fill in the title, activation overview, what you're offering clubs, target launch date, and submission deadline. Be specific about location preferences, club size requirements, and follower count ranges. Clear, detailed opportunities get better quality applications."
   },
   {
-    question: "What information should I include in my brand profile?",
-    answer: "Complete your company information, website, description, and social media accounts. Upload your logo and clearly describe your brand values and what you offer to running communities. A complete profile builds trust with run clubs."
+    question: "How do I find and browse run clubs on the platform?",
+    answer: "Use the 'All Clubs' page to browse all running clubs. Filter by state, member count (under 1K to 20K+), and follower ranges. Click on any club to view their full profile, social media stats, and community details. Use the heart icon to favorite clubs you're interested in."
   },
   {
-    question: "How do I review and manage applications?",
-    answer: "Go to your 'Applications' dashboard to review all applications for your opportunities. You can accept or decline applications, and chat will automatically be enabled with accepted clubs. Review club profiles thoroughly before making decisions."
+    question: "How does the application and review process work?",
+    answer: "When clubs apply to your opportunities, you'll get instant notifications. Go to 'Opportunities' → select your opportunity → 'View Applications' to review all submissions. You can see each club's profile, member count, social media reach, and any custom pitch they submitted. Accept or reject applications with one click."
   },
   {
-    question: "Can I contact run clubs directly without posting an opportunity?",
-    answer: "Yes! You can browse all clubs and contact them directly through their profiles. This is great for building relationships or proposing custom partnerships that don't fit into a standard opportunity format."
+    question: "What happens after I accept a run club's application?",
+    answer: "When you accept an application, a private chat is automatically created between you and the club. You'll both receive notifications and can start discussing partnership details immediately. The club also gets notified of the acceptance via email and in-app notifications."
   },
   {
-    question: "What types of partnerships work best with run clubs?",
-    answer: "Successful partnerships include product sampling, gear sponsorships, event partnerships, race sponsorships, and social media collaborations. Focus on providing value to the running community rather than just promotional opportunities."
+    question: "How do I communicate with run clubs?",
+    answer: "After accepting applications, use the built-in chat system to communicate with clubs. Access chats via the 'Chat' menu or click the chat button on accepted applications. All messages are private and real-time. You'll get notifications for new messages, and clubs can see when you've read their messages."
   },
   {
-    question: "How should I structure sponsorship offers?",
-    answer: "Consider offering a mix of products, services, or financial support along with clear expectations for deliverables. Popular options include gear for club members, race entry sponsorships, event space, or promotional products for giveaways."
+    question: "Can I edit or delete opportunities after posting them?",
+    answer: "Yes! Go to 'Opportunities' and click on any of your posted opportunities to edit details like the description, deadline, or requirements. You can also delete opportunities if needed. Note that if clubs have already applied, they'll be notified of any changes to ensure transparency."
   },
   {
-    question: "What club size should I target for partnerships?",
-    answer: "This depends on your goals and budget. Smaller clubs (under 1,000 members) often provide more engaged, tight-knit communities. Larger clubs offer broader reach. Many brands find success with clubs in the 1,000-4,000 member range for balanced engagement and reach."
+    question: "How do I track my opportunities and applications?",
+    answer: "Your dashboard shows key metrics: total opportunities posted and applications received. View detailed stats for each opportunity in the 'Opportunities' section. Track application counts, view which clubs applied, and monitor acceptance/rejection rates. All activity is tracked in real-time."
   },
   {
-    question: "How do I track the success of my partnerships?",
-    answer: "Work with clubs to establish clear metrics like social media posts, event participation, or member engagement. Many successful partnerships include photo sharing, social media mentions, and feedback from club members about your products or services."
+    question: "What notifications will I receive and how do I manage them?",
+    answer: "You'll get in-app notifications (bell icon) and optional email notifications for: new applications to your opportunities, new chat messages from clubs, and application updates. Manage email preferences in Profile → Settings → Permissions. All notifications appear in your dashboard's recent activity."
   },
   {
-    question: "Is there a cost to use RunHub Link for brands?",
-    answer: "Basic features like creating your profile and posting opportunities are free. Some premium features like enhanced club discovery and analytics may have associated costs. Contact support for information about premium features and pricing."
+    question: "How do I manage multiple opportunities and applications efficiently?",
+    answer: "Each opportunity has its own applications page where you can bulk review, accept, or reject applications. Use the notifications system to stay on top of new activity. The favorites system helps you track interesting clubs across opportunities. Your dashboard provides an overview of all activity across your account."
   }
 ];
 
