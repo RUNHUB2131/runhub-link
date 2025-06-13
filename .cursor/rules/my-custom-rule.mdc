@@ -97,7 +97,8 @@ src/
 3. Brands can only see applications for their own opportunities
 4. Row-level security (RLS) enforces data access permissions
 5. Real-time notifications for new applications
-6. Analytics tracking for premium feature usage
+6. Automated email notifications with user preferences
+7. Analytics tracking for premium feature usage
 
 ## Feature Areas
 
@@ -140,6 +141,15 @@ src/
 2. **Event Tracking**: Contact club clicks, club views, favorites
 3. **Analytics Dashboard**: Admin view of platform usage
 4. **Premium Feature Tracking**: Monitor usage of paid features
+
+### Email Notification System
+1. **Automated Email Queue**: Background processing via cron jobs (every 3 minutes)
+2. **Email Types**: New applications, application updates, new opportunities, new messages
+3. **User Preferences**: Individual email notification settings in profiles table
+4. **Email Templates**: Professional HTML templates via Resend API
+5. **Delivery Tracking**: Status tracking (pending/sent/failed) with retry logic
+6. **Rate Limiting**: Built-in delays to respect API limits
+7. **Self-Monitoring**: Queue health status and automatic cleanup functions
 
 ## Code Patterns & Conventions
 
@@ -216,6 +226,17 @@ const { data, error } = await supabase
 - Implement responsive design patterns
 - Use proper form validation with React Hook Form and Zod
 
+#### 6. Email Notification System
+- **Automated Processing**: Uses `pg_cron` extension for scheduled email processing (every 3 minutes)
+- **Queue Management**: All emails go through `email_queue` table with status tracking
+- **Database Triggers**: Automatic email queuing on application events via triggers
+- **User Preferences**: Respect email notification settings in profiles table
+- **Rate Limiting**: Built-in delays between emails to prevent API rate limiting
+- **Error Handling**: Automatic retry logic (up to 3 attempts) and failure tracking
+- **Monitoring**: Use `get_email_queue_status()` to check queue health
+- **Manual Processing**: Use `force_process_all_emails()` if needed
+- **Email Templates**: Professional HTML templates via `send-notification-email` Edge Function
+
 ### Supabase MCP Best Practices
 
 #### Database Analysis & Schema Discovery
@@ -250,6 +271,8 @@ const { data, error } = await supabase
 5. **Authentication**: Use existing AuthContext patterns
 6. **Analytics**: Use existing tracking service for user interactions
 7. **Schema analysis**: Always use MCP `list_tables` and `execute_sql` for current state
+8. **Email notifications**: Use existing automated queue system with database triggers
+9. **Monitoring email queue**: Use `get_email_queue_status()` for health checks
 
 ### Performance Considerations
 1. Use React Query for efficient data caching
@@ -271,7 +294,8 @@ const { data, error } = await supabase
 - ✅ Advanced Filtering
 - ✅ Analytics Tracking
 - ✅ Admin Analytics Dashboard
-- ✅ Notifications System
+- ✅ In-App Notifications System
+- ✅ **Automated Email Notifications** (with queue processing)
 - ✅ Responsive Design
 - ✅ Social Media Integration
 - ✅ Storage for logos/images
