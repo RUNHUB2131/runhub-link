@@ -8,7 +8,11 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <header className="bg-primary border-b">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="text-primary-foreground font-bold text-2xl">RUNHUB</div>
+          <img 
+            src="/RUNHUB white.png" 
+            alt="RUNHUB" 
+            className="h-8 w-auto"
+          />
           <div className="flex items-center gap-4">
             <Link to="/auth/login">
               <Button variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/20">
@@ -204,7 +208,11 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4">RUNHUB</h3>
+              <img 
+                src="/RUNHUB white.png" 
+                alt="RUNHUB" 
+                className="h-8 w-auto mb-4"
+              />
               <p className="text-primary-foreground/80 leading-relaxed">
                 Connecting running communities with brands for authentic partnerships.
               </p>
