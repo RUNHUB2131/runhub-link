@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-
 const EmailConfirmation = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -77,15 +75,43 @@ const EmailConfirmation = () => {
         return;
       }
 
-      // If we have token_hash, redirect to Supabase verification endpoint
+      // If we have token_hash, verify it directly using verifyOtp
       if (tokenHash && type) {
-        console.log('Redirecting to Supabase verification endpoint...');
-        const redirectTo = encodeURIComponent(window.location.origin + '/auth/confirm');
-        const verificationUrl = `${SUPABASE_URL}/auth/v1/verify?token_hash=${tokenHash}&type=${type}&redirect_to=${redirectTo}`;
-        
-        console.log('Redirecting to:', verificationUrl);
-        window.location.href = verificationUrl;
-        return;
+        console.log('Verifying token_hash directly using verifyOtp...');
+        try {
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: type as 'signup' | 'email' | 'recovery' | 'email_change'
+          });
+          
+          console.log('VerifyOtp result:', { data, error });
+          
+          if (error) {
+            console.error('Verification error:', error);
+            setStatus('error');
+            setError(`Verification failed: ${error.message}`);
+            return;
+          }
+          
+          if (data.user) {
+            console.log('Email verified successfully, user session created');
+            setStatus('success');
+            toast({
+              title: "Email confirmed!",
+              description: "Your email has been successfully verified.",
+            });
+            
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 2000);
+            return;
+          }
+        } catch (error: any) {
+          console.error('Error verifying token:', error);
+          setStatus('error');
+          setError(`Verification failed: ${error.message || 'Unknown error'}`);
+          return;
+        }
       }
 
       // If no tokens and no token_hash, show error
