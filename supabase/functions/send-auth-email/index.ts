@@ -42,8 +42,16 @@ const generateAuthEmailHTML = (user: any, emailData: any): string => {
   const userTypeText = user.user_metadata?.user_type === 'brand' ? 'brand' : 'running club';
   const { email_action_type, token_hash, redirect_to, site_url } = emailData;
 
-  // Build the confirmation URL
-  const confirmUrl = `${redirect_to}?token_hash=${token_hash}&type=${email_action_type}`;
+  // DEBUG: Log the values we're receiving
+  console.log('=== AUTH EMAIL DEBUG ===');
+  console.log('email_action_type:', email_action_type);
+  console.log('redirect_to:', redirect_to);
+  console.log('site_url:', site_url);
+  console.log('========================');
+
+  // Build the confirmation URL using site_url instead of redirect_to
+  // This fixes the bug where emails were going to homepage instead of /auth/confirm
+  const confirmUrl = `${site_url}?token_hash=${token_hash}&type=${email_action_type}`;
 
   switch (email_action_type) {
     case 'signup':
@@ -273,7 +281,6 @@ const handler = async (request: Request): Promise<Response> => {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-
   } catch (error) {
     console.error('Error in auth email webhook:', error);
     
