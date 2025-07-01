@@ -247,6 +247,23 @@ const handler = async (request: Request): Promise<Response> => {
 
     console.log('Processing auth email:', email_data.email_action_type, 'for user:', user.email);
 
+    // DEBUG: Log the actual values being received
+    console.log('=== EMAIL DATA DEBUG ===');
+    console.log('email_data.redirect_to:', email_data.redirect_to);
+    console.log('email_data.site_url:', email_data.site_url);
+    console.log('email_data.token_hash:', email_data.token_hash);
+    console.log('email_data.email_action_type:', email_data.email_action_type);
+    console.log('========================');
+
+    // Extract debug information
+    const { email_action_type, token_hash, redirect_to, site_url } = email_data;
+
+    // Build the confirmation URL using site_url instead of redirect_to
+    // This fixes the bug where emails were going to homepage instead of /auth/confirm
+    const confirmUrl = `${site_url}?token_hash=${token_hash}&type=${email_action_type}`;
+
+    console.log('Built confirmation URL:', confirmUrl);
+
     const subjectMap = {
       'signup': 'Welcome to RUNHUB LINK - Confirm Your Email',
       'recovery': 'Reset Your RUNHUB LINK Password',
