@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
 const EmailConfirmation = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -26,9 +28,9 @@ const EmailConfirmation = () => {
       
       console.log('URL Parameters:', { tokenHash, type, accessToken, refreshToken });
       
-      // If we have access and refresh tokens, set session directly
+      // If we have access and refresh tokens (from Supabase redirect), set session directly
       if (accessToken && refreshToken) {
-        console.log('Found tokens in URL, setting session...');
+        console.log('Found tokens in URL from Supabase redirect, setting session...');
         try {
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -75,50 +77,20 @@ const EmailConfirmation = () => {
         return;
       }
 
-      // If no session and no tokens, try manual verification with token_hash
-      if (!tokenHash) {
-        setStatus('error');
-        setError('Invalid confirmation link. Missing token_hash parameter.');
+      // If we have token_hash, redirect to Supabase verification endpoint
+      if (tokenHash && type) {
+        console.log('Redirecting to Supabase verification endpoint...');
+        const redirectTo = encodeURIComponent(window.location.origin + '/auth/confirm');
+        const verificationUrl = `${SUPABASE_URL}/auth/v1/verify?token_hash=${tokenHash}&type=${type}&redirect_to=${redirectTo}`;
+        
+        console.log('Redirecting to:', verificationUrl);
+        window.location.href = verificationUrl;
         return;
       }
 
-      if (!type || !['signup', 'recovery', 'email_change'].includes(type)) {
-        setStatus('error');
-        setError(`Invalid confirmation type: ${type}. Expected signup, recovery, or email_change.`);
-        return;
-      }
-
-      try {
-        console.log('Attempting manual verifyOtp...');
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: type as 'signup' | 'recovery' | 'email_change'
-        });
-
-        console.log('VerifyOtp result:', { data, error });
-
-        if (error) throw error;
-
-        if (data.user) {
-          console.log('Manual verification successful');
-          setStatus('success');
-          toast({
-            title: "Email confirmed!",
-            description: "Your email has been successfully verified.",
-          });
-
-          // Redirect to dashboard after a short delay
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-        } else {
-          throw new Error('Verification completed but no user data received');
-        }
-      } catch (error: any) {
-        console.error('Email confirmation error:', error);
-        setStatus('error');
-        setError(error.message || 'Failed to confirm email');
-      }
+      // If no tokens and no token_hash, show error
+      setStatus('error');
+      setError('Invalid confirmation link. Missing required parameters.');
     };
 
     confirmEmail();

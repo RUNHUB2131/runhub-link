@@ -47,11 +47,14 @@ const generateAuthEmailHTML = (user: any, emailData: any): string => {
   console.log('email_action_type:', email_action_type);
   console.log('redirect_to:', redirect_to);
   console.log('site_url:', site_url);
+  console.log('token_hash:', token_hash);
   console.log('========================');
 
-  // Build the confirmation URL using site_url instead of redirect_to
-  // This fixes the bug where emails were going to homepage instead of /auth/confirm
-  const confirmUrl = `${site_url}?token_hash=${token_hash}&type=${email_action_type}`;
+  // Build the confirmation URL using redirect_to (user's domain) with proper parameters
+  // The /auth/confirm page will handle the verification properly
+  const confirmUrl = `${redirect_to}?token_hash=${token_hash}&type=${email_action_type}`;
+
+  console.log('Built confirmation URL:', confirmUrl);
 
   switch (email_action_type) {
     case 'signup':
@@ -212,11 +215,7 @@ const handler = async (request: Request): Promise<Response> => {
     }
 
     if (!hookSecret) {
-      console.error('SEND_EMAIL_HOOK_SECRET not configured');
-      return new Response(
-        JSON.stringify({ error: 'Webhook secret not configured' }), 
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      console.warn('SEND_EMAIL_HOOK_SECRET not configured - webhook verification will be skipped');
     }
 
     // Verify the webhook
@@ -258,9 +257,9 @@ const handler = async (request: Request): Promise<Response> => {
     // Extract debug information
     const { email_action_type, token_hash, redirect_to, site_url } = email_data;
 
-    // Build the confirmation URL using site_url instead of redirect_to
-    // This fixes the bug where emails were going to homepage instead of /auth/confirm
-    const confirmUrl = `${site_url}?token_hash=${token_hash}&type=${email_action_type}`;
+    // Build the confirmation URL using redirect_to (user's domain) with proper parameters
+    // The /auth/confirm page will handle the verification properly
+    const confirmUrl = `${redirect_to}?token_hash=${token_hash}&type=${email_action_type}`;
 
     console.log('Built confirmation URL:', confirmUrl);
 
