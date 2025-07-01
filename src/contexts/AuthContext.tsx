@@ -9,7 +9,7 @@ interface AuthContextType {
   userType: UserType | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, userType: UserType, companyName?: string) => Promise<void>;
+  register: (email: string, password: string, userType: UserType, extraData?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -129,17 +129,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (email: string, password: string, userType: UserType, companyName?: string) => {
+  const register = async (email: string, password: string, userType: UserType, extraData?: string) => {
     setIsLoading(true);
     try {
+      const metadata: { user_type: UserType; company_name?: string; club_name?: string } = {
+        user_type: userType
+      };
+      
+      if (userType === 'brand' && extraData) {
+        metadata.company_name = extraData;
+      } else if (userType === 'run_club' && extraData) {
+        metadata.club_name = extraData;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            user_type: userType,
-            company_name: companyName
-          }
+          data: metadata
         }
       });
       

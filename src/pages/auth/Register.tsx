@@ -12,6 +12,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [clubName, setClubName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +42,16 @@ const Register = () => {
       });
       return;
     }
+
+    // Validate club name for run clubs
+    if (userType === 'run_club' && !clubName.trim()) {
+      toast({
+        title: "Club name required",
+        description: "Please enter your run club name.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     
@@ -50,12 +61,13 @@ const Register = () => {
         return;
       }
       
-      await register(email, password, userType, userType === 'brand' ? companyName.trim() : undefined);
+      const extraData = userType === 'brand' ? companyName.trim() : clubName.trim();
+      await register(email, password, userType, extraData);
       toast({
         title: "Registration successful",
-        description: "Welcome to RUNHUB LINK!",
+        description: "Please check your email to confirm your account before signing in.",
       });
-      navigate("/dashboard");
+      navigate("/auth/login");
     } catch (error) {
       console.error(error);
       setIsLoading(false);
@@ -79,6 +91,21 @@ const Register = () => {
               placeholder="Enter your company name"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
+              required
+              className="h-11"
+            />
+          </div>
+        )}
+        
+        {userType === 'run_club' && (
+          <div className="space-y-2">
+            <Label htmlFor="clubName">Run Club Name</Label>
+            <Input
+              id="clubName"
+              type="text"
+              placeholder="Enter your run club name"
+              value={clubName}
+              onChange={(e) => setClubName(e.target.value)}
               required
               className="h-11"
             />
