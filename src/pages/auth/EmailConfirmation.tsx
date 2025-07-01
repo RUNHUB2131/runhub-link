@@ -14,33 +14,106 @@ const EmailConfirmation = () => {
 
   useEffect(() => {
     const confirmEmail = async () => {
-      const token = searchParams.get('token');
-      const type = searchParams.get('type');
+      console.log('Starting email confirmation process...');
+      console.log('Full URL:', window.location.href);
+      console.log('Search params:', Object.fromEntries(searchParams.entries()));
       
-      if (!token || type !== 'signup') {
-        setStatus('error');
-        setError('Invalid confirmation link');
-        return;
+      // Get URL parameters
+      const tokenHash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      
+      console.log('URL Parameters:', { tokenHash, type, accessToken, refreshToken });
+      
+      // If we have access and refresh tokens, set session directly
+      if (accessToken && refreshToken) {
+        console.log('Found tokens in URL, setting session...');
+        try {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          console.log('SetSession result:', { data, error });
+          
+          if (error) throw error;
+          
+          if (data.user) {
+            console.log('Session set successfully, user confirmed');
+            setStatus('success');
+            toast({
+              title: "Email confirmed!",
+              description: "Your email has been successfully verified.",
+            });
+            
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 2000);
+            return;
+          }
+        } catch (error: any) {
+          console.error('Error setting session:', error);
+        }
       }
-
-      try {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'signup'
-        });
-
-        if (error) throw error;
-
+      
+      // Check if session is automatically detected
+      const { data: session } = await supabase.auth.getSession();
+      console.log('Current session after URL load:', session);
+      
+      if (session?.session?.user) {
+        console.log('Session automatically detected, user confirmed');
         setStatus('success');
         toast({
           title: "Email confirmed!",
           description: "Your email has been successfully verified.",
         });
-
-        // Redirect to login after a short delay
+        
         setTimeout(() => {
-          navigate('/auth/login');
+          navigate('/dashboard');
         }, 2000);
+        return;
+      }
+
+      // If no session and no tokens, try manual verification with token_hash
+      if (!tokenHash) {
+        setStatus('error');
+        setError('Invalid confirmation link. Missing token_hash parameter.');
+        return;
+      }
+
+      if (!type || !['signup', 'recovery', 'email_change'].includes(type)) {
+        setStatus('error');
+        setError(`Invalid confirmation type: ${type}. Expected signup, recovery, or email_change.`);
+        return;
+      }
+
+      try {
+        console.log('Attempting manual verifyOtp...');
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type as 'signup' | 'recovery' | 'email_change'
+        });
+
+        console.log('VerifyOtp result:', { data, error });
+
+        if (error) throw error;
+
+        if (data.user) {
+          console.log('Manual verification successful');
+          setStatus('success');
+          toast({
+            title: "Email confirmed!",
+            description: "Your email has been successfully verified.",
+          });
+
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+        } else {
+          throw new Error('Verification completed but no user data received');
+        }
       } catch (error: any) {
         console.error('Email confirmation error:', error);
         setStatus('error');
@@ -67,9 +140,9 @@ const EmailConfirmation = () => {
             <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
             <h1 className="text-2xl font-bold mb-2">Email confirmed!</h1>
             <p className="text-gray-500 mb-4">
-              Your email has been successfully verified. You can now log in to your account.
+              Your email has been successfully verified. You can now access your account.
             </p>
-            <p className="text-sm text-gray-400">Redirecting you to login...</p>
+            <p className="text-sm text-gray-400">Redirecting you to your dashboard...</p>
           </>
         )}
         
@@ -78,9 +151,18 @@ const EmailConfirmation = () => {
             <XCircle className="h-12 w-12 mx-auto mb-4 text-red-500" />
             <h1 className="text-2xl font-bold mb-2">Confirmation failed</h1>
             <p className="text-gray-500 mb-4">{error}</p>
-            <Button onClick={() => navigate('/auth/login')} className="w-full">
-              Go to Login
-            </Button>
+            <div className="space-y-2">
+              <Button onClick={() => navigate('/auth/login')} className="w-full">
+                Go to Login
+              </Button>
+              <Button 
+                onClick={() => navigate('/auth/register')} 
+                variant="outline" 
+                className="w-full"
+              >
+                Register Again
+              </Button>
+            </div>
           </>
         )}
       </div>
